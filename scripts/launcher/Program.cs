@@ -137,7 +137,7 @@ namespace CodePractice
             {
                 // App rejimi: sarlavha paneli, manzillar satrisiz, 1440x900 o'lchamda toza desktop oyna
                 string args = string.Format(
-                    "--app=http://localhost:1420 --window-size=1440,900 --user-data-dir=\"{0}\" --no-first-run --no-default-browser-check --disable-features=Translate,OptimizationHints",
+                    "--app=http://localhost:1420 --window-size=1440,900 --user-data-dir=\"{0}\" --no-first-run --no-default-browser-check --disable-http-cache --disable-features=Translate,OptimizationHints",
                     userDataDir
                 );
 

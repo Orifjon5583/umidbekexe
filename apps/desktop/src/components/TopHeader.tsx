@@ -22,7 +22,10 @@ export const TopHeader: React.FC<Props> = ({
           <img
             src="/icon.png"
             alt="CodePractice"
-            className="w-7 h-7 rounded-lg object-contain shadow-xs border border-slate-200/60"
+            width="28"
+            height="28"
+            style={{ width: '28px', height: '28px', minWidth: '28px', minHeight: '28px', objectFit: 'contain' }}
+            className="w-7 h-7 rounded-lg object-contain shadow-xs border border-slate-200/60 flex-shrink-0"
             onError={(e) => {
               (e.target as HTMLElement).style.display = 'none';
             }}

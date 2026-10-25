@@ -78,7 +78,14 @@ export const GuidePage: React.FC<Props> = ({ onProceed, onRequestExit }) => {
           <div className="flex-1 space-y-4">
             <div>
               <div className="flex items-center gap-2.5 mb-2">
-                <img src="/icon.png" alt="CodePractice" className="w-6 h-6 rounded-md object-contain" />
+                <img
+                  src="/icon.png"
+                  alt="CodePractice"
+                  width="24"
+                  height="24"
+                  style={{ width: '24px', height: '24px', minWidth: '24px', minHeight: '24px', objectFit: 'contain' }}
+                  className="rounded-md object-contain flex-shrink-0"
+                />
                 <span className="text-[10px] font-bold text-blue-600 bg-blue-50 px-2.5 py-0.5 rounded tracking-wider uppercase border border-blue-100">
                   CodePractice v2.4.0 • Yo‘riqnoma va Mezonlar
                 </span>
@@ -116,7 +123,13 @@ export const GuidePage: React.FC<Props> = ({ onProceed, onRequestExit }) => {
           <div className="w-full md:w-80 flex flex-col justify-between p-5 bg-gradient-to-b from-slate-50 to-blue-50/40 rounded-2xl border border-blue-100/80">
             <div>
               <div className="flex justify-center mb-4">
-                <img src="/logo.png" alt="CodePractice" className="h-10 object-contain drop-shadow-sm" />
+                <img
+                  src="/logo.png"
+                  alt="CodePractice"
+                  width="140"
+                  style={{ width: '140px', maxWidth: '140px', height: 'auto', maxHeight: '50px', objectFit: 'contain' }}
+                  className="object-contain drop-shadow-sm"
+                />
               </div>
               <div className="flex items-center justify-between text-xs text-slate-500 mb-3">
                 <span className="font-semibold text-slate-700 text-[11px] uppercase tracking-wider">

@@ -52,13 +52,15 @@ export const TitleBar: React.FC<Props> = ({
         <img
           src="/icon.png"
           alt="CodePractice"
-          className="w-4 h-4 rounded object-contain shadow-xs"
+          width="16"
+          height="16"
+          style={{ width: '16px', height: '16px', minWidth: '16px', minHeight: '16px', objectFit: 'contain' }}
+          className="w-4 h-4 rounded object-contain shadow-xs flex-shrink-0"
           onError={(e) => {
-            // Fallback agar rasm yuklanmasa
             (e.target as HTMLElement).style.display = 'none';
           }}
         />
-        <span className="text-slate-300 font-mono tracking-tight text-[11px] font-medium">
+        <span className="text-slate-300 font-mono tracking-tight text-[11px] font-medium truncate">
           {title}
         </span>
       </div>

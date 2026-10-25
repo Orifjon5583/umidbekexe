@@ -80,7 +80,9 @@ export const LoginPage: React.FC<Props> = ({ onLoginSuccess }) => {
               <img
                 src="/logo.png"
                 alt="CodePractice — Code • Build • Improve"
-                className="h-28 mx-auto object-contain filter drop-shadow-[0_12px_24px_rgba(59,130,246,0.3)] transition-transform duration-300 hover:scale-[1.02]"
+                width="240"
+                style={{ width: '240px', maxWidth: '240px', maxHeight: '110px', height: 'auto', objectFit: 'contain' }}
+                className="mx-auto object-contain filter drop-shadow-[0_12px_24px_rgba(59,130,246,0.3)] transition-transform duration-300 hover:scale-[1.02]"
               />
             </div>
             <p className="text-[11px] font-mono tracking-widest text-cyan-400/80 mt-1 uppercase font-semibold">

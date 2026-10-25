@@ -1,93 +1,95 @@
 import React from 'react';
-import { CheckSquare, FileText, Code2, Cpu } from 'lucide-react';
+import { Home, FileCode, CheckSquare, BarChart2, Settings, LogOut } from 'lucide-react';
 
 interface Props {
   currentTab: 'dashboard' | 'assignment_details' | 'code_editor';
   onNavigate: (tab: 'dashboard' | 'assignment_details' | 'code_editor') => void;
+  onRequestExit?: () => void;
 }
 
-export const Sidebar: React.FC<Props> = ({ currentTab, onNavigate }) => {
+export const Sidebar: React.FC<Props> = ({ currentTab, onNavigate, onRequestExit }) => {
   return (
-    <aside className="w-52 bg-white border-r border-slate-200 flex flex-col justify-between flex-shrink-0 select-none p-3.5">
+    <aside className="w-56 bg-[#0B1528] text-slate-300 flex flex-col justify-between flex-shrink-0 select-none p-4 border-r border-[#15233E]">
       <div className="space-y-6">
-        {/* Navigation Section */}
-        <div>
-          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2 px-2">
-            Asosiy navigatsiya
-          </p>
-          <nav className="space-y-1">
-            <button
-              onClick={() => onNavigate('dashboard')}
-              className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition ${
-                currentTab === 'dashboard'
-                  ? 'bg-blue-600 text-white shadow-xs'
-                  : 'text-slate-600 hover:bg-slate-100'
-              }`}
-            >
-              <CheckSquare className="w-4 h-4" />
-              <span>Vazifalarim</span>
-            </button>
-
-            <button
-              onClick={() => onNavigate('assignment_details')}
-              className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition ${
-                currentTab === 'assignment_details'
-                  ? 'bg-blue-600 text-white shadow-xs'
-                  : 'text-slate-600 hover:bg-slate-100'
-              }`}
-            >
-              <FileText className="w-4 h-4" />
-              <span>Vazifa tafsilotlari</span>
-            </button>
-
-            <button
-              onClick={() => onNavigate('code_editor')}
-              className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition ${
-                currentTab === 'code_editor'
-                  ? 'bg-blue-600 text-white shadow-xs'
-                  : 'text-slate-600 hover:bg-slate-100'
-              }`}
-            >
-              <Code2 className="w-4 h-4" />
-              <span>Kod muharriri</span>
-            </button>
-          </nav>
-        </div>
-
-        {/* Runtime & Compiler Status */}
-        <div className="pt-2 border-t border-slate-100">
-          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2 px-2">
-            Muhit va kompilyator
-          </p>
-          <div className="space-y-2 text-xs px-2 font-mono">
-            <div className="flex items-center justify-between text-[11px]">
-              <span className="text-slate-500 font-sans">Python</span>
-              <span className="text-slate-800 font-semibold">v3.11.4</span>
-            </div>
-            <div className="flex items-center justify-between text-[11px]">
-              <span className="text-slate-500 font-sans">GCC C++</span>
-              <span className="text-slate-800 font-semibold">v20 (std)</span>
-            </div>
-            <div className="flex items-center justify-between text-[11px]">
-              <span className="text-slate-500 font-sans">Test muhiti</span>
-              <span className="text-emerald-600 font-semibold font-sans">Online</span>
-            </div>
+        {/* Brand Logo */}
+        <div className="flex items-center gap-2.5 px-2 pt-1 pb-2 border-b border-slate-800/80">
+          <img
+            src="/icon.png"
+            alt="CodePractice"
+            className="w-7 h-7 rounded-lg object-contain"
+            style={{ width: '28px', height: '28px' }}
+          />
+          <div className="flex items-center gap-1">
+            <span className="font-bold text-base text-white tracking-tight">Code</span>
+            <span className="font-bold text-base text-blue-500 tracking-tight">Practice</span>
           </div>
         </div>
+
+        {/* Navigation Menu (From Design: Bosh sahifa, Vazifalar, Natijalar, Sozlamalar, Chiqish) */}
+        <nav className="space-y-1.5">
+          <button
+            onClick={() => onNavigate('dashboard')}
+            className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition ${
+              currentTab === 'dashboard'
+                ? 'bg-[#2563EB] text-white shadow-md shadow-blue-600/30'
+                : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
+            }`}
+          >
+            <Home className="w-4 h-4" />
+            <span>Bosh sahifa</span>
+          </button>
+
+          <button
+            onClick={() => onNavigate('assignment_details')}
+            className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition ${
+              currentTab === 'assignment_details'
+                ? 'bg-[#2563EB] text-white shadow-md shadow-blue-600/30'
+                : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
+            }`}
+          >
+            <CheckSquare className="w-4 h-4" />
+            <span>Vazifalar</span>
+          </button>
+
+          <button
+            onClick={() => onNavigate('code_editor')}
+            className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition ${
+              currentTab === 'code_editor'
+                ? 'bg-[#2563EB] text-white shadow-md shadow-blue-600/30'
+                : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
+            }`}
+          >
+            <FileCode className="w-4 h-4" />
+            <span>Kod laboratoriyasi</span>
+          </button>
+
+          <button
+            onClick={() => alert("Natijalar bo'limi: Barcha topshiriqlar bo'yicha baholash va ballar jurnali")}
+            className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold text-slate-400 hover:text-white hover:bg-slate-800/50 transition"
+          >
+            <BarChart2 className="w-4 h-4" />
+            <span>Natijalar</span>
+          </button>
+
+          <button
+            onClick={() => alert("Sozlamalar: Monaco muharrir o'lchami, shrift va shaxsiy parametrlar")}
+            className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold text-slate-400 hover:text-white hover:bg-slate-800/50 transition"
+          >
+            <Settings className="w-4 h-4" />
+            <span>Sozlamalar</span>
+          </button>
+        </nav>
       </div>
 
-      {/* RAM Resource Monitor Bar */}
-      <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-100">
-        <div className="flex items-center justify-between text-[10px] text-slate-500 font-medium mb-1.5">
-          <span className="flex items-center gap-1">
-            <Cpu className="w-3 h-3 text-slate-400" />
-            RAM:
-          </span>
-          <span className="font-mono text-slate-700">342 MB / 2048 MB</span>
-        </div>
-        <div className="w-full bg-slate-200 rounded-full h-1.5 overflow-hidden">
-          <div className="bg-blue-600 h-1.5 rounded-full" style={{ width: '16%' }} />
-        </div>
+      {/* Logout / Exit at Bottom */}
+      <div className="pt-4 border-t border-slate-800/80">
+        <button
+          onClick={onRequestExit}
+          className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold text-slate-400 hover:text-red-400 hover:bg-red-500/10 transition"
+        >
+          <LogOut className="w-4 h-4" />
+          <span>Chiqish</span>
+        </button>
       </div>
     </aside>
   );

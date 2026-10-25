@@ -1,0 +1,292 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum UserRole {
+  admin
+  teacher
+  student
+}
+
+enum ProgrammingLanguage {
+  python
+  cpp
+}
+
+enum ProblemDifficulty {
+  easy
+  medium
+  hard
+}
+
+enum AssignmentStatus {
+  draft
+  published
+  archived
+}
+
+enum ProgressStatus {
+  not_started
+  in_progress
+  completed
+}
+
+enum SubmissionStatus {
+  accepted
+  wrong_answer
+  compile_error
+  runtime_error
+  time_limit_exceeded
+  memory_limit_exceeded
+  output_limit_exceeded
+  runner_error
+}
+
+model User {
+  id           String    @id @default(uuid())
+  fullName     String    @map("full_name")
+  username     String    @unique
+  passwordHash String    @map("password_hash")
+  role         UserRole  @default(student)
+  isActive     Boolean   @default(true) @map("is_active")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+
+  groupMembers       GroupMember[]
+  createdProblems    Problem[]            @relation("CreatedProblems")
+  createdAssignments Assignment[]         @relation("CreatedAssignments")
+  assignmentStudents AssignmentStudent[]
+  studentProgress    StudentProgress[]
+  submissions        Submission[]
+  aiInteractions     AIInteraction[]
+  sessions           Session[]
+  auditLogs          AuditLog[]           @relation("ActorLogs")
+
+  @@map("users")
+}
+
+model Group {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  members     GroupMember[]
+  assignments Assignment[]
+
+  @@map("groups")
+}
+
+model GroupMember {
+  id        String   @id @default(uuid())
+  groupId   String   @map("group_id")
+  studentId String   @map("student_id")
+  joinedAt  DateTime @default(now()) @map("joined_at")
+
+  group   Group @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  student User  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([groupId, studentId])
+  @@map("group_members")
+}
+
+model Problem {
+  id                String              @id @default(uuid())
+  title             String
+  statement         String              @db.Text
+  inputDescription  String              @default("") @map("input_description") @db.Text
+  outputDescription String              @default("") @map("output_description") @db.Text
+  sampleInput       String              @default("") @map("sample_input") @db.Text
+  sampleOutput      String              @default("") @map("sample_output") @db.Text
+  language          ProgrammingLanguage @default(python)
+  difficulty        ProblemDifficulty   @default(easy)
+  timeLimitMs       Int                 @default(2000) @map("time_limit_ms")
+  memoryLimitMb     Int                 @default(128) @map("memory_limit_mb")
+  version           Int                 @default(1)
+  isActive          Boolean             @default(true) @map("is_active")
+  createdBy         String              @map("created_by")
+  createdAt         DateTime            @default(now()) @map("created_at")
+  updatedAt         DateTime            @updatedAt @map("updated_at")
+
+  creator            User                @relation("CreatedProblems", fields: [createdBy], references: [id])
+  testCases          TestCase[]
+  assignmentProblems AssignmentProblem[]
+  studentProgress    StudentProgress[]
+  submissions        Submission[]
+  aiInteractions     AIInteraction[]
+
+  @@index([language, difficulty])
+  @@map("problems")
+}
+
+model TestCase {
+  id             String   @id @default(uuid())
+  problemId      String   @map("problem_id")
+  inputData      String   @map("input_data") @db.Text
+  expectedOutput String   @map("expected_output") @db.Text
+  isHidden       Boolean  @default(false) @map("is_hidden")
+  orderIndex     Int      @default(0) @map("order_index")
+
+  problem     Problem      @relation(fields: [problemId], references: [id], onDelete: Cascade)
+  testResults TestResult[]
+
+  @@index([problemId, orderIndex])
+  @@map("test_cases")
+}
+
+model Assignment {
+  id          String           @id @default(uuid())
+  title       String
+  description String           @default("") @db.Text
+  groupId     String           @map("group_id")
+  startsAt    DateTime         @map("starts_at")
+  dueAt       DateTime         @map("due_at")
+  status      AssignmentStatus @default(draft)
+  createdBy   String           @map("created_by")
+  createdAt   DateTime         @default(now()) @map("created_at")
+  updatedAt   DateTime         @updatedAt @map("updated_at")
+
+  group              Group               @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  creator            User                @relation("CreatedAssignments", fields: [createdBy], references: [id])
+  assignmentProblems AssignmentProblem[]
+  assignmentStudents AssignmentStudent[]
+  studentProgress    StudentProgress[]
+  submissions        Submission[]
+
+  @@index([groupId, status, startsAt, dueAt])
+  @@map("assignments")
+}
+
+model AssignmentProblem {
+  id           String @id @default(uuid())
+  assignmentId String @map("assignment_id")
+  problemId    String @map("problem_id")
+  orderIndex   Int    @default(0) @map("order_index")
+
+  assignment Assignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+  problem    Problem    @relation(fields: [problemId], references: [id], onDelete: Cascade)
+
+  @@unique([assignmentId, problemId])
+  @@map("assignment_problems")
+}
+
+model AssignmentStudent {
+  id           String   @id @default(uuid())
+  assignmentId String   @map("assignment_id")
+  studentId    String   @map("student_id")
+  assignedAt   DateTime @default(now()) @map("assigned_at")
+  status       String   @default("assigned")
+
+  assignment Assignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+  student    User       @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([assignmentId, studentId])
+  @@map("assignment_students")
+}
+
+model StudentProgress {
+  id           String              @id @default(uuid())
+  assignmentId String              @map("assignment_id")
+  problemId    String              @map("problem_id")
+  studentId    String              @map("student_id")
+  status       ProgressStatus      @default(not_started)
+  draftCode    String              @default("") @map("draft_code") @db.Text
+  language     ProgrammingLanguage @default(python)
+  updatedAt    DateTime            @updatedAt @map("updated_at")
+
+  assignment Assignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+  problem    Problem    @relation(fields: [problemId], references: [id], onDelete: Cascade)
+  student    User       @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([assignmentId, problemId, studentId])
+  @@index([studentId, status])
+  @@map("student_progress")
+}
+
+model Submission {
+  id               String              @id @default(uuid())
+  studentId        String              @map("student_id")
+  assignmentId     String              @map("assignment_id")
+  problemId        String              @map("problem_id")
+  language         ProgrammingLanguage
+  sourceCode       String              @map("source_code") @db.Text
+  status           SubmissionStatus
+  passedTests      Int                 @default(0) @map("passed_tests")
+  totalTests       Int                 @default(0) @map("total_tests")
+  executionTimeMs  Int                 @default(0) @map("execution_time_ms")
+  cpuTimeMs        Int                 @default(0) @map("cpu_time_ms")
+  peakMemoryBytes  BigInt              @default(0) @map("peak_memory_bytes")
+  createdAt        DateTime            @default(now()) @map("created_at")
+
+  student     User         @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  assignment  Assignment   @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+  problem     Problem      @relation(fields: [problemId], references: [id], onDelete: Cascade)
+  testResults TestResult[]
+
+  @@index([studentId, assignmentId, problemId])
+  @@index([createdAt])
+  @@map("submissions")
+}
+
+model TestResult {
+  id              String   @id @default(uuid())
+  submissionId    String   @map("submission_id")
+  testCaseId      String?  @map("test_case_id")
+  status          String
+  executionTimeMs Int      @default(0) @map("execution_time_ms")
+  errorSummary    String?  @map("error_summary") @db.Text
+
+  submission Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  testCase   TestCase?  @relation(fields: [testCaseId], references: [id], onDelete: SetNull)
+
+  @@map("test_results")
+}
+
+model AIInteraction {
+  id              String   @id @default(uuid())
+  studentId       String   @map("student_id")
+  problemId       String   @map("problem_id")
+  requestType     String   @map("request_type")
+  requestSummary  String   @map("request_summary") @db.Text
+  responseSummary String   @map("response_summary") @db.Text
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  student User    @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  problem Problem @relation(fields: [problemId], references: [id], onDelete: Cascade)
+
+  @@index([studentId, createdAt])
+  @@map("ai_interactions")
+}
+
+model Session {
+  id               String    @id @default(uuid())
+  userId           String    @map("user_id")
+  refreshTokenHash String    @map("refresh_token_hash")
+  expiresAt        DateTime  @map("expires_at")
+  revokedAt        DateTime? @map("revoked_at")
+  createdAt        DateTime  @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, refreshTokenHash])
+  @@map("sessions")
+}
+
+model AuditLog {
+  id         String   @id @default(uuid())
+  actorId    String?  @map("actor_id")
+  action     String
+  entityType String   @map("entity_type")
+  entityId   String?  @map("entity_id")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  actor User? @relation("ActorLogs", fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([actorId, createdAt])
+  @@map("audit_logs")
+}

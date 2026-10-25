@@ -1,0 +1,58 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: codepractice-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: codepractice
+      POSTGRES_USER: codepractice_user
+      POSTGRES_PASSWORD: codepractice_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U codepractice_user -d codepractice"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    container_name: codepractice-api
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 4000
+      DATABASE_URL: postgresql://codepractice_user:codepractice_password@postgres:5432/codepractice?schema=public
+      JWT_ACCESS_SECRET: codepractice_super_secret_jwt_access_key_2026_xyz
+      JWT_REFRESH_SECRET: codepractice_super_secret_jwt_refresh_key_2026_xyz
+      JWT_ACCESS_EXPIRES_IN: 15m
+      JWT_REFRESH_EXPIRES_IN: 7d
+      AI_PROVIDER: gemini
+      AI_API_KEY: ${AI_API_KEY:-mock_ai_key}
+      EXIT_ACCESS_CODE: "4826"
+    ports:
+      - "4000:4000"
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    container_name: codepractice-web
+    restart: unless-stopped
+    depends_on:
+      - api
+    ports:
+      - "3000:80"
+
+volumes:
+  postgres_data:
+    driver: local

@@ -1,0 +1,35 @@
+{
+  "name": "codepractice-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "CodePractice — Windows 11 o‘quvchi desktop ilovasi va o‘qituvchi web-paneli",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "npm run build --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "lint": "npm run lint --workspaces --if-present",
+    "api:dev": "npm --workspace=apps/api run start:dev",
+    "web:dev": "npm --workspace=apps/web run dev",
+    "desktop:dev": "npm --workspace=apps/desktop run dev",
+    "desktop:build": "npm --workspace=apps/desktop run build",
+    "desktop:build-exe": "npm --workspace=apps/desktop run tauri build",
+    "build:launcher": "C:\\Windows\\Microsoft.NET\\Framework64\\v4.0.30319\\csc.exe /target:winexe /nologo /out:CodePractice.exe /r:System.Windows.Forms.dll scripts\\launcher\\Program.cs",
+    "db:migrate": "npm --workspace=apps/api run db:migrate",
+    "db:seed": "npm --workspace=apps/api run db:seed",
+    "db:studio": "npm --workspace=apps/api run db:studio"
+  },
+  "keywords": [
+    "codepractice",
+    "tauri",
+    "react",
+    "nestjs",
+    "monaco-editor",
+    "prisma",
+    "windows-job-objects"
+  ],
+  "author": "CodePractice Team",
+  "license": "MIT"
+}

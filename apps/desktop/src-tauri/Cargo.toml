@@ -1,0 +1,26 @@
+[package]
+name = "codepractice-desktop"
+version = "1.0.0"
+description = "CodePractice Windows 11 Student Desktop Application"
+authors = ["CodePractice Team"]
+edition = "2021"
+
+[build-dependencies]
+tauri-build = { version = "2.0.0", features = [] }
+
+[dependencies]
+tauri = { version = "2.0.0", features = [] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+tokio = { version = "1.38", features = ["full"] }
+tempfile = "3.10"
+uuid = { version = "1.8", features = ["v4"] }
+
+[target.'cfg(windows)'.dependencies]
+windows-sys = { version = "0.52", features = [
+    "Win32_Foundation",
+    "Win32_System_JobObjects",
+    "Win32_System_Threading",
+    "Win32_Security",
+    "Win32_System_Diagnostics_Debug"
+] }

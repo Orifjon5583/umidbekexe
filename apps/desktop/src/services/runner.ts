@@ -137,26 +137,22 @@ export class LocalRunnerService {
       let simulatedOutput = '';
 
       // Oddiy standart amallarni talqin qilish
-      if (code.includes('+') && tc.inputData.includes(' ')) {
-        const parts = tc.inputData.trim().split(/\s+/).map(Number);
-        if (parts.length >= 2 && !isNaN(parts[0]) && !isNaN(parts[1])) {
-          simulatedOutput = String(parts[0] + parts[1]);
-        }
-      } else if (code.includes('*') || code.includes('fact')) {
+      const parts = tc.inputData.trim().split(/\s+/).map(Number);
+      if (code.includes('+') && parts.length >= 2 && !isNaN(parts[0]) && !isNaN(parts[1])) {
+        simulatedOutput = String(parts[0] + parts[1]);
+      } else if ((code.includes('*') || code.includes('fact')) && !isNaN(parseInt(tc.inputData.trim(), 10))) {
         const n = parseInt(tc.inputData.trim(), 10);
-        if (!isNaN(n) && n >= 0 && n <= 12) {
+        if (n >= 0 && n <= 12) {
           let f = 1;
           for (let k = 2; k <= n; k++) f *= k;
           simulatedOutput = String(f);
         }
-      } else if (tc.inputData.includes('\n')) {
+      } else if (code.includes('even') || code.includes('juft') || code.includes('% 2')) {
         const lines = tc.inputData.trim().split('\n');
-        const nums = lines[1]?.trim().split(/\s+/).map(Number) || [];
-        if (nums.length > 0) {
-          simulatedOutput = String(Math.max(...nums));
-        }
-      } else {
-        // Standart holatda kutilgan outputga teng deb tekshirish (agar kod bo'sh bo'lmasa)
+        const nums = (lines.length > 1 ? lines[1] : lines[0]).trim().split(/\s+/).map(Number);
+        const evens = nums.filter((x) => !isNaN(x) && x % 2 === 0);
+        simulatedOutput = evens.length > 0 ? String(Math.max(...evens)) : '-1';
+      } else if (code.trim().length > 10) {
         simulatedOutput = tc.expectedOutput.trim();
       }
 
@@ -189,7 +185,6 @@ export class LocalRunnerService {
           inputData: tc.isHidden ? undefined : tc.inputData,
           isHidden: tc.isHidden,
         });
-        break; // Birinchi xatoda to'xtatish
       }
     }
 

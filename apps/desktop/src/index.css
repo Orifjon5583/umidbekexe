@@ -2,34 +2,100 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', Consolas, monospace;
+}
+
+html.dark body {
+  background-color: #05070E;
+  color: #F1F5F9;
+  color-scheme: dark;
+}
+
+html.light body {
+  background-color: #F8FAFC;
+  color: #0F172A;
+  color-scheme: light;
+}
+
 body {
   margin: 0;
   padding: 0;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  background-color: #F8FAFC;
-  color: #1E293B;
+  font-family: var(--font-sans);
   user-select: none;
   -webkit-user-select: none;
+  overflow: hidden;
+  transition: background-color 0.25s ease, color 0.25s ease;
 }
 
-/* Monaco Editor uchun kod font */
+/* Linear / Vercel style mesh gradients */
+.mesh-bg-dark {
+  background: radial-gradient(ellipse 80% 50% at 50% -20%, rgba(59, 130, 246, 0.15), transparent 70%),
+              radial-gradient(circle at 10% 80%, rgba(99, 102, 241, 0.08), transparent 50%),
+              #05070E;
+}
+
+.mesh-bg-light {
+  background: radial-gradient(ellipse 80% 50% at 50% -20%, rgba(59, 130, 246, 0.08), transparent 70%),
+              radial-gradient(circle at 10% 80%, rgba(99, 102, 241, 0.05), transparent 50%),
+              #F8FAFC;
+}
+
+/* Glassmorphism surfaces */
+.glass-panel-dark {
+  background: rgba(13, 17, 28, 0.7);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.glass-panel-light {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+}
+
+/* Glowing borders */
+.glow-border-blue {
+  box-shadow: 0 0 25px -5px rgba(59, 130, 246, 0.3);
+}
+
+.glow-border-emerald {
+  box-shadow: 0 0 25px -5px rgba(16, 185, 129, 0.3);
+}
+
+/* Monaco Editor font */
 .monaco-editor,
 .monaco-editor * {
-  font-family: 'JetBrains Mono', 'Fira Code', Consolas, monospace !important;
+  font-family: var(--font-mono) !important;
 }
 
 /* Scrollbar styles */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
 }
-::-webkit-scrollbar-track {
-  background: #f1f5f9;
+
+html.dark ::-webkit-scrollbar-track {
+  background: transparent;
 }
-::-webkit-scrollbar-thumb {
+html.dark ::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 9999px;
+}
+html.dark ::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+html.light ::-webkit-scrollbar-track {
+  background: transparent;
+}
+html.light ::-webkit-scrollbar-thumb {
   background: #cbd5e1;
-  border-radius: 4px;
+  border-radius: 9999px;
 }
-::-webkit-scrollbar-thumb:hover {
+html.light ::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
 }

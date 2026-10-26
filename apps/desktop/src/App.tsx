@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { ThemeProvider } from './context/ThemeContext';
 import { LoginPage } from './pages/LoginPage';
 import { GuidePage } from './pages/GuidePage';
 import { DashboardPage } from './pages/DashboardPage';
@@ -110,7 +111,7 @@ export const App: React.FC = () => {
   };
 
   return (
-    <>
+    <ThemeProvider>
       {currentScreen === 'login' && (
         <LoginPage onLoginSuccess={handleLoginSuccess} />
       )}
@@ -171,6 +172,6 @@ export const App: React.FC = () => {
         onClose={() => setIsExitModalOpen(false)}
         onConfirmExit={handleConfirmExit}
       />
-    </>
+    </ThemeProvider>
   );
 };

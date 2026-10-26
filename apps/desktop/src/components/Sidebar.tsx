@@ -1,5 +1,6 @@
 import React from 'react';
-import { Home, FileCode, CheckSquare, BarChart2, Settings, LogOut } from 'lucide-react';
+import { Home, FileCode, CheckSquare, BarChart2, Settings, LogOut, Sparkles } from 'lucide-react';
+import { useTheme } from '../context/ThemeContext';
 
 interface Props {
   currentTab: 'dashboard' | 'assignment_details' | 'code_editor';
@@ -8,87 +9,161 @@ interface Props {
 }
 
 export const Sidebar: React.FC<Props> = ({ currentTab, onNavigate, onRequestExit }) => {
+  const { theme } = useTheme();
+
+  const navItems = [
+    {
+      id: 'dashboard' as const,
+      label: 'Bosh sahifa',
+      icon: Home,
+      badge: null,
+    },
+    {
+      id: 'assignment_details' as const,
+      label: 'Vazifalar',
+      icon: CheckSquare,
+      badge: '4',
+    },
+    {
+      id: 'code_editor' as const,
+      label: 'Kod laboratoriyasi',
+      icon: FileCode,
+      badge: 'Faol',
+      badgeColor: 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20',
+    },
+  ];
+
   return (
-    <aside className="w-56 bg-[#0B1528] text-slate-300 flex flex-col justify-between flex-shrink-0 select-none p-4 border-r border-[#15233E]">
+    <aside
+      className={`w-60 flex flex-col justify-between flex-shrink-0 select-none p-4 border-r transition-colors duration-200 ${
+        theme === 'dark'
+          ? 'bg-[#080B14]/90 backdrop-blur-xl border-white/5 text-slate-300'
+          : 'bg-white border-slate-200 text-slate-700'
+      }`}
+    >
       <div className="space-y-6">
-        {/* Brand Logo */}
-        <div className="flex items-center gap-2.5 px-2 pt-1 pb-2 border-b border-slate-800/80">
-          <img
-            src="/icon.png"
-            alt="CodePractice"
-            className="w-7 h-7 rounded-lg object-contain"
-            style={{ width: '28px', height: '28px' }}
-          />
-          <div className="flex items-center gap-1">
-            <span className="font-bold text-base text-white tracking-tight">Code</span>
-            <span className="font-bold text-base text-blue-500 tracking-tight">Practice</span>
+        {/* Brand Header */}
+        <div className="flex items-center gap-3 px-2 pt-1 pb-3 border-b border-white/5">
+          <div className="relative group">
+            <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-blue-600 to-cyan-500 flex items-center justify-center p-1.5 shadow-md shadow-blue-500/20">
+              <img
+                src="/icon.png"
+                alt="CodePractice"
+                className="w-full h-full object-contain filter brightness-110"
+              />
+            </div>
+          </div>
+          <div>
+            <div className="flex items-center gap-1 font-extrabold text-sm tracking-tight">
+              <span className={theme === 'dark' ? 'text-white' : 'text-slate-900'}>Code</span>
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-cyan-400">
+                Practice
+              </span>
+            </div>
+            <div className="text-[10px] text-slate-400 font-mono tracking-wider">
+              STUDENT EDITION
+            </div>
           </div>
         </div>
 
-        {/* Navigation Menu (From Design: Bosh sahifa, Vazifalar, Natijalar, Sozlamalar, Chiqish) */}
-        <nav className="space-y-1.5">
+        {/* Navigation Items */}
+        <nav className="space-y-1">
+          <div className="px-2.5 pb-1 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+            Asosiy bo‘limlar
+          </div>
+
+          {navItems.map((item) => {
+            const Icon = item.icon;
+            const isActive = currentTab === item.id;
+            return (
+              <button
+                key={item.id}
+                onClick={() => onNavigate(item.id)}
+                className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold transition-all duration-150 cursor-pointer ${
+                  isActive
+                    ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/25'
+                    : theme === 'dark'
+                    ? 'text-slate-400 hover:text-white hover:bg-white/5'
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <Icon className={`w-4 h-4 ${isActive ? 'text-white' : 'text-slate-400'}`} />
+                  <span>{item.label}</span>
+                </div>
+
+                {item.badge && (
+                  <span
+                    className={`text-[10px] font-mono font-bold px-1.5 py-0.5 rounded-md ${
+                      isActive
+                        ? 'bg-white/20 text-white'
+                        : item.badgeColor ||
+                          (theme === 'dark'
+                            ? 'bg-slate-800 text-slate-300'
+                            : 'bg-slate-100 text-slate-600')
+                    }`}
+                  >
+                    {item.badge}
+                  </span>
+                )}
+              </button>
+            );
+          })}
+
+          <div className="pt-3 px-2.5 pb-1 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+            Qo‘shimcha
+          </div>
+
           <button
-            onClick={() => onNavigate('dashboard')}
-            className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition ${
-              currentTab === 'dashboard'
-                ? 'bg-[#2563EB] text-white shadow-md shadow-blue-600/30'
-                : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
+            onClick={() => alert("Natijalar: Barcha topshiriqlar va darslar bo'yicha baholar jurnali")}
+            className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-medium transition cursor-pointer ${
+              theme === 'dark'
+                ? 'text-slate-400 hover:text-white hover:bg-white/5'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
             }`}
           >
-            <Home className="w-4 h-4" />
-            <span>Bosh sahifa</span>
+            <BarChart2 className="w-4 h-4 text-slate-400" />
+            <span>Natijalar jurnali</span>
           </button>
 
           <button
-            onClick={() => onNavigate('assignment_details')}
-            className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition ${
-              currentTab === 'assignment_details'
-                ? 'bg-[#2563EB] text-white shadow-md shadow-blue-600/30'
-                : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
+            onClick={() => alert("Sozlamalar: Monaco editor mavzusi, shriftlar va klaviatura sozlamalari")}
+            className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-medium transition cursor-pointer ${
+              theme === 'dark'
+                ? 'text-slate-400 hover:text-white hover:bg-white/5'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
             }`}
           >
-            <CheckSquare className="w-4 h-4" />
-            <span>Vazifalar</span>
-          </button>
-
-          <button
-            onClick={() => onNavigate('code_editor')}
-            className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition ${
-              currentTab === 'code_editor'
-                ? 'bg-[#2563EB] text-white shadow-md shadow-blue-600/30'
-                : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
-            }`}
-          >
-            <FileCode className="w-4 h-4" />
-            <span>Kod laboratoriyasi</span>
-          </button>
-
-          <button
-            onClick={() => alert("Natijalar bo'limi: Barcha topshiriqlar bo'yicha baholash va ballar jurnali")}
-            className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold text-slate-400 hover:text-white hover:bg-slate-800/50 transition"
-          >
-            <BarChart2 className="w-4 h-4" />
-            <span>Natijalar</span>
-          </button>
-
-          <button
-            onClick={() => alert("Sozlamalar: Monaco muharrir o'lchami, shrift va shaxsiy parametrlar")}
-            className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold text-slate-400 hover:text-white hover:bg-slate-800/50 transition"
-          >
-            <Settings className="w-4 h-4" />
+            <Settings className="w-4 h-4 text-slate-400" />
             <span>Sozlamalar</span>
           </button>
         </nav>
       </div>
 
-      {/* Logout / Exit at Bottom */}
-      <div className="pt-4 border-t border-slate-800/80">
+      {/* AI Status Card & Logout */}
+      <div className="space-y-3 pt-3 border-t border-white/5">
+        <div
+          className={`p-3 rounded-2xl border ${
+            theme === 'dark'
+              ? 'bg-gradient-to-b from-blue-950/30 to-indigo-950/20 border-blue-500/20 text-slate-300'
+              : 'bg-blue-50/70 border-blue-200/80 text-blue-950'
+          }`}
+        >
+          <div className="flex items-center gap-2 text-xs font-bold mb-1">
+            <Sparkles className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
+            <span>AI Murabbiy faol</span>
+          </div>
+          <p className="text-[10px] text-slate-400 leading-tight">
+            Har qanday savol bo‘yicha kod muharririda yordam oling.
+          </p>
+        </div>
+
         <button
           onClick={onRequestExit}
-          className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold text-slate-400 hover:text-red-400 hover:bg-red-500/10 transition"
+          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 transition cursor-pointer"
         >
           <LogOut className="w-4 h-4" />
-          <span>Chiqish</span>
+          <span>Ilovadan chiqish</span>
         </button>
       </div>
     </aside>

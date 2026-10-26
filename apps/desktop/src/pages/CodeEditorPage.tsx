@@ -1,17 +1,16 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import Editor from '@monaco-editor/react';
 import { TitleBar } from '../components/TitleBar';
 import { LocalRunnerService } from '../services/runner';
 import { desktopApiClient } from '../services/api';
 import { TestCase } from '@codepractice/shared-types';
 import { useClipboardRestrictions } from '../hooks/useClipboardRestrictions';
+import { useTheme } from '../context/ThemeContext';
 import {
   Play,
   Check,
   Copy,
   ChevronDown,
-  ChevronLeft,
-  ChevronRight,
   Sparkles,
   FileText,
   Clock,
@@ -32,9 +31,10 @@ import {
   XCircle,
   Gauge,
   Terminal,
-  ArrowLeft,
-  RefreshCw,
-  Sliders,
+  ArrowRight,
+  ChevronRight,
+  Layers,
+  Flame,
 } from 'lucide-react';
 
 interface Props {
@@ -67,11 +67,12 @@ export const CodeEditorPage: React.FC<Props> = ({
   onFinishAssignment,
 }) => {
   useClipboardRestrictions(true);
+  const { theme } = useTheme();
 
-  // Programming language selection
+  // Programming language
   const [selectedLanguage, setSelectedLanguage] = useState<'python' | 'cpp'>('python');
 
-  // Code state (Python default matching user screenshot)
+  // Python template
   const [codePython, setCodePython] = useState<string>(
 `son1 = int(input())
 son2 = int(input())
@@ -79,6 +80,7 @@ print(son1 + son2)
 `
   );
 
+  // C++ template
   const [codeCpp, setCodeCpp] = useState<string>(
 `#include <iostream>
 using namespace std;
@@ -102,13 +104,11 @@ int main() {
     }
   };
 
-  // Left pane tabs: 'masala' | 'urinishlar' | 'statistika' | 'yechganlar'
+  // Tabs
   const [activeLeftTab, setActiveLeftTab] = useState<'masala' | 'urinishlar' | 'statistika' | 'yechganlar'>('masala');
+  const [activeBottomTab, setActiveBottomTab] = useState<'namuna' | 'konsol'>('namuna');
 
-  // Bottom pane tabs: 'konsol' | 'namuna'
-  const [activeBottomTab, setActiveBottomTab] = useState<'konsol' | 'namuna'>('namuna');
-
-  // 5 test cases as requested by the user
+  // 5 Test Cases
   const [testCases, setTestCases] = useState<TestCaseItem[]>([
     {
       id: 1,
@@ -174,21 +174,21 @@ int main() {
   const [isRunning, setIsRunning] = useState(false);
   const [isTestingAll, setIsTestingAll] = useState(false);
   const [consoleOutput, setConsoleOutput] = useState<string>(
-    `> ${selectedLanguage === 'python' ? 'python3 main.py' : 'g++ -O3 main.cpp -o main && ./main'} < input.txt\n4\n[Jarayon 0.018s ichida muvaffaqiyatli yakunlandi]`
+    `> ${selectedLanguage === 'python' ? 'python3 main.py' : 'g++ -O3 main.cpp && ./a.out'} < input.txt\n4\n[Jarayon 0.018s ichida muvaffaqiyatli yakunlandi • Kod holati: QABUL QILINDI]`
   );
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
 
-  // Social stats state (matching screenshot: 142 likes, 16 dislikes, star)
+  // Social Stats
   const [likes, setLikes] = useState<number>(142);
   const [hasLiked, setHasLiked] = useState<boolean>(false);
   const [dislikes, setDislikes] = useState<number>(16);
   const [hasDisliked, setHasDisliked] = useState<boolean>(false);
   const [isStarred, setIsStarred] = useState<boolean>(false);
 
-  // Auto-save notification
+  // Auto-save
   const [saveStatus, setSaveStatus] = useState<string>('Saqlandi');
 
-  // AI Assistant drawer state
+  // AI Assistant Drawer
   const [isAiOpen, setIsAiOpen] = useState(false);
   const [aiMessages, setAiMessages] = useState<Array<{ sender: 'user' | 'ai'; text: string; time: string }>>([
     {
@@ -198,7 +198,7 @@ int main() {
     },
     {
       sender: 'ai',
-      text: 'Albatta! Masala juda sodda: berilgan 2 ta butun sonni o‘qib olib, ularning yig‘indisini topishingiz kerak.\n\nPython tilida:\n`son1 = int(input())`\n`son2 = int(input())`\n`print(son1 + son2)`\n\nC++ tilida esa `cin >> a >> b;` va `cout << a + b;` dan foydalanishingiz mumkin.',
+      text: 'Albatta! Masala juda sodda: berilgan 2 ta butun sonni kiritishdan o‘qib olib, ularning yig‘indisini hisoblaysiz.\n\nPython tilida:\n`son1 = int(input())`\n`son2 = int(input())`\n`print(son1 + son2)`\n\nC++ tilida:\n`cin >> son1 >> son2;`\n`cout << son1 + son2 << endl;`',
       time: '14:31 • AI Murabbiy',
     },
   ]);
@@ -242,7 +242,7 @@ int main() {
     }
   };
 
-  // Autosave draft to backend
+  // Autosave draft
   useEffect(() => {
     const timer = setTimeout(() => {
       desktopApiClient
@@ -257,11 +257,11 @@ int main() {
           setSaveStatus(`Saqlandi (${now})`);
         })
         .catch(() => {});
-    }, 3000);
+    }, 2500);
     return () => clearTimeout(timer);
   }, [currentCode, selectedLanguage, assignmentId, problemId]);
 
-  // RUN CODE (Single Test / Current code execution)
+  // RUN CODE (Single Test execution)
   const handleRunCode = async () => {
     setIsRunning(true);
     try {
@@ -291,9 +291,10 @@ int main() {
           : tc.expected;
 
       const isPassed =
-        actualResult.trim() === tc.expected.trim() && res.status !== 'compile_error' && res.status !== 'time_limit_exceeded';
+        actualResult.trim() === tc.expected.trim() &&
+        res.status !== 'compile_error' &&
+        res.status !== 'time_limit_exceeded';
 
-      // Update current test case
       setTestCases((prev) =>
         prev.map((item) =>
           item.id === tc.id
@@ -307,8 +308,7 @@ int main() {
         )
       );
 
-      // Console output
-      const langCmd = selectedLanguage === 'python' ? 'python3 main.py' : './main';
+      const langCmd = selectedLanguage === 'python' ? 'python3 main.py' : './a.out';
       setConsoleOutput(
         `> ${langCmd} < input.txt\n${actualResult}\n\n[Jarayon ${res.executionTimeMs} ms ichida yakunlandi. Holat: ${
           isPassed ? 'ACCEPTED' : 'WRONG_ANSWER'
@@ -321,7 +321,7 @@ int main() {
     }
   };
 
-  // TESTLASH (Full test suite execution on all 5 test cases)
+  // TESTLASH (All 5 test cases)
   const handleTestAllCases = async () => {
     setIsTestingAll(true);
     try {
@@ -359,17 +359,16 @@ int main() {
 
       const passedCount = updated.filter((t) => t.status === 'passed').length;
       setConsoleOutput(
-        `> Barcha testlar tekshirildi (${passedCount}/${updated.length})\n` +
+        `> Barcha 5 ta test tekshirildi (${passedCount}/${updated.length})\n` +
           updated
             .map(
               (t) =>
                 `[${t.status === 'passed' ? 'OK' : 'FAIL'}] ${t.title}: Kirish "${t.displayInput}" -> Chiqish "${t.actual}" (Kutilgan: "${t.expected}") [${t.time}]`
             )
             .join('\n') +
-          `\n\nNatija: ${passedCount === updated.length ? '100/100 Ball - MUVAFFAQIYATLI YAKUNLANDI' : 'Ayrim testlarda nomuvofiqlik aniqlandi'}`
+          `\n\nNatija: ${passedCount === updated.length ? '100/100 Ball — Muvaffaqiyatli yakunlandi' : 'Ayrim testlarda nomuvofiqlik aniqlandi'}`
       );
 
-      // Submit results to server
       try {
         await desktopApiClient.submitCodeResult({
           assignmentId,
@@ -380,13 +379,13 @@ int main() {
         });
       } catch {}
     } catch (err: any) {
-      setConsoleOutput(`> Testlashda xatolik:\n${err.message || 'Xatolik yuz berdi'}`);
+      setConsoleOutput(`> Testlash xatoligi:\n${err.message || 'Xatolik'}`);
     } finally {
       setIsTestingAll(false);
     }
   };
 
-  // AI Chat send
+  // AI chat send
   const handleSendAi = async (customPrompt?: string) => {
     const q = customPrompt || aiInput.trim();
     if (!q) return;
@@ -421,15 +420,15 @@ int main() {
         },
       ]);
     } catch {
-      let fallbackReply = 'Maslahat: Ikki sonni qo‘shish uchun input() orqali o‘qib olib, int() ga o‘giring va print(a + b) bajaring.';
+      let fallback = 'Maslahat: Ikki sonni qo‘shish uchun input() orqali o‘qib oling, int() ga aylantiring va print(a + b) bajaring.';
       if (q.includes('xato')) {
-        fallbackReply = 'Kodingizda sintaktik xato aniqlanmadi. Testlar to‘liq o‘tmoqda!';
+        fallback = 'Kodingizda sintaktik xato aniqlanmadi. Testlar to‘liq o‘tmoqda!';
       }
       setAiMessages((prev) => [
         ...prev,
         {
           sender: 'ai',
-          text: fallbackReply,
+          text: fallback,
           time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + ' • AI Murabbiy',
         },
       ]);
@@ -437,129 +436,166 @@ int main() {
   };
 
   return (
-    <div className="h-screen flex flex-col bg-[#000000] text-slate-100 select-none overflow-hidden font-sans">
-      {/* TitleBar with Windows Controls */}
+    <div
+      className={`h-screen flex flex-col select-none overflow-hidden font-sans transition-colors duration-200 ${
+        theme === 'dark' ? 'bg-[#060810] text-slate-100' : 'bg-slate-50 text-slate-800'
+      }`}
+    >
       <TitleBar onExitRequest={onRequestExit} />
 
       {/* Main Split Layout: Left Problem Pane, Right Editor Pane */}
       <div className="flex-1 flex min-h-0 overflow-hidden relative">
         {/* ===================== LEFT PANE (Problem Statement) ===================== */}
-        <div className="w-[500px] flex-shrink-0 flex flex-col bg-[#000000] border-r border-[#21262d] overflow-hidden">
-          {/* Top Left Navigation Tabs */}
-          <div className="h-10 bg-[#000000] border-b border-[#21262d] px-3 flex items-center gap-6 text-xs font-medium flex-shrink-0">
-            <button
-              onClick={() => setActiveLeftTab('masala')}
-              className={`h-full flex items-center gap-1.5 px-1 border-b-2 transition ${
-                activeLeftTab === 'masala'
-                  ? 'border-blue-500 text-blue-400 font-semibold'
-                  : 'border-transparent text-slate-400 hover:text-slate-200'
-              }`}
-            >
-              <FileText className="w-3.5 h-3.5" />
-              <span>Masala</span>
-            </button>
-
-            <button
-              onClick={() => setActiveLeftTab('urinishlar')}
-              className={`h-full flex items-center gap-1.5 px-1 border-b-2 transition ${
-                activeLeftTab === 'urinishlar'
-                  ? 'border-blue-500 text-blue-400 font-semibold'
-                  : 'border-transparent text-slate-400 hover:text-slate-200'
-              }`}
-            >
-              <Clock className="w-3.5 h-3.5" />
-              <span>Urinishlar</span>
-            </button>
-
-            <button
-              onClick={() => setActiveLeftTab('statistika')}
-              className={`h-full flex items-center gap-1.5 px-1 border-b-2 transition ${
-                activeLeftTab === 'statistika'
-                  ? 'border-blue-500 text-blue-400 font-semibold'
-                  : 'border-transparent text-slate-400 hover:text-slate-200'
-              }`}
-            >
-              <BarChart2 className="w-3.5 h-3.5" />
-              <span>Statistika</span>
-            </button>
-
-            <button
-              onClick={() => setActiveLeftTab('yechganlar')}
-              className={`h-full flex items-center gap-1.5 px-1 border-b-2 transition ${
-                activeLeftTab === 'yechganlar'
-                  ? 'border-blue-500 text-blue-400 font-semibold'
-                  : 'border-transparent text-slate-400 hover:text-slate-200'
-              }`}
-            >
-              <Users className="w-3.5 h-3.5" />
-              <span>Yechganlar</span>
-            </button>
+        <div
+          className={`w-[480px] flex-shrink-0 flex flex-col border-r overflow-hidden transition-colors duration-200 ${
+            theme === 'dark'
+              ? 'bg-[#080B14] border-white/5'
+              : 'bg-white border-slate-200'
+          }`}
+        >
+          {/* Top Left Navigation Tabs (Linear style sliding pills) */}
+          <div
+            className={`h-11 px-3 flex items-center gap-4 text-xs font-semibold flex-shrink-0 border-b ${
+              theme === 'dark'
+                ? 'bg-[#070912] border-white/5'
+                : 'bg-slate-50 border-slate-200'
+            }`}
+          >
+            {[
+              { id: 'masala', label: 'Masala', icon: FileText },
+              { id: 'urinishlar', label: 'Urinishlar', icon: Clock },
+              { id: 'statistika', label: 'Statistika', icon: BarChart2 },
+              { id: 'yechganlar', label: 'Yechganlar', icon: Users },
+            ].map((tab) => {
+              const Icon = tab.icon;
+              const isActive = activeLeftTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveLeftTab(tab.id as any)}
+                  className={`h-7 px-2.5 rounded-lg flex items-center gap-1.5 transition cursor-pointer ${
+                    isActive
+                      ? 'bg-blue-600 text-white shadow-xs'
+                      : theme === 'dark'
+                      ? 'text-slate-400 hover:text-white hover:bg-white/5'
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
+                  }`}
+                >
+                  <Icon className="w-3.5 h-3.5" />
+                  <span>{tab.label}</span>
+                </button>
+              );
+            })}
           </div>
 
           {/* Left Content Scrollable Area */}
-          <div className="flex-1 overflow-y-auto p-5 space-y-5 text-xs text-slate-200">
+          <div className="flex-1 overflow-y-auto p-5 space-y-5 text-xs">
             {activeLeftTab === 'masala' && (
               <>
                 {/* Title and Badges */}
                 <div className="space-y-3">
-                  <h1 className="text-xl font-bold text-white tracking-tight">
-                    1. Ikki sonni yig`indisi
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-md bg-blue-500/10 text-blue-400 border border-blue-500/20">
+                      LAB-01
+                    </span>
+                    <span className="text-slate-400">•</span>
+                    <span className="text-[11px] text-slate-400">Algoritmik topshiriq</span>
+                  </div>
+
+                  <h1 className="text-xl font-extrabold tracking-tight">
+                    1. Ikki sonni yig'indisi
                   </h1>
 
                   <div className="flex flex-wrap items-center gap-2 text-[11px]">
-                    <span className="px-2.5 py-0.5 rounded-full font-medium bg-emerald-950/70 text-emerald-400 border border-emerald-800/60">
+                    <span className="px-2.5 py-0.5 rounded-full font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
                       Boshlang'ich
                     </span>
-                    <span className="px-2.5 py-0.5 rounded-full bg-[#161B22] text-slate-300 border border-slate-700/60 font-mono">
-                      Vaqt cheklovi: 3000 ms
+                    <span
+                      className={`px-2.5 py-0.5 rounded-full border font-mono ${
+                        theme === 'dark'
+                          ? 'bg-slate-900/60 border-white/5 text-slate-300'
+                          : 'bg-slate-100 border-slate-200 text-slate-700'
+                      }`}
+                    >
+                      Vaqt: 3000 ms
                     </span>
-                    <span className="px-2.5 py-0.5 rounded-full bg-[#161B22] text-slate-300 border border-slate-700/60 font-mono">
-                      Xotira cheklovi: 512 MB
+                    <span
+                      className={`px-2.5 py-0.5 rounded-full border font-mono ${
+                        theme === 'dark'
+                          ? 'bg-slate-900/60 border-white/5 text-slate-300'
+                          : 'bg-slate-100 border-slate-200 text-slate-700'
+                      }`}
+                    >
+                      Xotira: 512 MB
                     </span>
-                    <span className="px-2.5 py-0.5 rounded-full bg-[#161B22] text-slate-300 border border-slate-700/60 font-mono flex items-center gap-1">
-                      <Gauge className="w-3.5 h-3.5 text-slate-400" />
-                      <span>100</span>
+                    <span className="px-2.5 py-0.5 rounded-full font-mono font-bold bg-blue-500/10 text-blue-400 border border-blue-500/20 flex items-center gap-1">
+                      <Gauge className="w-3.5 h-3.5" />
+                      <span>100 ball</span>
                     </span>
                   </div>
                 </div>
 
-                {/* Mathematical Problem Statement */}
-                <div className="pt-2 text-slate-300 text-sm leading-relaxed border-b border-[#21262d] pb-4">
-                  <p>
-                    <span className="italic font-serif font-semibold text-slate-100">a</span> va{' '}
-                    <span className="italic font-serif font-semibold text-slate-100">b</span> sonlari berilgan. Ushbu
-                    sonlar yig'indisini hisoblang.
+                {/* Mathematical Description */}
+                <div
+                  className={`p-4 rounded-xl border leading-relaxed ${
+                    theme === 'dark'
+                      ? 'bg-slate-900/40 border-white/5 text-slate-300'
+                      : 'bg-slate-50 border-slate-200 text-slate-700'
+                  }`}
+                >
+                  <p className="text-sm">
+                    <span className="italic font-serif font-bold text-blue-400">a</span> va{' '}
+                    <span className="italic font-serif font-bold text-blue-400">b</span> sonlari berilgan. Ushbu
+                    sonlarning yig‘indisini hisoblab ekranga chiqaring.
                   </p>
                 </div>
 
                 {/* Kirish ma'lumotlari */}
                 <div className="space-y-1.5">
-                  <h3 className="font-bold text-white text-sm">Kirish ma'lumotlari</h3>
-                  <p className="text-slate-300 text-xs leading-relaxed">
-                    Birinchi qatorda butun son, <span className="font-mono text-slate-200">a(1 ≤ a ≤ 1000)</span>.
+                  <h3 className="font-bold text-xs uppercase tracking-wider text-slate-400">
+                    Kirish ma'lumotlari
+                  </h3>
+                  <p className="text-xs leading-relaxed">
+                    Birinchi qatorda butun son, <code className="font-mono text-blue-400 font-bold">a (1 ≤ a ≤ 1000)</code>.
                   </p>
-                  <p className="text-slate-300 text-xs leading-relaxed">
-                    Ikkinchi qatorda butun son, <span className="font-mono text-slate-200">b(1 ≤ b ≤ 1000)</span>.
+                  <p className="text-xs leading-relaxed">
+                    Ikkinchi qatorda butun son, <code className="font-mono text-blue-400 font-bold">b (1 ≤ b ≤ 1000)</code>.
                   </p>
                 </div>
 
                 {/* Chiquvchi ma'lumotlar */}
                 <div className="space-y-1.5 pt-1">
-                  <h3 className="font-bold text-white text-sm">Chiquvchi ma'lumotlar</h3>
-                  <p className="text-slate-300 text-xs">Yagona qatorda masala yechimi.</p>
+                  <h3 className="font-bold text-xs uppercase tracking-wider text-slate-400">
+                    Chiquvchi ma'lumotlar
+                  </h3>
+                  <p className="text-xs">Yagona qatorda masala yechimi (yig‘indi qiymati).</p>
                 </div>
 
                 {/* Namuna testlar */}
-                <div className="space-y-2 pt-2">
-                  <h3 className="font-bold text-white text-sm">Namuna testlar</h3>
+                <div className="space-y-3 pt-2">
+                  <h3 className="font-bold text-xs uppercase tracking-wider text-slate-400">
+                    Namunaviy testlar
+                  </h3>
 
                   {/* Sample Input Box */}
-                  <div className="bg-[#0D1117] border border-[#21262D] rounded-lg overflow-hidden">
-                    <div className="px-3 py-2 bg-[#161B22]/60 border-b border-[#21262D] flex items-center justify-between text-xs font-semibold text-slate-300">
-                      <span>Kirish</span>
+                  <div
+                    className={`rounded-xl border overflow-hidden ${
+                      theme === 'dark'
+                        ? 'bg-[#0A0D18] border-white/5'
+                        : 'bg-white border-slate-200 shadow-xs'
+                    }`}
+                  >
+                    <div
+                      className={`px-3 py-2 border-b flex items-center justify-between text-xs font-semibold ${
+                        theme === 'dark'
+                          ? 'bg-white/5 border-white/5 text-slate-300'
+                          : 'bg-slate-50 border-slate-200 text-slate-600'
+                      }`}
+                    >
+                      <span>Namunaviy kirish (Input)</span>
                       <button
                         onClick={() => handleCopy('2\n2', 'sample_in')}
-                        className="flex items-center gap-1 text-slate-400 hover:text-white transition text-[11px]"
+                        className="flex items-center gap-1 text-slate-400 hover:text-white transition text-[11px] cursor-pointer"
                       >
                         {copiedKey === 'sample_in' ? (
                           <>
@@ -581,12 +617,24 @@ int main() {
                   </div>
 
                   {/* Sample Output Box */}
-                  <div className="bg-[#0D1117] border border-[#21262D] rounded-lg overflow-hidden">
-                    <div className="px-3 py-2 bg-[#161B22]/60 border-b border-[#21262D] flex items-center justify-between text-xs font-semibold text-slate-300">
-                      <span>Chiqish</span>
+                  <div
+                    className={`rounded-xl border overflow-hidden ${
+                      theme === 'dark'
+                        ? 'bg-[#0A0D18] border-white/5'
+                        : 'bg-white border-slate-200 shadow-xs'
+                    }`}
+                  >
+                    <div
+                      className={`px-3 py-2 border-b flex items-center justify-between text-xs font-semibold ${
+                        theme === 'dark'
+                          ? 'bg-white/5 border-white/5 text-slate-300'
+                          : 'bg-slate-50 border-slate-200 text-slate-600'
+                      }`}
+                    >
+                      <span>Namunaviy chiqish (Output)</span>
                       <button
                         onClick={() => handleCopy('4', 'sample_out')}
-                        className="flex items-center gap-1 text-slate-400 hover:text-white transition text-[11px]"
+                        className="flex items-center gap-1 text-slate-400 hover:text-white transition text-[11px] cursor-pointer"
                       >
                         {copiedKey === 'sample_out' ? (
                           <>
@@ -601,7 +649,7 @@ int main() {
                         )}
                       </button>
                     </div>
-                    <pre className="p-3 text-sm font-mono text-slate-200 whitespace-pre">
+                    <pre className="p-3 text-sm font-mono text-emerald-400 font-bold whitespace-pre">
 4
                     </pre>
                   </div>
@@ -612,10 +660,14 @@ int main() {
             {activeLeftTab === 'urinishlar' && (
               <div className="space-y-3 font-mono text-xs">
                 <div className="text-slate-400 text-[11px]">Sizning so‘nggi urinishlaringiz:</div>
-                <div className="p-2.5 rounded-lg bg-[#0D1117] border border-[#21262D] flex items-center justify-between">
+                <div
+                  className={`p-3 rounded-xl border flex items-center justify-between ${
+                    theme === 'dark' ? 'bg-[#0A0D18] border-white/5' : 'bg-white border-slate-200'
+                  }`}
+                >
                   <div>
-                    <span className="text-emerald-400 font-bold">Qabul qilindi (100 ball)</span>
-                    <div className="text-[10px] text-slate-500 font-sans mt-0.5">Bugun, 14:32 • Python 3.12</div>
+                    <span className="text-emerald-400 font-bold">100 ball (Qabul qilindi)</span>
+                    <div className="text-[10px] text-slate-400 font-sans mt-0.5">Bugun, 14:32 • Python 3.12</div>
                   </div>
                   <span className="text-slate-400 text-[11px]">18 ms / 12.4 MB</span>
                 </div>
@@ -626,13 +678,21 @@ int main() {
               <div className="space-y-3 text-xs">
                 <div className="text-slate-400 text-[11px]">Umumiy statistika:</div>
                 <div className="grid grid-cols-2 gap-2 text-center font-mono">
-                  <div className="p-3 rounded-lg bg-[#0D1117] border border-[#21262D]">
-                    <div className="text-lg font-bold text-emerald-400">94.8%</div>
-                    <div className="text-[10px] text-slate-500 font-sans">Qabul darajasi</div>
+                  <div
+                    className={`p-3 rounded-xl border ${
+                      theme === 'dark' ? 'bg-[#0A0D18] border-white/5' : 'bg-white border-slate-200'
+                    }`}
+                  >
+                    <div className="text-xl font-bold text-emerald-400">94.8%</div>
+                    <div className="text-[10px] text-slate-400 font-sans mt-1">Qabul darajasi</div>
                   </div>
-                  <div className="p-3 rounded-lg bg-[#0D1117] border border-[#21262D]">
-                    <div className="text-lg font-bold text-blue-400">1,482</div>
-                    <div className="text-[10px] text-slate-500 font-sans">Yechgan o‘quvchilar</div>
+                  <div
+                    className={`p-3 rounded-xl border ${
+                      theme === 'dark' ? 'bg-[#0A0D18] border-white/5' : 'bg-white border-slate-200'
+                    }`}
+                  >
+                    <div className="text-xl font-bold text-blue-400">1,482</div>
+                    <div className="text-[10px] text-slate-400 font-sans mt-1">Yechgan o‘quvchilar</div>
                   </div>
                 </div>
               </div>
@@ -640,31 +700,49 @@ int main() {
 
             {activeLeftTab === 'yechganlar' && (
               <div className="space-y-2 text-xs">
-                <div className="text-slate-400 text-[11px]">Eng tezkor yechimlar:</div>
-                {['Jasur Aliyev (0.012s)', 'Madina Karimova (0.014s)', 'Bobur Umarov (0.015s)'].map((name, i) => (
-                  <div key={i} className="p-2 rounded bg-[#0D1117] border border-[#21262D] flex items-center justify-between">
-                    <span className="text-slate-200">#{i + 1} {name}</span>
-                    <span className="text-emerald-400 font-mono text-[11px]">100 ball</span>
+                <div className="text-slate-400 text-[11px]">Eng tezkor yechimlar reytingi:</div>
+                {[
+                  { name: 'Jasur Aliyev', time: '12 ms', score: '100 ball' },
+                  { name: 'Madina Karimova', time: '14 ms', score: '100 ball' },
+                  { name: 'Bobur Umarov', time: '15 ms', score: '100 ball' },
+                ].map((item, i) => (
+                  <div
+                    key={i}
+                    className={`p-2.5 rounded-xl border flex items-center justify-between ${
+                      theme === 'dark' ? 'bg-[#0A0D18] border-white/5' : 'bg-white border-slate-200'
+                    }`}
+                  >
+                    <span className="font-medium">#{i + 1} {item.name}</span>
+                    <div className="flex items-center gap-3 font-mono text-[11px]">
+                      <span className="text-slate-400">{item.time}</span>
+                      <span className="text-emerald-400 font-bold">{item.score}</span>
+                    </div>
                   </div>
                 ))}
               </div>
             )}
           </div>
 
-          {/* Bottom Author Bar (Matching user screenshot) */}
-          <div className="h-11 bg-[#000000] border-t border-[#21262d] px-4 flex items-center justify-between text-xs flex-shrink-0">
+          {/* Bottom Author & Feedback Bar */}
+          <div
+            className={`h-11 px-4 flex items-center justify-between text-xs flex-shrink-0 border-t ${
+              theme === 'dark'
+                ? 'bg-[#070912] border-white/5'
+                : 'bg-slate-50 border-slate-200'
+            }`}
+          >
             <div className="flex items-center gap-2">
-              <div className="w-5 h-5 rounded-full bg-slate-700 flex items-center justify-center text-[10px] font-bold text-white uppercase tracking-tighter">
-                cp
+              <div className="w-5 h-5 rounded-full bg-blue-600 text-white flex items-center justify-center text-[10px] font-bold">
+                A
               </div>
-              <span className="text-slate-300 font-semibold">admin</span>
+              <span className="font-semibold text-slate-300">admin</span>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5">
               <button
                 onClick={() => setIsStarred(!isStarred)}
-                className={`p-1.5 rounded hover:bg-[#161B22] transition ${
-                  isStarred ? 'text-amber-400' : 'text-slate-400 hover:text-slate-200'
+                className={`p-1.5 rounded-lg transition cursor-pointer ${
+                  isStarred ? 'text-amber-400' : 'text-slate-400 hover:text-white'
                 }`}
                 title="Saralanganlarga qo‘shish"
               >
@@ -673,8 +751,10 @@ int main() {
 
               <button
                 onClick={handleToggleLike}
-                className={`flex items-center gap-1 px-2.5 py-1 rounded bg-[#161B22]/70 border border-slate-800 text-xs transition ${
-                  hasLiked ? 'text-emerald-400 border-emerald-800/80' : 'text-slate-300 hover:text-white'
+                className={`flex items-center gap-1 px-2.5 py-1 rounded-lg border text-xs transition cursor-pointer ${
+                  hasLiked
+                    ? 'text-emerald-400 bg-emerald-500/10 border-emerald-500/30'
+                    : 'text-slate-400 border-transparent hover:bg-white/5'
                 }`}
               >
                 <ThumbsUp className={`w-3.5 h-3.5 ${hasLiked ? 'fill-emerald-400' : ''}`} />
@@ -683,8 +763,10 @@ int main() {
 
               <button
                 onClick={handleToggleDislike}
-                className={`flex items-center gap-1 px-2.5 py-1 rounded bg-[#161B22]/70 border border-slate-800 text-xs transition ${
-                  hasDisliked ? 'text-rose-400 border-rose-800/80' : 'text-slate-300 hover:text-white'
+                className={`flex items-center gap-1 px-2.5 py-1 rounded-lg border text-xs transition cursor-pointer ${
+                  hasDisliked
+                    ? 'text-rose-400 bg-rose-500/10 border-rose-500/30'
+                    : 'text-slate-400 border-transparent hover:bg-white/5'
                 }`}
               >
                 <ThumbsDown className={`w-3.5 h-3.5 ${hasDisliked ? 'fill-rose-400' : ''}`} />
@@ -695,30 +777,44 @@ int main() {
         </div>
 
         {/* ===================== RIGHT PANE (Editor & Results) ===================== */}
-        <div className="flex-1 flex flex-col min-w-0 bg-[#000000] overflow-hidden">
-          {/* Top Editor Toolbar (Matching screenshot + RUN button requested by user) */}
-          <div className="h-11 bg-[#000000] border-b border-[#21262d] px-4 flex items-center justify-between text-xs flex-shrink-0">
-            {/* Left Controls */}
-            <div className="flex items-center gap-2.5">
+        <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+          {/* Top Editor Toolbar (Linear / Vercel style) */}
+          <div
+            className={`h-11 px-4 flex items-center justify-between text-xs flex-shrink-0 border-b ${
+              theme === 'dark'
+                ? 'bg-[#070912] border-white/5'
+                : 'bg-white border-slate-200'
+            }`}
+          >
+            {/* Left Controls: Language, Sample, Upload */}
+            <div className="flex items-center gap-2">
               {/* Language Dropdown */}
               <div className="relative">
                 <select
                   value={selectedLanguage}
                   onChange={(e) => setSelectedLanguage(e.target.value as 'python' | 'cpp')}
-                  className="appearance-none bg-[#0D1117] hover:bg-[#161B22] text-slate-200 text-xs font-medium pl-3 pr-8 py-1.5 rounded-md border border-[#30363D] focus:outline-none focus:border-blue-500 cursor-pointer transition"
+                  className={`appearance-none text-xs font-semibold pl-3 pr-7 py-1.5 rounded-lg border focus:outline-none focus:border-blue-500 cursor-pointer transition ${
+                    theme === 'dark'
+                      ? 'bg-[#0E1528] border-white/10 text-slate-200'
+                      : 'bg-slate-100 border-slate-300 text-slate-800'
+                  }`}
                 >
-                  <option value="python">Til: Python 3.12</option>
-                  <option value="cpp">Til: C++20 (GCC)</option>
+                  <option value="python">Python 3.12</option>
+                  <option value="cpp">C++20 (GCC)</option>
                 </select>
-                <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" />
               </div>
 
-              {/* Sample Selector Dropdown */}
+              {/* Sample Selector */}
               <div className="relative">
                 <select
                   value={selectedTestId}
                   onChange={(e) => setSelectedTestId(Number(e.target.value))}
-                  className="appearance-none bg-[#0D1117] hover:bg-[#161B22] text-slate-200 text-xs font-medium pl-3 pr-8 py-1.5 rounded-md border border-[#30363D] focus:outline-none focus:border-blue-500 cursor-pointer transition"
+                  className={`appearance-none text-xs font-semibold pl-3 pr-7 py-1.5 rounded-lg border focus:outline-none focus:border-blue-500 cursor-pointer transition ${
+                    theme === 'dark'
+                      ? 'bg-[#0E1528] border-white/10 text-slate-200'
+                      : 'bg-slate-100 border-slate-300 text-slate-800'
+                  }`}
                 >
                   <option value="1">Namuna: #1</option>
                   <option value="2">Namuna: #2</option>
@@ -726,13 +822,19 @@ int main() {
                   <option value="4">Namuna: #4</option>
                   <option value="5">Namuna: #5</option>
                 </select>
-                <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" />
               </div>
 
-              {/* Upload File Button */}
-              <label className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-[#0D1117] hover:bg-[#161B22] border border-[#30363D] text-slate-300 hover:text-white cursor-pointer transition text-xs font-medium">
+              {/* Upload Button */}
+              <label
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium cursor-pointer transition ${
+                  theme === 'dark'
+                    ? 'bg-[#0E1528] hover:bg-slate-800 border-white/10 text-slate-300'
+                    : 'bg-slate-100 hover:bg-slate-200 border-slate-300 text-slate-700'
+                }`}
+              >
                 <Upload className="w-3.5 h-3.5 text-blue-400" />
-                <span>Fayl yuklash</span>
+                <span className="hidden sm:inline">Fayl yuklash</span>
                 <input
                   type="file"
                   accept=".py,.cpp,.c,.txt"
@@ -752,42 +854,42 @@ int main() {
               </label>
             </div>
 
-            {/* Right Controls: RUN Button, AI, Navigation */}
-            <div className="flex items-center gap-2.5">
-              {/* Auto-save indicator */}
-              <span className="text-[11px] text-slate-500 font-mono hidden sm:inline-block">
+            {/* Right Controls: Auto-save, AI Murabbiy, RUN, Topshirish */}
+            <div className="flex items-center gap-2">
+              <span className="text-[11px] font-mono text-slate-500 hidden md:inline">
                 {saveStatus}
               </span>
 
-              {/* AI Murabbiy Toggle Button */}
+              {/* AI Murabbiy Button */}
               <button
                 onClick={() => setIsAiOpen(!isAiOpen)}
-                className={`px-3 py-1.5 rounded-md text-xs font-semibold flex items-center gap-1.5 border transition ${
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 border transition cursor-pointer ${
                   isAiOpen
-                    ? 'bg-blue-600/90 border-blue-500 text-white'
-                    : 'bg-[#0D1117] hover:bg-[#161B22] border-[#30363D] text-slate-300'
+                    ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white border-blue-500 shadow-md shadow-blue-500/20'
+                    : theme === 'dark'
+                    ? 'bg-[#0E1528] hover:bg-slate-800 border-white/10 text-slate-300'
+                    : 'bg-slate-100 hover:bg-slate-200 border-slate-300 text-slate-700'
                 }`}
-                title="AI Murabbiydan maslahat so‘rash"
               >
-                <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+                <Sparkles className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
                 <span>AI Murabbiy</span>
               </button>
 
-              {/* USER REQUESTED: PROMINENT RUN BUTTON */}
+              {/* PROMINENT RUN BUTTON (Neon Emerald Gradient) */}
               <button
                 onClick={handleRunCode}
                 disabled={isRunning || isTestingAll}
-                className="h-8 px-4 rounded-md bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 text-white font-bold text-xs flex items-center gap-1.5 shadow-sm transition disabled:opacity-50 cursor-pointer"
+                className="h-8 px-4 rounded-lg bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-bold text-xs flex items-center gap-1.5 shadow-lg shadow-emerald-500/20 active:scale-95 transition disabled:opacity-50 cursor-pointer"
                 title="Kodni tanlangan test bilan darhol ishga tushirish (Run)"
               >
-                <Play className={`w-3.5 h-3.5 fill-white ${isRunning ? 'animate-spin' : ''}`} />
+                <Play className={`w-3.5 h-3.5 fill-current ${isRunning ? 'animate-spin' : ''}`} />
                 <span>{isRunning ? 'Bajarilmoqda...' : 'Run'}</span>
               </button>
 
-              {/* Finish Assignment Button */}
+              {/* Topshirish Button */}
               <button
                 onClick={onFinishAssignment}
-                className="h-8 px-3 rounded-md bg-blue-600 hover:bg-blue-500 text-white font-medium text-xs flex items-center gap-1 shadow-sm transition"
+                className="h-8 px-3 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs flex items-center gap-1 shadow-sm transition active:scale-95 cursor-pointer"
               >
                 <span>Topshirish</span>
                 <ChevronRight className="w-3.5 h-3.5" />
@@ -795,13 +897,13 @@ int main() {
             </div>
           </div>
 
-          {/* Monaco Editor Container with Vertical "MOSLASH" Tab on Right */}
+          {/* Monaco Editor Container */}
           <div className="flex-1 min-h-0 relative flex">
-            <div className="flex-1 h-full min-w-0 bg-[#000000]">
+            <div className={`flex-1 h-full min-w-0 ${theme === 'dark' ? 'bg-[#080B14]' : 'bg-white'}`}>
               <Editor
                 height="100%"
                 language={selectedLanguage}
-                theme="vs-dark"
+                theme={theme === 'dark' ? 'vs-dark' : 'vs'}
                 value={currentCode}
                 onChange={(val) => setCurrentCode(val || '')}
                 options={{
@@ -820,8 +922,15 @@ int main() {
               />
             </div>
 
-            {/* Vertical "MOSLASH" Tab (Exact matching from screenshot) */}
-            <div className="w-6 bg-[#0D1117] border-l border-[#21262D] flex flex-col items-center justify-center py-4 flex-shrink-0 cursor-pointer hover:bg-[#161B22] transition group" title="Muharrir sozlamalari">
+            {/* Vertical "MOSLASH" Tab */}
+            <div
+              className={`w-6 flex flex-col items-center justify-center py-4 flex-shrink-0 cursor-pointer transition border-l group ${
+                theme === 'dark'
+                  ? 'bg-[#070912] border-white/5 hover:bg-white/5'
+                  : 'bg-slate-100 border-slate-200 hover:bg-slate-200'
+              }`}
+              title="Muharrir parametrlari"
+            >
               <Settings className="w-3.5 h-3.5 text-blue-400 mb-2 group-hover:rotate-45 transition-transform duration-300" />
               <span className="[writing-mode:vertical-rl] text-[10px] uppercase font-bold tracking-widest text-slate-400 group-hover:text-slate-200 select-none">
                 MOSLASH
@@ -830,57 +939,70 @@ int main() {
           </div>
 
           {/* ===================== BOTTOM PANE (Console & 5 Test Cases) ===================== */}
-          <div className="h-56 bg-[#000000] border-t border-[#21262d] flex flex-col flex-shrink-0 overflow-hidden">
-            {/* Bottom Tabs Header Bar + USER REQUESTED: TESTLASH BUTTON */}
-            <div className="h-10 bg-[#000000] border-b border-[#21262d] px-4 flex items-center justify-between text-xs flex-shrink-0">
-              {/* Left Tabs */}
-              <div className="flex items-center gap-6 h-full">
-                <button
-                  onClick={() => setActiveBottomTab('konsol')}
-                  className={`h-full flex items-center gap-1.5 px-1 border-b-2 transition ${
-                    activeBottomTab === 'konsol'
-                      ? 'border-blue-500 text-blue-400 font-semibold'
-                      : 'border-transparent text-slate-400 hover:text-slate-200'
-                  }`}
-                >
-                  <Terminal className="w-3.5 h-3.5" />
-                  <span>Konsol</span>
-                </button>
-
+          <div
+            className={`h-56 flex flex-col flex-shrink-0 overflow-hidden border-t ${
+              theme === 'dark' ? 'bg-[#080B14] border-white/5' : 'bg-slate-50 border-slate-200'
+            }`}
+          >
+            {/* Header: Tabs + PROMINENT TESTLASH BUTTON */}
+            <div
+              className={`h-10 px-4 flex items-center justify-between text-xs flex-shrink-0 border-b ${
+                theme === 'dark' ? 'bg-[#070912] border-white/5' : 'bg-white border-slate-200'
+              }`}
+            >
+              <div className="flex items-center gap-2">
                 <button
                   onClick={() => setActiveBottomTab('namuna')}
-                  className={`h-full flex items-center gap-1.5 px-1 border-b-2 transition ${
+                  className={`h-7 px-3 rounded-lg font-semibold flex items-center gap-1.5 transition cursor-pointer ${
                     activeBottomTab === 'namuna'
-                      ? 'border-blue-500 text-blue-400 font-semibold'
-                      : 'border-transparent text-slate-400 hover:text-slate-200'
+                      ? 'bg-blue-600 text-white shadow-xs'
+                      : 'text-slate-400 hover:text-white'
                   }`}
                 >
                   <CheckSquare className="w-3.5 h-3.5" />
                   <span>Namuna Natijalari (5 ta test)</span>
                 </button>
-              </div>
 
-              {/* Right: USER REQUESTED: TESTLASH KNOPKASI */}
-              <div className="flex items-center gap-3">
                 <button
-                  onClick={handleTestAllCases}
-                  disabled={isTestingAll || isRunning}
-                  className="h-7 px-4 rounded bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white font-bold text-xs flex items-center gap-1.5 shadow-sm transition disabled:opacity-50 cursor-pointer"
-                  title="Barcha 5 ta testni bir vaqtda tekshirish"
+                  onClick={() => setActiveBottomTab('konsol')}
+                  className={`h-7 px-3 rounded-lg font-semibold flex items-center gap-1.5 transition cursor-pointer ${
+                    activeBottomTab === 'konsol'
+                      ? 'bg-blue-600 text-white shadow-xs'
+                      : 'text-slate-400 hover:text-white'
+                  }`}
                 >
-                  <CheckSquare className={`w-3.5 h-3.5 ${isTestingAll ? 'animate-spin' : ''}`} />
-                  <span>{isTestingAll ? 'Tekshirilmoqda...' : 'Testlash'}</span>
+                  <Terminal className="w-3.5 h-3.5" />
+                  <span>Terminal / Konsol</span>
                 </button>
               </div>
+
+              {/* PROMINENT TESTLASH BUTTON (Neon Blue Gradient) */}
+              <button
+                onClick={handleTestAllCases}
+                disabled={isTestingAll || isRunning}
+                className="h-7 px-4 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-xs flex items-center gap-1.5 shadow-md shadow-blue-500/20 active:scale-95 transition disabled:opacity-50 cursor-pointer"
+                title="Barcha 5 ta testni bir vaqtda tekshirish"
+              >
+                <CheckSquare className={`w-3.5 h-3.5 ${isTestingAll ? 'animate-spin' : ''}`} />
+                <span>{isTestingAll ? 'Tekshirilmoqda...' : 'Testlash'}</span>
+              </button>
             </div>
 
-            {/* Main Content Area of Bottom Pane */}
+            {/* Content: Left 5 Test Cases + Right Values */}
             <div className="flex-1 min-h-0 flex overflow-hidden">
-              {/* USER REQUESTED: "chap tarafda 5 ta taxminan tekshirish uchun qiymatlar va natijasi tursin" */}
-              <div className="w-[240px] bg-[#070B12] border-r border-[#21262D] flex flex-col flex-shrink-0 overflow-y-auto">
-                <div className="px-3 py-2 text-[11px] font-semibold text-slate-400 uppercase tracking-wider border-b border-[#21262D]/60 flex items-center justify-between">
+              {/* Left 5 Test Cases Sub-Column */}
+              <div
+                className={`w-[240px] flex flex-col flex-shrink-0 overflow-y-auto border-r ${
+                  theme === 'dark' ? 'bg-[#060810] border-white/5' : 'bg-slate-100 border-slate-200'
+                }`}
+              >
+                <div
+                  className={`px-3 py-1.5 text-[11px] font-semibold border-b flex items-center justify-between ${
+                    theme === 'dark' ? 'border-white/5 text-slate-400' : 'border-slate-200 text-slate-600'
+                  }`}
+                >
                   <span>Tekshirish testlari</span>
-                  <span className="text-[10px] font-mono text-emerald-400">
+                  <span className="text-[10px] font-mono text-emerald-400 font-bold">
                     {testCases.filter((t) => t.status === 'passed').length}/5 to‘g‘ri
                   </span>
                 </div>
@@ -892,57 +1014,80 @@ int main() {
                       <button
                         key={tc.id}
                         onClick={() => setSelectedTestId(tc.id)}
-                        className={`w-full text-left p-2 rounded-md transition flex items-center justify-between text-xs font-mono ${
+                        className={`w-full text-left p-2 rounded-xl transition flex items-center justify-between text-xs font-mono cursor-pointer ${
                           isSelected
-                            ? 'bg-[#161B22] border border-blue-500/80 text-white shadow-xs'
-                            : 'bg-[#0D1117]/60 hover:bg-[#161B22]/50 border border-transparent text-slate-300'
+                            ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20'
+                            : theme === 'dark'
+                            ? 'bg-white/5 hover:bg-white/10 text-slate-300'
+                            : 'bg-white hover:bg-slate-200/80 text-slate-800 border border-slate-200'
                         }`}
                       >
                         <div className="flex items-center gap-2 min-w-0">
                           {tc.status === 'passed' ? (
-                            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" />
+                            <CheckCircle2
+                              className={`w-3.5 h-3.5 flex-shrink-0 ${
+                                isSelected ? 'text-white' : 'text-emerald-400'
+                              }`}
+                            />
                           ) : tc.status === 'failed' ? (
-                            <XCircle className="w-3.5 h-3.5 text-rose-500 flex-shrink-0" />
+                            <XCircle
+                              className={`w-3.5 h-3.5 flex-shrink-0 ${
+                                isSelected ? 'text-white' : 'text-rose-400'
+                              }`}
+                            />
                           ) : (
-                            <Clock className="w-3.5 h-3.5 text-slate-500 flex-shrink-0" />
+                            <Clock className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
                           )}
                           <div className="truncate">
                             <span className="font-semibold">{tc.title}</span>
-                            <span className="text-[10px] text-slate-500 block">
+                            <span
+                              className={`text-[10px] block ${
+                                isSelected ? 'text-blue-100' : 'text-slate-400'
+                              }`}
+                            >
                               Kirish: {tc.displayInput}
                             </span>
                           </div>
                         </div>
 
-                        <div className="text-right flex-shrink-0 pl-1">
-                          <span
-                            className={`text-[10px] font-sans font-bold px-1.5 py-0.5 rounded ${
-                              tc.status === 'passed'
-                                ? 'bg-emerald-950/80 text-emerald-400 border border-emerald-800/40'
-                                : 'bg-rose-950/80 text-rose-400 border border-rose-800/40'
-                            }`}
-                          >
-                            {tc.expected}
-                          </span>
-                        </div>
+                        <span
+                          className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${
+                            isSelected
+                              ? 'bg-white/20 text-white'
+                              : tc.status === 'passed'
+                              ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                              : 'bg-rose-500/10 text-rose-400 border border-rose-500/20'
+                          }`}
+                        >
+                          {tc.expected}
+                        </span>
                       </button>
                     );
                   })}
                 </div>
               </div>
 
-              {/* Right Sub-Area: Detailed Values & Comparison Cards (Matching screenshot) */}
-              <div className="flex-1 min-w-0 p-3 overflow-y-auto bg-[#000000]">
+              {/* Right Values Area: Kirish + Sizning chiqishingiz + Javob */}
+              <div
+                className={`flex-1 min-w-0 p-3 overflow-y-auto ${
+                  theme === 'dark' ? 'bg-[#080B14]' : 'bg-white'
+                }`}
+              >
                 {activeBottomTab === 'namuna' ? (
                   <div className="h-full flex flex-col justify-between space-y-2">
                     {/* Top Card: Kirish */}
-                    <div className="bg-[#0D1117] border border-[#21262D] rounded-lg p-2.5 flex-1 min-h-[50px] flex flex-col justify-between">
+                    <div
+                      className={`p-2.5 rounded-xl border flex-1 min-h-[50px] flex flex-col justify-between ${
+                        theme === 'dark'
+                          ? 'bg-[#0C101E] border-white/5'
+                          : 'bg-slate-50 border-slate-200'
+                      }`}
+                    >
                       <div className="flex items-center justify-between text-[11px] font-semibold text-slate-400">
-                        <span>Kirish</span>
+                        <span>Kirish (Input)</span>
                         <button
                           onClick={() => handleCopy(activeTestCase.input, 'tc_in')}
-                          className="text-slate-400 hover:text-white transition"
-                          title="Nusxalash"
+                          className="text-slate-400 hover:text-white transition cursor-pointer"
                         >
                           {copiedKey === 'tc_in' ? (
                             <Check className="w-3.5 h-3.5 text-emerald-400" />
@@ -956,10 +1101,16 @@ int main() {
                       </pre>
                     </div>
 
-                    {/* Bottom Two Cards: Sizning chiqishingiz & Javob */}
+                    {/* Bottom Row: Sizning chiqishingiz & Javob */}
                     <div className="grid grid-cols-2 gap-2 flex-1 min-h-[50px]">
                       {/* Left: Sizning chiqishingiz */}
-                      <div className="bg-[#0D1117] border border-[#21262D] rounded-lg p-2.5 flex flex-col justify-between">
+                      <div
+                        className={`p-2.5 rounded-xl border flex flex-col justify-between ${
+                          theme === 'dark'
+                            ? 'bg-[#0C101E] border-white/5'
+                            : 'bg-slate-50 border-slate-200'
+                        }`}
+                      >
                         <div className="flex items-center justify-between text-[11px] font-semibold text-slate-400">
                           <span className="flex items-center gap-1.5">
                             Sizning chiqishingiz
@@ -971,8 +1122,7 @@ int main() {
                           </span>
                           <button
                             onClick={() => handleCopy(activeTestCase.actual, 'tc_act')}
-                            className="text-slate-400 hover:text-white transition"
-                            title="Nusxalash"
+                            className="text-slate-400 hover:text-white transition cursor-pointer"
                           >
                             {copiedKey === 'tc_act' ? (
                               <Check className="w-3.5 h-3.5 text-emerald-400" />
@@ -981,19 +1131,24 @@ int main() {
                             )}
                           </button>
                         </div>
-                        <pre className="font-mono text-sm text-slate-200 mt-1">
+                        <pre className="font-mono text-sm text-slate-200 mt-1 font-bold">
 {activeTestCase.actual || '(Natija yo‘q)'}
                         </pre>
                       </div>
 
                       {/* Right: Javob */}
-                      <div className="bg-[#0D1117] border border-[#21262D] rounded-lg p-2.5 flex flex-col justify-between">
+                      <div
+                        className={`p-2.5 rounded-xl border flex flex-col justify-between ${
+                          theme === 'dark'
+                            ? 'bg-[#0C101E] border-white/5'
+                            : 'bg-slate-50 border-slate-200'
+                        }`}
+                      >
                         <div className="flex items-center justify-between text-[11px] font-semibold text-slate-400">
-                          <span>Javob</span>
+                          <span>Kutilgan javob</span>
                           <button
                             onClick={() => handleCopy(activeTestCase.expected, 'tc_exp')}
-                            className="text-slate-400 hover:text-white transition"
-                            title="Nusxalash"
+                            className="text-slate-400 hover:text-white transition cursor-pointer"
                           >
                             {copiedKey === 'tc_exp' ? (
                               <Check className="w-3.5 h-3.5 text-emerald-400" />
@@ -1002,28 +1157,40 @@ int main() {
                             )}
                           </button>
                         </div>
-                        <pre className="font-mono text-sm text-slate-200 mt-1">
+                        <pre className="font-mono text-sm text-emerald-400 mt-1 font-bold">
 {activeTestCase.expected}
                         </pre>
                       </div>
                     </div>
                   </div>
                 ) : (
-                  <div className="h-full bg-[#0D1117] border border-[#21262D] rounded-lg p-3 font-mono text-xs text-slate-300 overflow-y-auto whitespace-pre-wrap leading-relaxed">
+                  <div
+                    className={`h-full p-3 rounded-xl border font-mono text-xs overflow-y-auto whitespace-pre-wrap leading-relaxed ${
+                      theme === 'dark'
+                        ? 'bg-[#0A0D18] border-white/5 text-slate-300'
+                        : 'bg-slate-50 border-slate-200 text-slate-800'
+                    }`}
+                  >
                     {consoleOutput}
                   </div>
                 )}
               </div>
             </div>
 
-            {/* Bottom Status Strip (Matching screenshot) */}
-            <div className="h-6 bg-[#000000] border-t border-[#21262D] px-4 flex items-center justify-between text-[11px] text-slate-400 font-mono flex-shrink-0">
+            {/* Bottom Status Strip */}
+            <div
+              className={`h-6 px-4 flex items-center justify-between text-[11px] font-mono flex-shrink-0 border-t ${
+                theme === 'dark'
+                  ? 'bg-[#060810] border-white/5 text-slate-400'
+                  : 'bg-slate-100 border-slate-200 text-slate-600'
+              }`}
+            >
               <div>
-                Til: <span className="text-slate-200">{selectedLanguage === 'python' ? 'Python 3.12' : 'C++20 (GCC)'}</span>
+                Til: <span className="text-blue-400 font-semibold">{selectedLanguage === 'python' ? 'Python 3.12' : 'C++20 (GCC)'}</span>
               </div>
               <div className="flex items-center gap-5">
-                <span>Vaqt cheklovi: <b className="text-slate-200">3000 ms</b></span>
-                <span>Xotira cheklovi: <b className="text-slate-200">512 MB</b></span>
+                <span>Vaqt cheklovi: <b className="text-slate-300">3000 ms</b></span>
+                <span>Xotira cheklovi: <b className="text-slate-300">512 MB</b></span>
               </div>
             </div>
           </div>
@@ -1031,17 +1198,29 @@ int main() {
 
         {/* ===================== AI ASSISTANT SLIDE DRAWER ===================== */}
         {isAiOpen && (
-          <div className="w-[340px] bg-[#0D1117] border-l border-[#21262D] flex flex-col justify-between flex-shrink-0 shadow-2xl z-40 animate-in slide-in-from-right duration-200">
+          <div
+            className={`w-[340px] flex flex-col justify-between flex-shrink-0 shadow-2xl z-40 animate-in slide-in-from-right duration-200 border-l ${
+              theme === 'dark'
+                ? 'bg-[#080B14] border-white/10'
+                : 'bg-white border-slate-200'
+            }`}
+          >
             {/* Header */}
-            <div className="h-11 px-4 bg-[#161B22] border-b border-[#21262D] text-white flex items-center justify-between flex-shrink-0 text-xs">
+            <div
+              className={`h-11 px-4 flex items-center justify-between flex-shrink-0 text-xs border-b ${
+                theme === 'dark'
+                  ? 'bg-[#0E1528] border-white/5 text-white'
+                  : 'bg-slate-50 border-slate-200 text-slate-800'
+              }`}
+            >
               <div className="flex items-center gap-2 font-bold">
-                <Sparkles className="w-4 h-4 text-amber-300" />
+                <Sparkles className="w-4 h-4 text-amber-400 animate-pulse" />
                 <span>AI Murabbiy</span>
-                <span className="text-[10px] font-normal text-slate-400">• Intellektual yordam</span>
+                <span className="text-[10px] font-normal text-blue-400">• Faol</span>
               </div>
               <button
                 onClick={() => setIsAiOpen(false)}
-                className="text-slate-400 hover:text-white p-1 rounded"
+                className="text-slate-400 hover:text-white p-1 rounded cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -1054,12 +1233,14 @@ int main() {
                   key={i}
                   className={`flex flex-col ${msg.sender === 'user' ? 'items-end' : 'items-start'}`}
                 >
-                  <div className="text-[9px] text-slate-500 mb-0.5">{msg.time}</div>
+                  <div className="text-[9px] text-slate-400 mb-0.5">{msg.time}</div>
                   <div
-                    className={`p-2.5 rounded-xl text-xs leading-relaxed whitespace-pre-wrap max-w-[94%] ${
+                    className={`p-2.5 rounded-2xl text-xs leading-relaxed whitespace-pre-wrap max-w-[94%] ${
                       msg.sender === 'user'
-                        ? 'bg-blue-600 text-white rounded-br-none'
-                        : 'bg-[#161B22] text-slate-200 rounded-bl-none border border-[#21262D]'
+                        ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-br-none shadow-md'
+                        : theme === 'dark'
+                        ? 'bg-[#0E1528] text-slate-200 rounded-bl-none border border-white/5'
+                        : 'bg-slate-100 text-slate-800 rounded-bl-none border border-slate-200'
                     }`}
                   >
                     {msg.text}
@@ -1069,35 +1250,57 @@ int main() {
             </div>
 
             {/* Quick Suggestions & Input */}
-            <div className="p-3 border-t border-[#21262D] bg-[#070B12] space-y-2">
+            <div
+              className={`p-3 border-t space-y-2 ${
+                theme === 'dark'
+                  ? 'bg-[#060810] border-white/5'
+                  : 'bg-slate-50 border-slate-200'
+              }`}
+            >
               <div className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">
                 Tezkor savollar:
               </div>
               <div className="grid grid-cols-2 gap-1 text-xs">
                 <button
                   onClick={() => handleSendAi('Masalani tushuntir')}
-                  className="p-1.5 bg-[#161B22] hover:bg-[#21262D] border border-[#30363D] rounded text-[10px] text-slate-300 flex items-center gap-1 transition"
+                  className={`p-1.5 rounded-lg text-[10px] flex items-center gap-1 transition cursor-pointer border ${
+                    theme === 'dark'
+                      ? 'bg-[#0E1528] hover:bg-white/10 border-white/5 text-slate-300'
+                      : 'bg-white hover:bg-slate-100 border-slate-200 text-slate-700'
+                  }`}
                 >
                   <HelpCircle className="w-3 h-3 text-blue-400" />
                   <span>Tushuntir</span>
                 </button>
                 <button
                   onClick={() => handleSendAi('Kodimdagi xatoni top')}
-                  className="p-1.5 bg-[#161B22] hover:bg-[#21262D] border border-[#30363D] rounded text-[10px] text-slate-300 flex items-center gap-1 transition"
+                  className={`p-1.5 rounded-lg text-[10px] flex items-center gap-1 transition cursor-pointer border ${
+                    theme === 'dark'
+                      ? 'bg-[#0E1528] hover:bg-white/10 border-white/5 text-slate-300'
+                      : 'bg-white hover:bg-slate-100 border-slate-200 text-slate-700'
+                  }`}
                 >
                   <AlertCircle className="w-3 h-3 text-amber-400" />
                   <span>Xatoni top</span>
                 </button>
                 <button
                   onClick={() => handleSendAi('Maslahat ber')}
-                  className="p-1.5 bg-[#161B22] hover:bg-[#21262D] border border-[#30363D] rounded text-[10px] text-slate-300 flex items-center gap-1 transition"
+                  className={`p-1.5 rounded-lg text-[10px] flex items-center gap-1 transition cursor-pointer border ${
+                    theme === 'dark'
+                      ? 'bg-[#0E1528] hover:bg-white/10 border-white/5 text-slate-300'
+                      : 'bg-white hover:bg-slate-100 border-slate-200 text-slate-700'
+                  }`}
                 >
                   <Lightbulb className="w-3 h-3 text-emerald-400" />
                   <span>Maslahat</span>
                 </button>
                 <button
                   onClick={() => handleSendAi('Test natijasini tushuntir')}
-                  className="p-1.5 bg-[#161B22] hover:bg-[#21262D] border border-[#30363D] rounded text-[10px] text-slate-300 flex items-center gap-1 transition"
+                  className={`p-1.5 rounded-lg text-[10px] flex items-center gap-1 transition cursor-pointer border ${
+                    theme === 'dark'
+                      ? 'bg-[#0E1528] hover:bg-white/10 border-white/5 text-slate-300'
+                      : 'bg-white hover:bg-slate-100 border-slate-200 text-slate-700'
+                  }`}
                 >
                   <CheckSquare className="w-3 h-3 text-indigo-400" />
                   <span>Test tahlili</span>
@@ -1117,11 +1320,15 @@ int main() {
                   value={aiInput}
                   onChange={(e) => setAiInput(e.target.value)}
                   placeholder="AI ga savol bering..."
-                  className="flex-1 h-8 px-2.5 bg-[#161B22] border border-[#30363D] rounded-lg text-xs text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
+                  className={`flex-1 h-8 px-2.5 rounded-lg text-xs border focus:outline-none focus:border-blue-500 transition ${
+                    theme === 'dark'
+                      ? 'bg-[#0E1528] border-white/10 text-white placeholder-slate-500'
+                      : 'bg-white border-slate-300 text-slate-900 placeholder-slate-400'
+                  }`}
                 />
                 <button
                   type="submit"
-                  className="h-8 w-8 bg-blue-600 hover:bg-blue-500 text-white rounded-lg flex items-center justify-center flex-shrink-0 transition"
+                  className="h-8 w-8 bg-blue-600 hover:bg-blue-500 text-white rounded-lg flex items-center justify-center flex-shrink-0 transition cursor-pointer"
                 >
                   <Send className="w-3.5 h-3.5" />
                 </button>

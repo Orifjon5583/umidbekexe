@@ -1,5 +1,6 @@
 import React from 'react';
-import { User, LogOut } from 'lucide-react';
+import { User, LogOut, Bell, Sparkles } from 'lucide-react';
+import { useTheme } from '../context/ThemeContext';
 
 interface Props {
   studentName?: string;
@@ -14,25 +15,51 @@ export const TopHeader: React.FC<Props> = ({
   breadcrumb = 'Bosh sahifa',
   onRequestExit,
 }) => {
+  const { theme } = useTheme();
+
   return (
-    <header className="h-12 bg-white border-b border-slate-200 px-6 flex items-center justify-between flex-shrink-0 select-none z-10">
-      {/* Breadcrumb / Title */}
-      <div className="text-xs font-semibold text-slate-500">
-        {breadcrumb}
+    <header
+      className={`h-12 px-6 flex items-center justify-between flex-shrink-0 select-none z-10 border-b transition-colors duration-200 ${
+        theme === 'dark'
+          ? 'bg-[#060810]/80 backdrop-blur-md border-white/5 text-slate-200'
+          : 'bg-white border-slate-200 text-slate-800'
+      }`}
+    >
+      {/* Breadcrumb / Title with sleek gradient icon */}
+      <div className="flex items-center gap-2 text-xs font-semibold">
+        <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+        <span className={theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}>CodePractice</span>
+        <span className="text-slate-400">/</span>
+        <span className={theme === 'dark' ? 'text-white' : 'text-slate-800'}>{breadcrumb}</span>
       </div>
 
-      {/* Student Profile Pill (Exact match to poster: Aliyev Asliddin) */}
+      {/* Student Profile Pill & Exit */}
       <div className="flex items-center gap-3">
-        <div className="flex items-center gap-2.5 px-3 py-1 rounded-full bg-slate-50 border border-slate-200 text-xs">
-          <div className="w-5 h-5 rounded-full bg-blue-600 text-white flex items-center justify-center text-[10px] font-bold">
-            A
-          </div>
-          <span className="font-semibold text-slate-800">{studentName}</span>
+        {/* Live Status Pill */}
+        <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-mono">
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+          <span>Server faol</span>
         </div>
 
+        {/* Student Avatar Pill */}
+        <div
+          className={`flex items-center gap-2.5 px-3 py-1 rounded-full border text-xs shadow-xs ${
+            theme === 'dark'
+              ? 'bg-[#0E1528] border-white/10 text-slate-200'
+              : 'bg-slate-50 border-slate-200 text-slate-800'
+          }`}
+        >
+          <div className="w-5 h-5 rounded-full bg-gradient-to-tr from-blue-600 to-cyan-500 text-white flex items-center justify-center text-[10px] font-bold shadow-xs">
+            {studentName.charAt(0)}
+          </div>
+          <span className="font-semibold text-xs">{studentName}</span>
+          <span className="text-[10px] text-slate-400 font-mono hidden md:inline">({grade})</span>
+        </div>
+
+        {/* Exit Button */}
         <button
           onClick={onRequestExit}
-          className="h-8 px-2.5 rounded-lg border border-slate-200 text-slate-500 hover:bg-red-50 hover:text-red-600 hover:border-red-200 text-xs font-medium flex items-center gap-1.5 transition"
+          className="h-7 px-2.5 rounded-lg border border-slate-700/50 text-slate-400 hover:bg-rose-500/10 hover:text-rose-400 hover:border-rose-500/30 text-xs font-medium flex items-center gap-1.5 transition cursor-pointer"
           title="Ilovadan chiqish"
         >
           <LogOut className="w-3.5 h-3.5" />

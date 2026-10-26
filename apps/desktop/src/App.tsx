@@ -22,20 +22,33 @@ export const App: React.FC = () => {
   const [selectedProblemId, setSelectedProblemId] = useState<string | null>('prob-1');
   const [isExitModalOpen, setIsExitModalOpen] = useState(false);
 
-  // Esc yoki 'qwe' ketma-ketligini ushlash
+  // Maxfiy chiqish kombinatsiyasini ushlash (Ctrl+Shift+Q yoki oynani yopish)
   useEffect(() => {
-    let keyBuffer = '';
     const handleGlobalKeyDown = (e: KeyboardEvent) => {
       if (!e || !e.key) return;
+
+      // Agar modal ochiq bo'lsa va Esc bosilsa, modalni yopamiz
       if (e.key === 'Escape') {
+        setIsExitModalOpen((prev) => !prev ? false : false);
+        return;
+      }
+
+      // Agar biror input yoki kod muharririda yozilayotgan bo'lsa, chiqish modalini chaqirmaymiz
+      const activeEl = document.activeElement;
+      if (
+        activeEl &&
+        (activeEl.tagName === 'INPUT' ||
+          activeEl.tagName === 'TEXTAREA' ||
+          (activeEl as HTMLElement).isContentEditable ||
+          activeEl.classList.contains('inputarea'))
+      ) {
+        return;
+      }
+
+      // Maxsus o'qituvchi kombinatsiyasi: Ctrl + Shift + Q
+      if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'q') {
+        e.preventDefault();
         setIsExitModalOpen(true);
-      } else {
-        keyBuffer += e.key.toLowerCase();
-        if (keyBuffer.length > 5) keyBuffer = keyBuffer.slice(-5);
-        if (keyBuffer.endsWith('qwe')) {
-          setIsExitModalOpen(true);
-          keyBuffer = '';
-        }
       }
     };
 

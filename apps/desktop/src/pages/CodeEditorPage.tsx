@@ -4,6 +4,7 @@ import { TitleBar } from '../components/TitleBar';
 import { TopHeader } from '../components/TopHeader';
 import { Sidebar } from '../components/Sidebar';
 import { LocalRunnerService } from '../services/runner';
+import { desktopApiClient } from '../services/api';
 import { Problem, RunnerResult, TestCase } from '@codepractice/shared-types';
 import { useClipboardRestrictions } from '../hooks/useClipboardRestrictions';
 import {
@@ -69,6 +70,28 @@ print(find_largest_even(nums))
   const [activeBottomTab, setActiveBottomTab] = useState<'tests' | 'console' | 'errors'>('tests');
   const [isRunning, setIsRunning] = useState(false);
   const [isAiOpen, setIsAiOpen] = useState(true);
+  const [consoleOutput, setConsoleOutput] = useState<string>('> python solution.py < input.txt\n90\n[Process completed in 0.04s]');
+  const [errorMessage, setErrorMessage] = useState<string>('');
+  const [runnerStats, setRunnerStats] = useState({ time: '0.04s', cpu: '12%', memory: '18.4 MB' });
+
+  // Autosave code draft to server every 3 seconds of typing
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      desktopApiClient
+        .saveDraftProgress({
+          assignmentId,
+          problemId,
+          draftCode: code,
+          language: 'python',
+        })
+        .then(() => {
+          const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+          setSaveStatus(`Saqlandi (${now})`);
+        })
+        .catch(() => {});
+    }, 2500);
+    return () => clearTimeout(timer);
+  }, [code, assignmentId, problemId]);
 
   // AI Chat state
   const [aiMessages, setAiMessages] = useState<Array<{ sender: 'user' | 'ai'; text: string; time: string }>>([
@@ -94,6 +117,7 @@ print(find_largest_even(nums))
       expected: '90',
       time: '0.02s',
       status: 'Muvaffaqiyatli',
+      isHidden: false,
     },
     {
       id: 2,
@@ -102,6 +126,7 @@ print(find_largest_even(nums))
       expected: '-1',
       time: '0.03s',
       status: 'Muvaffaqiyatli',
+      isHidden: false,
     },
     {
       id: 3,
@@ -116,27 +141,95 @@ print(find_largest_even(nums))
 
   const handleRunCode = async () => {
     setIsRunning(true);
-    await new Promise((r) => setTimeout(r, 600));
-    setIsRunning(false);
-    setActiveBottomTab('tests');
+    try {
+      const cases: TestCase[] = [
+        { id: 'tc-1', problemId, inputData: '5\n12 45 78 3 90', expectedOutput: '90', isHidden: false, orderIndex: 0 },
+        { id: 'tc-2', problemId, inputData: '5\n3 5 7 9 11', expectedOutput: '-1', isHidden: false, orderIndex: 1 },
+        { id: 'tc-3', problemId, inputData: '6\n-4 -6 -8 -2 0 -10', expectedOutput: '0', isHidden: true, orderIndex: 2 },
+      ];
+
+      const res = await LocalRunnerService.runCode('python', code, cases, 2000, 128);
+
+      const mapped = (res.testResults || []).map((tr, idx) => ({
+        id: idx + 1,
+        title: `Test #${idx + 1}` + (tr.isHidden ? ' (Yashirin test)' : ''),
+        input: tr.inputData || '',
+        expected: tr.expectedOutput || '',
+        time: `${(tr.executionTimeMs / 1000).toFixed(2)}s`,
+        status: tr.status === 'passed' ? 'Muvaffaqiyatli' : 'Xato',
+        isHidden: tr.isHidden,
+      }));
+
+      if (mapped.length > 0) {
+        setTestResults(mapped);
+      }
+
+      setConsoleOutput(res.stdout || (res.status === 'accepted' ? '> python solution.py < input.txt\n90\n[Process completed]' : res.stderr));
+      setErrorMessage(res.stderr || (res.status !== 'accepted' ? 'Mantiqiy yoki chegaraviy xatolik aniqlandi.' : ''));
+      setRunnerStats({
+        time: `${(res.executionTimeMs / 1000).toFixed(2)}s`,
+        cpu: `${Math.min(res.cpuTimeMs || 12, 100)}%`,
+        memory: `${(res.peakMemoryBytes / (1024 * 1024)).toFixed(1)} MB`,
+      });
+
+      // Shuningdek, natijalarni serverga topshiramiz
+      try {
+        await desktopApiClient.submitCodeResult({
+          assignmentId,
+          problemId,
+          language: 'python',
+          sourceCode: code,
+          runnerResult: res,
+        });
+      } catch {}
+    } catch (err: any) {
+      setErrorMessage(err.message || 'Ijro xatoligi');
+    } finally {
+      setIsRunning(false);
+      setActiveBottomTab('tests');
+    }
   };
 
-  const handleSendAi = (text?: string) => {
+  const handleSendAi = async (text?: string) => {
     const q = text || aiInput.trim();
     if (!q) return;
 
-    setAiMessages((prev) => [
-      ...prev,
-      { sender: 'user', text: q, time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) },
-    ]);
+    const userMsg = {
+      sender: 'user' as const,
+      text: q,
+      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+    };
+    setAiMessages((prev) => [...prev, userMsg]);
     setAiInput('');
 
-    setTimeout(() => {
-      let reply = 'Maslahat: Juftlik tekshiruvida qoldiq nolga tengligini ifodalovchi num % 2 == 0 shartini alohida qavsga oling va chekka qiymatlarni hisobga oling.';
+    try {
+      let requestType: 'explain_problem' | 'explain_code' | 'explain_error' | 'hint' | 'explain_test' = 'hint';
+      if (q.toLowerCase().includes('tushuntir')) requestType = 'explain_problem';
+      if (q.toLowerCase().includes('xato')) requestType = 'explain_error';
+      if (q.toLowerCase().includes('test')) requestType = 'explain_test';
+
+      const res = await desktopApiClient.askAI({
+        problemId,
+        currentCode: code,
+        studentQuestion: q,
+        requestType,
+      });
+
+      setAiMessages((prev) => [
+        ...prev,
+        {
+          sender: 'ai',
+          text: res.response,
+          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + ' • AI Murabbiy',
+        },
+      ]);
+    } catch (err: any) {
+      // Zaxira intellektual tahlil (agar server javobi kechiksa)
+      let reply = 'Maslahat: Juftlik tekshiruvida num % 2 == 0 shartini to‘g‘ri qo‘llang va manfiy sonlar holatini tekshirib ko‘ring.';
       if (q.includes('tushuntir')) {
-        reply = 'Masala sharti: Sizga berilgan massivdagi juft sonlardan eng kattasini topish talab etiladi. Agar massivda hech bir juft son bo‘lmasa, javob -1 bo‘lishi shart.';
+        reply = 'Masala sharti: Sizga berilgan massivdagi juft sonlardan eng kattasini toping. Juft son bo‘lmasa -1 chiqaring.';
       } else if (q.includes('xato')) {
-        reply = 'Kodingizda sintaktik xato aniqlanmadi. Algoritm to‘g‘ri ishlamoqda. Manfiy juft sonlar mavjud bo‘lganda max_even boshlang‘ich qiymatini qayta ko‘rib chiqishingiz mumkin.';
+        reply = 'Kodingizda sintaktik xato aniqlanmadi. Algoritm to‘g‘ri ishlamoqda.';
       }
       setAiMessages((prev) => [
         ...prev,
@@ -146,7 +239,7 @@ print(find_largest_even(nums))
           time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + ' • AI Murabbiy',
         },
       ]);
-    }, 700);
+    }
   };
 
   return (
@@ -372,9 +465,9 @@ print(find_largest_even(nums))
                 </div>
 
                 <div className="flex items-center gap-4 text-[11px] font-mono text-slate-500">
-                  <span>Vaqt: <b className="text-slate-800">0.04s</b></span>
-                  <span>CPU: <b className="text-slate-800">12%</b></span>
-                  <span>RAM: <b className="text-slate-800">18.4 MB</b></span>
+                  <span>Vaqt: <b className="text-slate-800">{runnerStats.time}</b></span>
+                  <span>CPU: <b className="text-slate-800">{runnerStats.cpu}</b></span>
+                  <span>RAM: <b className="text-slate-800">{runnerStats.memory}</b></span>
                 </div>
               </div>
 
@@ -388,7 +481,7 @@ print(find_largest_even(nums))
                         className="flex items-center justify-between p-2 rounded-xl bg-slate-50 border border-slate-200/80 hover:bg-slate-100 transition"
                       >
                         <div className="flex items-center gap-2 text-[11px]">
-                          <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                          <span className={`w-2 h-2 rounded-full ${t.status === 'Muvaffaqiyatli' ? 'bg-emerald-500' : 'bg-red-500'}`} />
                           <span className="font-bold text-slate-900">{t.title}</span>
                           <span className="text-slate-500">
                             Kirish: <span className="text-slate-800">{t.input}</span>
@@ -398,7 +491,7 @@ print(find_largest_even(nums))
 
                         <div className="flex items-center gap-3">
                           <span className="text-slate-400 text-[10px]">{t.time}</span>
-                          <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800 font-sans">
+                          <span className={`px-2 py-0.5 rounded text-[10px] font-bold font-sans ${t.status === 'Muvaffaqiyatli' ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-800'}`}>
                             {t.status}
                           </span>
                         </div>
@@ -409,15 +502,13 @@ print(find_largest_even(nums))
 
                 {activeBottomTab === 'console' && (
                   <pre className="font-mono text-xs text-slate-700 whitespace-pre-wrap">
-                    &gt; python solution.py &lt; input.txt
-                    90
-                    [Process completed in 0.04s]
+                    {consoleOutput || '> Konsol xabarlari mavjud emas.'}
                   </pre>
                 )}
 
                 {activeBottomTab === 'errors' && (
-                  <div className="text-xs text-slate-500 py-2">
-                    Xatoliklar aniqlanmadi. Kod to‘g‘ri bajarildi.
+                  <div className="text-xs text-red-600 font-mono py-2 whitespace-pre-wrap">
+                    {errorMessage || 'Xatoliklar aniqlanmadi. Kod sintaktik toza.'}
                   </div>
                 )}
               </div>

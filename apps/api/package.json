@@ -15,6 +15,24 @@
     "test": "jest",
     "test:e2e": "jest --config ./test/jest-e2e.json"
   },
+  "jest": {
+    "moduleFileExtensions": [
+      "js",
+      "json",
+      "ts"
+    ],
+    "rootDir": ".",
+    "testRegex": "test/.*\\.spec\\.ts$",
+    "transform": {
+      "^.+\\.(t|j)s$": "ts-jest"
+    },
+    "testEnvironment": "node",
+    "moduleNameMapper": {
+      "^@codepractice/shared-types$": "<rootDir>/../../packages/shared-types/src/index.ts",
+      "^@codepractice/validation$": "<rootDir>/../../packages/validation/src/index.ts",
+      "^@codepractice/api-client$": "<rootDir>/../../packages/api-client/src/index.ts"
+    }
+  },
   "dependencies": {
     "@codepractice/shared-types": "*",
     "@codepractice/validation": "*",

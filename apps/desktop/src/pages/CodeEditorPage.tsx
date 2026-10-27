@@ -31,8 +31,10 @@ import {
   XCircle,
   Gauge,
   Terminal,
-  ArrowRight,
-  ChevronRight,
+  ArrowLeft,
+  RotateCcw,
+  Code2,
+  Cpu,
   Layers,
   Flame,
 } from 'lucide-react';
@@ -69,20 +71,17 @@ export const CodeEditorPage: React.FC<Props> = ({
   useClipboardRestrictions(true);
   const { theme } = useTheme();
 
-  // Programming language
+  // Programming language selection
   const [selectedLanguage, setSelectedLanguage] = useState<'python' | 'cpp'>('python');
 
   // Python template
-  const [codePython, setCodePython] = useState<string>(
-`son1 = int(input())
+  const defaultPythonCode = `son1 = int(input())
 son2 = int(input())
 print(son1 + son2)
-`
-  );
+`;
 
   // C++ template
-  const [codeCpp, setCodeCpp] = useState<string>(
-`#include <iostream>
+  const defaultCppCode = `#include <iostream>
 using namespace std;
 
 int main() {
@@ -92,8 +91,10 @@ int main() {
     }
     return 0;
 }
-`
-  );
+`;
+
+  const [codePython, setCodePython] = useState<string>(defaultPythonCode);
+  const [codeCpp, setCodeCpp] = useState<string>(defaultCppCode);
 
   const currentCode = selectedLanguage === 'python' ? codePython : codeCpp;
   const setCurrentCode = (val: string) => {
@@ -101,6 +102,16 @@ int main() {
       setCodePython(val);
     } else {
       setCodeCpp(val);
+    }
+  };
+
+  const handleResetCode = () => {
+    if (confirm('Kodni boshlang‘ich holatga qaytarishni xohlaysizmi?')) {
+      if (selectedLanguage === 'python') {
+        setCodePython(defaultPythonCode);
+      } else {
+        setCodeCpp(defaultCppCode);
+      }
     }
   };
 
@@ -174,7 +185,7 @@ int main() {
   const [isRunning, setIsRunning] = useState(false);
   const [isTestingAll, setIsTestingAll] = useState(false);
   const [consoleOutput, setConsoleOutput] = useState<string>(
-    `> ${selectedLanguage === 'python' ? 'python3 main.py' : 'g++ -O3 main.cpp && ./a.out'} < input.txt\n4\n[Jarayon 0.018s ichida muvaffaqiyatli yakunlandi • Kod holati: QABUL QILINDI]`
+    `> ${selectedLanguage === 'python' ? 'python3 solution.py' : 'g++ -O3 solution.cpp && ./a.out'} < input.txt\n4\n\n[Jarayon muvaffaqiyatli yakunlandi • Ishlash vaqti: 18ms • Xotira: 12.4 MB • Holati: ACCEPTED]`
   );
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
 
@@ -185,7 +196,7 @@ int main() {
   const [hasDisliked, setHasDisliked] = useState<boolean>(false);
   const [isStarred, setIsStarred] = useState<boolean>(false);
 
-  // Auto-save
+  // Auto-save state
   const [saveStatus, setSaveStatus] = useState<string>('Saqlandi');
 
   // AI Assistant Drawer
@@ -198,7 +209,7 @@ int main() {
     },
     {
       sender: 'ai',
-      text: 'Albatta! Masala juda sodda: berilgan 2 ta butun sonni kiritishdan o‘qib olib, ularning yig‘indisini hisoblaysiz.\n\nPython tilida:\n`son1 = int(input())`\n`son2 = int(input())`\n`print(son1 + son2)`\n\nC++ tilida:\n`cin >> son1 >> son2;`\n`cout << son1 + son2 << endl;`',
+      text: 'Albatta! Masala juda sodda: berilgan 2 ta butun sonni o‘qib olib, ularning yig‘indisini topishingiz kerak.\n\nPython tilida:\n`son1 = int(input())`\n`son2 = int(input())`\n`print(son1 + son2)`\n\nC++ tilida esa `cin >> son1 >> son2;` va `cout << son1 + son2 << endl;` dan foydalanishingiz mumkin.',
       time: '14:31 • AI Murabbiy',
     },
   ]);
@@ -242,7 +253,7 @@ int main() {
     }
   };
 
-  // Autosave draft
+  // Autosave draft to backend
   useEffect(() => {
     const timer = setTimeout(() => {
       desktopApiClient
@@ -308,14 +319,14 @@ int main() {
         )
       );
 
-      const langCmd = selectedLanguage === 'python' ? 'python3 main.py' : './a.out';
+      const langCmd = selectedLanguage === 'python' ? 'python3 solution.py' : './a.out';
       setConsoleOutput(
-        `> ${langCmd} < input.txt\n${actualResult}\n\n[Jarayon ${res.executionTimeMs} ms ichida yakunlandi. Holat: ${
-          isPassed ? 'ACCEPTED' : 'WRONG_ANSWER'
+        `> ${langCmd} < input.txt\n${actualResult}\n\n[Jarayon ${res.executionTimeMs} ms ichida yakunlandi • Holati: ${
+          isPassed ? 'ACCEPTED (To‘g‘ri)' : 'WRONG_ANSWER (Nomuvofiq)'
         }]`
       );
     } catch (err: any) {
-      setConsoleOutput(`> Xatolik yuz berdi:\n${err.message || 'Noma\'lum xatolik'}`);
+      setConsoleOutput(`> Ijro xatoligi:\n${err.message || 'Noma\'lum xatolik'}`);
     } finally {
       setIsRunning(false);
     }
@@ -359,14 +370,14 @@ int main() {
 
       const passedCount = updated.filter((t) => t.status === 'passed').length;
       setConsoleOutput(
-        `> Barcha 5 ta test tekshirildi (${passedCount}/${updated.length})\n` +
+        `> Barcha 5 ta test tekshirildi (${passedCount}/${updated.length} muvaffaqiyatli)\n` +
           updated
             .map(
               (t) =>
                 `[${t.status === 'passed' ? 'OK' : 'FAIL'}] ${t.title}: Kirish "${t.displayInput}" -> Chiqish "${t.actual}" (Kutilgan: "${t.expected}") [${t.time}]`
             )
             .join('\n') +
-          `\n\nNatija: ${passedCount === updated.length ? '100/100 Ball — Muvaffaqiyatli yakunlandi' : 'Ayrim testlarda nomuvofiqlik aniqlandi'}`
+          `\n\nNatija: ${passedCount === updated.length ? '100/100 Ball — Barcha testlar muvaffaqiyatli o‘tdi!' : 'Ayrim testlarda nomuvofiqlik aniqlandi'}`
       );
 
       try {
@@ -420,7 +431,7 @@ int main() {
         },
       ]);
     } catch {
-      let fallback = 'Maslahat: Ikki sonni qo‘shish uchun input() orqali o‘qib oling, int() ga aylantiring va print(a + b) bajaring.';
+      let fallback = 'Maslahat: Ikki sonni qo‘shish uchun input() orqali o‘qib olib, int() ga aylantiring va print(a + b) bajaring.';
       if (q.includes('xato')) {
         fallback = 'Kodingizda sintaktik xato aniqlanmadi. Testlar to‘liq o‘tmoqda!';
       }
@@ -438,7 +449,7 @@ int main() {
   return (
     <div
       className={`h-screen flex flex-col select-none overflow-hidden font-sans transition-colors duration-200 ${
-        theme === 'dark' ? 'bg-[#060810] text-slate-100' : 'bg-slate-50 text-slate-800'
+        theme === 'dark' ? 'bg-[#05070E] text-slate-100' : 'bg-slate-50 text-slate-800'
       }`}
     >
       <TitleBar onExitRequest={onRequestExit} />
@@ -455,37 +466,47 @@ int main() {
         >
           {/* Top Left Navigation Tabs (Linear style sliding pills) */}
           <div
-            className={`h-11 px-3 flex items-center gap-4 text-xs font-semibold flex-shrink-0 border-b ${
+            className={`h-11 px-3 flex items-center justify-between text-xs font-semibold flex-shrink-0 border-b ${
               theme === 'dark'
-                ? 'bg-[#070912] border-white/5'
+                ? 'bg-[#060810] border-white/5'
                 : 'bg-slate-50 border-slate-200'
             }`}
           >
-            {[
-              { id: 'masala', label: 'Masala', icon: FileText },
-              { id: 'urinishlar', label: 'Urinishlar', icon: Clock },
-              { id: 'statistika', label: 'Statistika', icon: BarChart2 },
-              { id: 'yechganlar', label: 'Yechganlar', icon: Users },
-            ].map((tab) => {
-              const Icon = tab.icon;
-              const isActive = activeLeftTab === tab.id;
-              return (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveLeftTab(tab.id as any)}
-                  className={`h-7 px-2.5 rounded-lg flex items-center gap-1.5 transition cursor-pointer ${
-                    isActive
-                      ? 'bg-blue-600 text-white shadow-xs'
-                      : theme === 'dark'
-                      ? 'text-slate-400 hover:text-white hover:bg-white/5'
-                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
-                  }`}
-                >
-                  <Icon className="w-3.5 h-3.5" />
-                  <span>{tab.label}</span>
-                </button>
-              );
-            })}
+            <div className="flex items-center gap-1.5">
+              {[
+                { id: 'masala', label: 'Masala', icon: FileText },
+                { id: 'urinishlar', label: 'Urinishlar', icon: Clock },
+                { id: 'statistika', label: 'Statistika', icon: BarChart2 },
+                { id: 'yechganlar', label: 'Yechganlar', icon: Users },
+              ].map((tab) => {
+                const Icon = tab.icon;
+                const isActive = activeLeftTab === tab.id;
+                return (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveLeftTab(tab.id as any)}
+                    className={`h-7 px-2.5 rounded-lg flex items-center gap-1.5 transition cursor-pointer text-xs ${
+                      isActive
+                        ? 'bg-blue-600 text-white shadow-xs font-semibold'
+                        : theme === 'dark'
+                        ? 'text-slate-400 hover:text-white hover:bg-white/5'
+                        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
+                    }`}
+                  >
+                    <Icon className="w-3.5 h-3.5" />
+                    <span>{tab.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+
+            <button
+              onClick={onBackToAssignment}
+              className="p-1.5 rounded-lg text-slate-400 hover:text-blue-400 hover:bg-white/5 transition cursor-pointer"
+              title="Vazifalarga qaytish"
+            >
+              <ArrowLeft className="w-4 h-4" />
+            </button>
           </div>
 
           {/* Left Content Scrollable Area */}
@@ -499,7 +520,7 @@ int main() {
                       LAB-01
                     </span>
                     <span className="text-slate-400">•</span>
-                    <span className="text-[11px] text-slate-400">Algoritmik topshiriq</span>
+                    <span className="text-[11px] text-slate-400 font-medium">Algoritmlar laboratoriyasi</span>
                   </div>
 
                   <h1 className="text-xl font-extrabold tracking-tight">
@@ -537,7 +558,7 @@ int main() {
 
                 {/* Mathematical Description */}
                 <div
-                  className={`p-4 rounded-xl border leading-relaxed ${
+                  className={`p-4 rounded-2xl border leading-relaxed ${
                     theme === 'dark'
                       ? 'bg-slate-900/40 border-white/5 text-slate-300'
                       : 'bg-slate-50 border-slate-200 text-slate-700'
@@ -579,14 +600,14 @@ int main() {
 
                   {/* Sample Input Box */}
                   <div
-                    className={`rounded-xl border overflow-hidden ${
+                    className={`rounded-2xl border overflow-hidden ${
                       theme === 'dark'
                         ? 'bg-[#0A0D18] border-white/5'
                         : 'bg-white border-slate-200 shadow-xs'
                     }`}
                   >
                     <div
-                      className={`px-3 py-2 border-b flex items-center justify-between text-xs font-semibold ${
+                      className={`px-3.5 py-2 border-b flex items-center justify-between text-xs font-semibold ${
                         theme === 'dark'
                           ? 'bg-white/5 border-white/5 text-slate-300'
                           : 'bg-slate-50 border-slate-200 text-slate-600'
@@ -618,14 +639,14 @@ int main() {
 
                   {/* Sample Output Box */}
                   <div
-                    className={`rounded-xl border overflow-hidden ${
+                    className={`rounded-2xl border overflow-hidden ${
                       theme === 'dark'
                         ? 'bg-[#0A0D18] border-white/5'
                         : 'bg-white border-slate-200 shadow-xs'
                     }`}
                   >
                     <div
-                      className={`px-3 py-2 border-b flex items-center justify-between text-xs font-semibold ${
+                      className={`px-3.5 py-2 border-b flex items-center justify-between text-xs font-semibold ${
                         theme === 'dark'
                           ? 'bg-white/5 border-white/5 text-slate-300'
                           : 'bg-slate-50 border-slate-200 text-slate-600'
@@ -661,7 +682,7 @@ int main() {
               <div className="space-y-3 font-mono text-xs">
                 <div className="text-slate-400 text-[11px]">Sizning so‘nggi urinishlaringiz:</div>
                 <div
-                  className={`p-3 rounded-xl border flex items-center justify-between ${
+                  className={`p-3.5 rounded-2xl border flex items-center justify-between ${
                     theme === 'dark' ? 'bg-[#0A0D18] border-white/5' : 'bg-white border-slate-200'
                   }`}
                 >
@@ -677,21 +698,21 @@ int main() {
             {activeLeftTab === 'statistika' && (
               <div className="space-y-3 text-xs">
                 <div className="text-slate-400 text-[11px]">Umumiy statistika:</div>
-                <div className="grid grid-cols-2 gap-2 text-center font-mono">
+                <div className="grid grid-cols-2 gap-3 text-center font-mono">
                   <div
-                    className={`p-3 rounded-xl border ${
+                    className={`p-4 rounded-2xl border ${
                       theme === 'dark' ? 'bg-[#0A0D18] border-white/5' : 'bg-white border-slate-200'
                     }`}
                   >
-                    <div className="text-xl font-bold text-emerald-400">94.8%</div>
+                    <div className="text-2xl font-bold text-emerald-400">94.8%</div>
                     <div className="text-[10px] text-slate-400 font-sans mt-1">Qabul darajasi</div>
                   </div>
                   <div
-                    className={`p-3 rounded-xl border ${
+                    className={`p-4 rounded-2xl border ${
                       theme === 'dark' ? 'bg-[#0A0D18] border-white/5' : 'bg-white border-slate-200'
                     }`}
                   >
-                    <div className="text-xl font-bold text-blue-400">1,482</div>
+                    <div className="text-2xl font-bold text-blue-400">1,482</div>
                     <div className="text-[10px] text-slate-400 font-sans mt-1">Yechgan o‘quvchilar</div>
                   </div>
                 </div>
@@ -708,7 +729,7 @@ int main() {
                 ].map((item, i) => (
                   <div
                     key={i}
-                    className={`p-2.5 rounded-xl border flex items-center justify-between ${
+                    className={`p-3 rounded-2xl border flex items-center justify-between ${
                       theme === 'dark' ? 'bg-[#0A0D18] border-white/5' : 'bg-white border-slate-200'
                     }`}
                   >
@@ -727,7 +748,7 @@ int main() {
           <div
             className={`h-11 px-4 flex items-center justify-between text-xs flex-shrink-0 border-t ${
               theme === 'dark'
-                ? 'bg-[#070912] border-white/5'
+                ? 'bg-[#060810] border-white/5'
                 : 'bg-slate-50 border-slate-200'
             }`}
           >
@@ -782,11 +803,11 @@ int main() {
           <div
             className={`h-11 px-4 flex items-center justify-between text-xs flex-shrink-0 border-b ${
               theme === 'dark'
-                ? 'bg-[#070912] border-white/5'
+                ? 'bg-[#060810] border-white/5'
                 : 'bg-white border-slate-200'
             }`}
           >
-            {/* Left Controls: Language, Sample, Upload */}
+            {/* Left Controls: Language, Sample, Upload, Reset */}
             <div className="flex items-center gap-2">
               {/* Language Dropdown */}
               <div className="relative">
@@ -825,6 +846,19 @@ int main() {
                 <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" />
               </div>
 
+              {/* Reset Code Button */}
+              <button
+                onClick={handleResetCode}
+                className={`p-1.5 rounded-lg border transition cursor-pointer ${
+                  theme === 'dark'
+                    ? 'bg-[#0E1528] hover:bg-slate-800 border-white/10 text-slate-400 hover:text-white'
+                    : 'bg-slate-100 hover:bg-slate-200 border-slate-300 text-slate-600'
+                }`}
+                title="Kodni boshlang‘ich holatga qaytarish"
+              >
+                <RotateCcw className="w-3.5 h-3.5" />
+              </button>
+
               {/* Upload Button */}
               <label
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium cursor-pointer transition ${
@@ -855,7 +889,7 @@ int main() {
             </div>
 
             {/* Right Controls: Auto-save, AI Murabbiy, RUN, Topshirish */}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2.5">
               <span className="text-[11px] font-mono text-slate-500 hidden md:inline">
                 {saveStatus}
               </span>
@@ -892,7 +926,7 @@ int main() {
                 className="h-8 px-3 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs flex items-center gap-1 shadow-sm transition active:scale-95 cursor-pointer"
               >
                 <span>Topshirish</span>
-                <ChevronRight className="w-3.5 h-3.5" />
+                <CheckSquare className="w-3.5 h-3.5" />
               </button>
             </div>
           </div>
@@ -926,7 +960,7 @@ int main() {
             <div
               className={`w-6 flex flex-col items-center justify-center py-4 flex-shrink-0 cursor-pointer transition border-l group ${
                 theme === 'dark'
-                  ? 'bg-[#070912] border-white/5 hover:bg-white/5'
+                  ? 'bg-[#060810] border-white/5 hover:bg-white/5'
                   : 'bg-slate-100 border-slate-200 hover:bg-slate-200'
               }`}
               title="Muharrir parametrlari"
@@ -947,7 +981,7 @@ int main() {
             {/* Header: Tabs + PROMINENT TESTLASH BUTTON */}
             <div
               className={`h-10 px-4 flex items-center justify-between text-xs flex-shrink-0 border-b ${
-                theme === 'dark' ? 'bg-[#070912] border-white/5' : 'bg-white border-slate-200'
+                theme === 'dark' ? 'bg-[#060810] border-white/5' : 'bg-white border-slate-200'
               }`}
             >
               <div className="flex items-center gap-2">
@@ -993,7 +1027,7 @@ int main() {
               {/* Left 5 Test Cases Sub-Column */}
               <div
                 className={`w-[240px] flex flex-col flex-shrink-0 overflow-y-auto border-r ${
-                  theme === 'dark' ? 'bg-[#060810] border-white/5' : 'bg-slate-100 border-slate-200'
+                  theme === 'dark' ? 'bg-[#05070E] border-white/5' : 'bg-slate-100 border-slate-200'
                 }`}
               >
                 <div
@@ -1077,7 +1111,7 @@ int main() {
                   <div className="h-full flex flex-col justify-between space-y-2">
                     {/* Top Card: Kirish */}
                     <div
-                      className={`p-2.5 rounded-xl border flex-1 min-h-[50px] flex flex-col justify-between ${
+                      className={`p-2.5 rounded-2xl border flex-1 min-h-[50px] flex flex-col justify-between ${
                         theme === 'dark'
                           ? 'bg-[#0C101E] border-white/5'
                           : 'bg-slate-50 border-slate-200'
@@ -1088,6 +1122,7 @@ int main() {
                         <button
                           onClick={() => handleCopy(activeTestCase.input, 'tc_in')}
                           className="text-slate-400 hover:text-white transition cursor-pointer"
+                          title="Nusxalash"
                         >
                           {copiedKey === 'tc_in' ? (
                             <Check className="w-3.5 h-3.5 text-emerald-400" />
@@ -1105,7 +1140,7 @@ int main() {
                     <div className="grid grid-cols-2 gap-2 flex-1 min-h-[50px]">
                       {/* Left: Sizning chiqishingiz */}
                       <div
-                        className={`p-2.5 rounded-xl border flex flex-col justify-between ${
+                        className={`p-2.5 rounded-2xl border flex flex-col justify-between ${
                           theme === 'dark'
                             ? 'bg-[#0C101E] border-white/5'
                             : 'bg-slate-50 border-slate-200'
@@ -1123,6 +1158,7 @@ int main() {
                           <button
                             onClick={() => handleCopy(activeTestCase.actual, 'tc_act')}
                             className="text-slate-400 hover:text-white transition cursor-pointer"
+                            title="Nusxalash"
                           >
                             {copiedKey === 'tc_act' ? (
                               <Check className="w-3.5 h-3.5 text-emerald-400" />
@@ -1138,7 +1174,7 @@ int main() {
 
                       {/* Right: Javob */}
                       <div
-                        className={`p-2.5 rounded-xl border flex flex-col justify-between ${
+                        className={`p-2.5 rounded-2xl border flex flex-col justify-between ${
                           theme === 'dark'
                             ? 'bg-[#0C101E] border-white/5'
                             : 'bg-slate-50 border-slate-200'
@@ -1149,6 +1185,7 @@ int main() {
                           <button
                             onClick={() => handleCopy(activeTestCase.expected, 'tc_exp')}
                             className="text-slate-400 hover:text-white transition cursor-pointer"
+                            title="Nusxalash"
                           >
                             {copiedKey === 'tc_exp' ? (
                               <Check className="w-3.5 h-3.5 text-emerald-400" />
@@ -1165,7 +1202,7 @@ int main() {
                   </div>
                 ) : (
                   <div
-                    className={`h-full p-3 rounded-xl border font-mono text-xs overflow-y-auto whitespace-pre-wrap leading-relaxed ${
+                    className={`h-full p-3 rounded-2xl border font-mono text-xs overflow-y-auto whitespace-pre-wrap leading-relaxed ${
                       theme === 'dark'
                         ? 'bg-[#0A0D18] border-white/5 text-slate-300'
                         : 'bg-slate-50 border-slate-200 text-slate-800'
@@ -1263,7 +1300,7 @@ int main() {
               <div className="grid grid-cols-2 gap-1 text-xs">
                 <button
                   onClick={() => handleSendAi('Masalani tushuntir')}
-                  className={`p-1.5 rounded-lg text-[10px] flex items-center gap-1 transition cursor-pointer border ${
+                  className={`p-1.5 rounded-xl text-[10px] flex items-center gap-1 transition cursor-pointer border ${
                     theme === 'dark'
                       ? 'bg-[#0E1528] hover:bg-white/10 border-white/5 text-slate-300'
                       : 'bg-white hover:bg-slate-100 border-slate-200 text-slate-700'
@@ -1274,7 +1311,7 @@ int main() {
                 </button>
                 <button
                   onClick={() => handleSendAi('Kodimdagi xatoni top')}
-                  className={`p-1.5 rounded-lg text-[10px] flex items-center gap-1 transition cursor-pointer border ${
+                  className={`p-1.5 rounded-xl text-[10px] flex items-center gap-1 transition cursor-pointer border ${
                     theme === 'dark'
                       ? 'bg-[#0E1528] hover:bg-white/10 border-white/5 text-slate-300'
                       : 'bg-white hover:bg-slate-100 border-slate-200 text-slate-700'
@@ -1285,7 +1322,7 @@ int main() {
                 </button>
                 <button
                   onClick={() => handleSendAi('Maslahat ber')}
-                  className={`p-1.5 rounded-lg text-[10px] flex items-center gap-1 transition cursor-pointer border ${
+                  className={`p-1.5 rounded-xl text-[10px] flex items-center gap-1 transition cursor-pointer border ${
                     theme === 'dark'
                       ? 'bg-[#0E1528] hover:bg-white/10 border-white/5 text-slate-300'
                       : 'bg-white hover:bg-slate-100 border-slate-200 text-slate-700'
@@ -1296,7 +1333,7 @@ int main() {
                 </button>
                 <button
                   onClick={() => handleSendAi('Test natijasini tushuntir')}
-                  className={`p-1.5 rounded-lg text-[10px] flex items-center gap-1 transition cursor-pointer border ${
+                  className={`p-1.5 rounded-xl text-[10px] flex items-center gap-1 transition cursor-pointer border ${
                     theme === 'dark'
                       ? 'bg-[#0E1528] hover:bg-white/10 border-white/5 text-slate-300'
                       : 'bg-white hover:bg-slate-100 border-slate-200 text-slate-700'
@@ -1320,7 +1357,7 @@ int main() {
                   value={aiInput}
                   onChange={(e) => setAiInput(e.target.value)}
                   placeholder="AI ga savol bering..."
-                  className={`flex-1 h-8 px-2.5 rounded-lg text-xs border focus:outline-none focus:border-blue-500 transition ${
+                  className={`flex-1 h-8 px-2.5 rounded-xl text-xs border focus:outline-none focus:border-blue-500 transition ${
                     theme === 'dark'
                       ? 'bg-[#0E1528] border-white/10 text-white placeholder-slate-500'
                       : 'bg-white border-slate-300 text-slate-900 placeholder-slate-400'
@@ -1328,7 +1365,7 @@ int main() {
                 />
                 <button
                   type="submit"
-                  className="h-8 w-8 bg-blue-600 hover:bg-blue-500 text-white rounded-lg flex items-center justify-center flex-shrink-0 transition cursor-pointer"
+                  className="h-8 w-8 bg-blue-600 hover:bg-blue-500 text-white rounded-xl flex items-center justify-center flex-shrink-0 transition cursor-pointer"
                 >
                   <Send className="w-3.5 h-3.5" />
                 </button>

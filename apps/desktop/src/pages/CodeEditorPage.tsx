@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Editor from '@monaco-editor/react';
 import { TitleBar } from '../components/TitleBar';
 import { LocalRunnerService } from '../services/runner';
@@ -112,6 +112,19 @@ int main() {
       } else {
         setCodeCpp(defaultCppCode);
       }
+    }
+  };
+
+  const editorRef = useRef<any>(null);
+
+  const handleEditorDidMount = (editor: any, monaco: any) => {
+    editorRef.current = editor;
+    if (typeof document !== 'undefined' && (document as any).fonts && (document as any).fonts.ready) {
+      (document as any).fonts.ready.then(() => {
+        try {
+          monaco.editor.remeasureFonts();
+        } catch {}
+      });
     }
   };
 
@@ -995,9 +1008,13 @@ int main() {
                 theme={theme === 'dark' ? 'vs-dark' : 'vs'}
                 value={currentCode}
                 onChange={(val) => setCurrentCode(val || '')}
+                onMount={handleEditorDidMount}
                 options={{
                   fontSize: 14,
-                  fontFamily: "'JetBrains Mono', Consolas, 'Fira Code', monospace",
+                  lineHeight: 22,
+                  fontFamily: "Consolas, 'Courier New', monospace",
+                  fontLigatures: false,
+                  letterSpacing: 0,
                   minimap: { enabled: false },
                   lineNumbers: 'on',
                   roundedSelection: true,
@@ -1007,6 +1024,7 @@ int main() {
                   tabSize: 4,
                   cursorBlinking: 'smooth',
                   renderLineHighlight: 'all',
+                  wordWrap: 'off',
                 }}
               />
             </div>

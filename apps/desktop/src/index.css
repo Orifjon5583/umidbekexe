@@ -68,10 +68,10 @@
   box-shadow: 0 0 25px -5px rgba(16, 185, 129, 0.25);
 }
 
-/* Monaco Editor font */
-.monaco-editor,
-.monaco-editor * {
-  font-family: var(--font-mono) !important;
+/* Monaco Editor styles */
+.monaco-editor {
+  user-select: text !important;
+  -webkit-user-select: text !important;
 }
 
 /* Sleek Scrollbars */

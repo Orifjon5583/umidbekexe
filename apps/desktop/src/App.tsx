@@ -7,6 +7,7 @@ import { AssignmentsPage } from './pages/AssignmentsPage';
 import { AssignmentDetailsPage } from './pages/AssignmentDetailsPage';
 import { CodeEditorPage } from './pages/CodeEditorPage';
 import { ResultsPage } from './pages/ResultsPage';
+import { RewardsPage } from './pages/RewardsPage';
 import { ProfilePage } from './pages/ProfilePage';
 import { SubmissionResultPage } from './pages/SubmissionResultPage';
 import { ExitModal } from './components/ExitModal';
@@ -19,6 +20,7 @@ type AppScreen =
   | 'assignment_details'
   | 'code_editor'
   | 'results'
+  | 'rewards'
   | 'profile'
   | 'submission_result';
 
@@ -183,6 +185,13 @@ export const App: React.FC = () => {
             setSelectedProblemId(probId);
             setCurrentScreen('code_editor');
           }}
+        />
+      )}
+
+      {currentScreen === 'rewards' && (
+        <RewardsPage
+          onNavigateTab={(tab) => setCurrentScreen(tab)}
+          onRequestExit={() => setIsExitModalOpen(true)}
         />
       )}
 

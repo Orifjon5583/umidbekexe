@@ -1,8 +1,8 @@
 import React from 'react';
-import { Home, FileCode, CheckSquare, BarChart2, User, LogOut, Sparkles } from 'lucide-react';
+import { Home, FileCode, CheckSquare, BarChart2, User, LogOut, Sparkles, Gift } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 
-export type DesktopNavTab = 'dashboard' | 'assignments' | 'assignment_details' | 'code_editor' | 'results' | 'profile';
+export type DesktopNavTab = 'dashboard' | 'assignments' | 'assignment_details' | 'code_editor' | 'results' | 'rewards' | 'profile';
 
 interface Props {
   currentTab: DesktopNavTab;
@@ -38,6 +38,13 @@ export const Sidebar: React.FC<Props> = ({ currentTab, onNavigate, onRequestExit
       label: 'Natijalar',
       icon: BarChart2,
       badge: null,
+    },
+    {
+      id: 'rewards' as const,
+      label: 'Sovg‘alar',
+      icon: Gift,
+      badge: 'Yangi 🔥',
+      badgeColor: 'bg-amber-500/15 text-amber-400 border border-amber-500/30',
     },
     {
       id: 'profile' as const,

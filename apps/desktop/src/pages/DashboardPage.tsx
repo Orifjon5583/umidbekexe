@@ -12,6 +12,7 @@ import {
   Clock,
   Sparkles,
   Play,
+  Gift,
 } from 'lucide-react';
 
 interface Props {
@@ -214,6 +215,40 @@ export const DashboardPage: React.FC<Props> = ({
               >
                 <Play className="w-3.5 h-3.5 fill-current" />
                 <span>Muharrirni ochish</span>
+              </button>
+            </div>
+
+            {/* Sovg'alar va Yutuqlar Banner */}
+            <div
+              className={`p-5 rounded-3xl border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 relative overflow-hidden ${
+                theme === 'dark'
+                  ? 'bg-gradient-to-r from-amber-950/40 via-purple-950/30 to-indigo-950/40 border-amber-500/20'
+                  : 'bg-gradient-to-r from-amber-50 via-purple-50 to-indigo-50 border-amber-200 shadow-sm'
+              }`}
+            >
+              <div className="flex items-center gap-3.5 z-10">
+                <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-amber-500 to-yellow-400 flex items-center justify-center text-slate-950 shadow-md shadow-amber-500/20 flex-shrink-0">
+                  <Gift className="w-6 h-6" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-black text-amber-400 font-mono">850 TANGA MAVJUD 🪙</span>
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-400 font-bold border border-amber-500/20">
+                      Sovg‘alar do‘koni
+                    </span>
+                  </div>
+                  <h4 className="text-sm font-extrabold mt-0.5">
+                    Xudi, futbolkalar, mexanik klaviatura va stikerlarni yutib oling!
+                  </h4>
+                </div>
+              </div>
+
+              <button
+                onClick={() => onNavigateTab('rewards')}
+                className="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-400 hover:from-amber-400 hover:to-yellow-300 text-slate-950 font-bold text-xs flex items-center gap-1.5 shadow-md shadow-amber-500/20 transition active:scale-95 cursor-pointer z-10 flex-shrink-0"
+              >
+                <span>Sovg‘alarni ko‘rish</span>
+                <ArrowRight className="w-3.5 h-3.5" />
               </button>
             </div>
 

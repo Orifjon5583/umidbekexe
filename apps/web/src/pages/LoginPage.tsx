@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { apiClient } from '../services/api';
-import { Eye, EyeOff, AlertCircle } from 'lucide-react';
+import { Eye, EyeOff, AlertCircle, ShieldCheck, UserCheck, Sparkles } from 'lucide-react';
 
 interface Props {
   onLoginSuccess: (user: any) => void;
@@ -14,15 +14,14 @@ export const LoginPage: React.FC<Props> = ({ onLoginSuccess }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const performLogin = async (userToLogin: string, passToLogin: string) => {
     setError(null);
     setLoading(true);
 
     try {
       const res = await apiClient.login({
-        username: username.trim(),
-        password,
+        username: userToLogin.trim(),
+        password: passToLogin,
         rememberMe,
       });
 
@@ -41,10 +40,27 @@ export const LoginPage: React.FC<Props> = ({ onLoginSuccess }) => {
     }
   };
 
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    performLogin(username, password);
+  };
+
+  const handleQuickDemo = (role: 'teacher' | 'admin') => {
+    if (role === 'teacher') {
+      setUsername('teacher1');
+      setPassword('Teacher123!');
+      performLogin('teacher1', 'Teacher123!');
+    } else {
+      setUsername('admin');
+      setPassword('Admin123!');
+      performLogin('admin', 'Admin123!');
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#070D1E] flex items-center justify-center p-6 font-sans">
       <div className="w-full max-w-4xl flex flex-col md:flex-row items-center justify-between gap-12">
-        {/* Left: Brand with squircle icon and O'qituvchi paneli (Matching Poster Section 2 Item 1) */}
+        {/* Left: Brand with squircle icon and O'qituvchi paneli */}
         <div className="flex-1 flex flex-col items-center md:items-start text-center md:text-left">
           <div className="w-24 h-24 rounded-3xl bg-[#0F1E36] border border-blue-500/20 shadow-2xl flex items-center justify-center mb-6 p-4">
             <img
@@ -58,15 +74,23 @@ export const LoginPage: React.FC<Props> = ({ onLoginSuccess }) => {
             CodePractice
           </h1>
           <p className="text-sm tracking-wider text-blue-400 font-medium">
-            O‘qituvchi paneli
+            O‘qituvchi va Boshqaruv paneli
+          </p>
+          <p className="text-xs text-slate-400 mt-3 max-w-xs leading-relaxed">
+            O‘quvchilar guruhlari, topshiriqlar, masalalar banki, test natijalari va sovg‘alar do‘koni boshqaruvi.
           </p>
         </div>
 
         {/* Right: Login Card */}
         <div className="w-full max-w-sm bg-white rounded-2xl p-8 shadow-2xl border border-slate-200">
-          <h2 className="text-lg font-bold text-slate-900 mb-5">
-            Tizimga kirish
-          </h2>
+          <div className="flex items-center justify-between mb-5">
+            <h2 className="text-lg font-bold text-slate-900">
+              Tizimga kirish
+            </h2>
+            <span className="text-[11px] font-semibold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md">
+              Web Panel
+            </span>
+          </div>
 
           {error && (
             <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl flex items-start gap-2 text-red-600 text-xs font-medium">
@@ -74,6 +98,37 @@ export const LoginPage: React.FC<Props> = ({ onLoginSuccess }) => {
               <span>{error}</span>
             </div>
           )}
+
+          {/* Quick Demo Login Buttons */}
+          <div className="mb-5 space-y-2">
+            <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+              Tezkor kirish (1-klik):
+            </p>
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                onClick={() => handleQuickDemo('teacher')}
+                className="flex items-center justify-center gap-1.5 py-2 px-2 bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-semibold rounded-lg border border-blue-200 transition"
+              >
+                <UserCheck className="w-3.5 h-3.5" />
+                O‘qituvchi
+              </button>
+              <button
+                type="button"
+                onClick={() => handleQuickDemo('admin')}
+                className="flex items-center justify-center gap-1.5 py-2 px-2 bg-purple-50 hover:bg-purple-100 text-purple-700 text-xs font-semibold rounded-lg border border-purple-200 transition"
+              >
+                <ShieldCheck className="w-3.5 h-3.5" />
+                Administrator
+              </button>
+            </div>
+          </div>
+
+          <div className="relative flex py-2 items-center mb-4">
+            <div className="flex-grow border-t border-slate-200"></div>
+            <span className="flex-shrink mx-3 text-slate-400 text-[11px] font-medium">yoki login orqali</span>
+            <div className="flex-grow border-t border-slate-200"></div>
+          </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>

@@ -6,6 +6,7 @@ import { GroupsPage } from './pages/GroupsPage';
 import { ProblemsPage } from './pages/ProblemsPage';
 import { AssignmentsPage } from './pages/AssignmentsPage';
 import { ReportsPage } from './pages/ReportsPage';
+import { RewardsPage } from './pages/RewardsPage';
 
 export const App: React.FC = () => {
   const [currentUser, setCurrentUser] = useState<any | null>(null);
@@ -33,6 +34,7 @@ export const App: React.FC = () => {
       {currentTab === 'problems' && <ProblemsPage />}
       {currentTab === 'assignments' && <AssignmentsPage />}
       {currentTab === 'reports' && <ReportsPage />}
+      {currentTab === 'rewards' && <RewardsPage />}
     </DashboardLayout>
   );
 };

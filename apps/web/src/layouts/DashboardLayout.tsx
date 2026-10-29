@@ -1,5 +1,5 @@
 import React from 'react';
-import { LayoutDashboard, Users, BookOpen, CheckSquare, BarChart3, LogOut, Code2, ShieldAlert } from 'lucide-react';
+import { LayoutDashboard, Users, BookOpen, CheckSquare, BarChart3, LogOut, Code2, ShieldAlert, Gift } from 'lucide-react';
 
 interface Props {
   currentTab: string;
@@ -24,6 +24,7 @@ export const DashboardLayout: React.FC<Props> = ({ currentTab, onTabChange, chil
     { id: 'problems', label: 'Masalalar banki', icon: Code2 },
     { id: 'assignments', label: 'Vazifalar', icon: CheckSquare },
     { id: 'reports', label: 'Natijalar va Hisobot', icon: BarChart3 },
+    { id: 'rewards', label: 'Sovg‘alar (Do‘kon)', icon: Gift },
   ];
 
   return (

@@ -3,7 +3,18 @@ const fs = require('fs');
 const path = require('path');
 
 const PORT = 1420;
-const DIST_DIR = path.resolve(__dirname, '..', 'apps', 'desktop', 'dist');
+
+// dist papkasini bir nechta ehtimoliy joylashuvlardan avtomatik aniqlash
+let DIST_DIR = path.resolve(__dirname, '..', 'apps', 'desktop', 'dist');
+if (!fs.existsSync(DIST_DIR)) {
+  DIST_DIR = path.resolve(__dirname, '..', 'dist');
+}
+if (!fs.existsSync(DIST_DIR)) {
+  DIST_DIR = path.resolve(process.cwd(), 'apps', 'desktop', 'dist');
+}
+if (!fs.existsSync(DIST_DIR)) {
+  DIST_DIR = path.resolve(process.cwd(), 'dist');
+}
 
 const MIME_TYPES = {
   '.html': 'text/html; charset=utf-8',
@@ -91,6 +102,15 @@ const server = http.createServer((req, res) => {
   });
 });
 
-server.listen(PORT, '127.0.0.1', () => {
-  console.log(`[CodePractice Desktop Server] http://127.0.0.1:${PORT} da ishga tushdi`);
+server.on('error', (err) => {
+  if (err.code === 'EADDRINUSE') {
+    console.log(`[CodePractice Desktop Server] Port ${PORT} allaqachon band, davom etilmoqda`);
+  } else {
+    console.error(`[CodePractice Desktop Server] Xatolik: ${err.message}`);
+  }
+});
+
+// 0.0.0.0 barcha interfeyslarda (IPv4 127.0.0.1 va localhost) tinglashni ta'minlaydi
+server.listen(PORT, '0.0.0.0', () => {
+  console.log(`[CodePractice Desktop Server] http://127.0.0.1:${PORT} da muvaffaqiyatli ishga tushdi`);
 });

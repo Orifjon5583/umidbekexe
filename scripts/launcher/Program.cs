@@ -17,21 +17,27 @@ namespace CodePractice
             {
                 string baseDir = AppDomain.CurrentDomain.BaseDirectory;
 
-                // 1. Backend API (port 4000) ishlayotganligini tekshirish
-                if (!IsPortOpen("127.0.0.1", 4000))
-                {
-                    StartBackendServer(baseDir);
-                    WaitForPort("127.0.0.1", 4000, 10);
-                }
-
-                // 2. Desktop Web (port 1420) ishlayotganligini tekshirish
+                // 1. Desktop UI Server (port 1420) ni birinchi navbatda ishga tushirish
                 if (!IsPortOpen("127.0.0.1", 1420))
                 {
                     StartDesktopServer(baseDir);
                     WaitForPort("127.0.0.1", 1420, 10);
                 }
 
-                // 3. Microsoft Edge ilova rejimida ishga tushirish (Windows 11 nativ desktop oynasi)
+                // 2. Backend API (port 4000) ni fonda ishga tushirish (asosiy oynani kutdirmasdan)
+                ThreadPool.QueueUserWorkItem((state) =>
+                {
+                    try
+                    {
+                        if (!IsPortOpen("127.0.0.1", 4000))
+                        {
+                            StartBackendServer(baseDir);
+                        }
+                    }
+                    catch {}
+                });
+
+                // 3. Microsoft Edge ilova rejimida ochish (127.0.0.1 orqali to'g'ridan-to'g'ri bog'lanish)
                 LaunchAppWindow();
             }
             catch (Exception ex)
@@ -52,7 +58,7 @@ namespace CodePractice
                 using (var client = new TcpClient())
                 {
                     var result = client.BeginConnect(host, port, null, null);
-                    bool success = result.AsyncWaitHandle.WaitOne(1000);
+                    bool success = result.AsyncWaitHandle.WaitOne(800);
                     if (!success) return false;
                     client.EndConnect(result);
                     return true;
@@ -73,6 +79,71 @@ namespace CodePractice
             }
         }
 
+        static string FindNodeExe()
+        {
+            string[] possiblePaths = new string[]
+            {
+                @"C:\Program Files\nodejs\node.exe",
+                @"C:\Program Files (x86)\nodejs\node.exe",
+                Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), @"Programs\nodejs\node.exe"),
+                Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), @"nodejs\node.exe")
+            };
+
+            foreach (var p in possiblePaths)
+            {
+                if (File.Exists(p)) return p;
+            }
+
+            return "node";
+        }
+
+        static void StartDesktopServer(string baseDir)
+        {
+            string scriptPath = Path.Combine(baseDir, "scripts", "serve-desktop.js");
+            if (!File.Exists(scriptPath))
+            {
+                // Agar o'rnatilgan papkada bo'lmasa, ishchi stol/loyiha papkasidan qidiramiz
+                scriptPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "scripts", "serve-desktop.js");
+            }
+
+            if (!File.Exists(scriptPath)) return;
+
+            string nodeExe = FindNodeExe();
+
+            var psi = new ProcessStartInfo
+            {
+                FileName = nodeExe,
+                Arguments = "\"" + scriptPath + "\"",
+                WorkingDirectory = baseDir,
+                WindowStyle = ProcessWindowStyle.Hidden,
+                CreateNoWindow = true,
+                UseShellExecute = false
+            };
+
+            try
+            {
+                Process.Start(psi);
+            }
+            catch
+            {
+                // Zaxira: cmd.exe orqali chaqirish
+                try
+                {
+                    var cmdPsi = new ProcessStartInfo
+                    {
+                        FileName = "cmd.exe",
+                        Arguments = "/c node \"" + scriptPath + "\"",
+                        WorkingDirectory = baseDir,
+                        WindowStyle = ProcessWindowStyle.Hidden,
+                        CreateNoWindow = true,
+                        UseShellExecute = false
+                    };
+                    Process.Start(cmdPsi);
+                }
+                catch {}
+            }
+        }
+
         static void StartBackendServer(string baseDir)
         {
             string apiDir = Path.Combine(baseDir, "apps", "api");
@@ -88,25 +159,11 @@ namespace CodePractice
                 UseShellExecute = false
             };
 
-            Process.Start(psi);
-        }
-
-        static void StartDesktopServer(string baseDir)
-        {
-            string scriptPath = Path.Combine(baseDir, "scripts", "serve-desktop.js");
-            if (!File.Exists(scriptPath)) return;
-
-            var psi = new ProcessStartInfo
+            try
             {
-                FileName = "cmd.exe",
-                Arguments = "/c node \"" + scriptPath + "\"",
-                WorkingDirectory = baseDir,
-                WindowStyle = ProcessWindowStyle.Hidden,
-                CreateNoWindow = true,
-                UseShellExecute = false
-            };
-
-            Process.Start(psi);
+                Process.Start(psi);
+            }
+            catch {}
         }
 
         static void LaunchAppWindow()
@@ -133,11 +190,14 @@ namespace CodePractice
                 "CodePracticeStudentApp"
             );
 
+            // DIQQAT: localhost o'rniga 127.0.0.1 ishlatiladi (Windows 11 IPv6 timeout xatosini oldini olish uchun)
+            string appUrl = "http://127.0.0.1:1420";
+
             if (edgePath != null)
             {
-                // App rejimi: sarlavha paneli, manzillar satrisiz, 1440x900 o'lchamda toza desktop oyna
                 string args = string.Format(
-                    "--app=http://localhost:1420 --window-size=1440,900 --user-data-dir=\"{0}\" --no-first-run --no-default-browser-check --disable-http-cache --disable-features=Translate,OptimizationHints",
+                    "--app={0} --window-size=1440,900 --user-data-dir=\"{1}\" --no-first-run --no-default-browser-check --disable-http-cache --disable-features=Translate,OptimizationHints",
+                    appUrl,
                     userDataDir
                 );
 
@@ -155,7 +215,7 @@ namespace CodePractice
                 // Edge topilmasa standart brauzerda ochish
                 Process.Start(new ProcessStartInfo
                 {
-                    FileName = "http://localhost:1420",
+                    FileName = appUrl,
                     UseShellExecute = true
                 });
             }

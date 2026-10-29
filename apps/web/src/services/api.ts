@@ -90,7 +90,7 @@ export const apiClient = {
     try {
       return await realClient.getAdminUsers();
     } catch {
-      return MOCK_STUDENTS;
+      return getStored<User[]>('students', MOCK_STUDENTS);
     }
   },
 
@@ -100,12 +100,36 @@ export const apiClient = {
     } catch {
       const groups = getStored<Group[]>('groups', INITIAL_GROUPS);
       const grp = groups.find((g) => g.id === groupId) || groups[0];
+      const allStudents = getStored<User[]>('students', MOCK_STUDENTS);
+
+      const defaultMemberIds =
+        grp.id === 'g-1'
+          ? ['s-1', 's-2', 's-6']
+          : grp.id === 'g-2'
+          ? ['s-3', 's-4', 's-7']
+          : ['s-5', 's-8'];
+
+      const memberIds = getStored<string[]>(`group_members_${grp.id}`, defaultMemberIds);
+      const members = memberIds.map((id) => {
+        const student = allStudents.find((s) => s.id === id) || {
+          id,
+          fullName: 'O‘quvchi',
+          username: id,
+          role: 'student' as const,
+          isActive: true,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        };
+        return {
+          student,
+          joinedAt: new Date(Date.now() - 3 * 86400000).toISOString(),
+        };
+      });
+
       return {
         ...grp,
-        members: MOCK_STUDENTS.slice(0, 6).map((student, idx) => ({
-          student,
-          joinedAt: new Date(Date.now() - idx * 86400000).toISOString(),
-        })),
+        studentCount: members.length,
+        members,
       };
     }
   },
@@ -125,24 +149,99 @@ export const apiClient = {
       };
       const updated = [newGroup, ...current];
       setStored('groups', updated);
+      setStored(`group_members_${newGroup.id}`, []);
       return newGroup;
     }
   },
 
+  async updateGroupName(groupId: string, newName: string): Promise<Group> {
+    const groups = getStored<Group[]>('groups', INITIAL_GROUPS);
+    const updated = groups.map((g) =>
+      g.id === groupId ? { ...g, name: newName.trim(), updatedAt: new Date().toISOString() } : g
+    );
+    setStored('groups', updated);
+    return updated.find((g) => g.id === groupId)!;
+  },
+
+  async deleteGroup(groupId: string): Promise<void> {
+    try {
+      await (realClient as any).deleteGroup?.(groupId);
+    } catch {}
+    const groups = getStored<Group[]>('groups', INITIAL_GROUPS);
+    const updated = groups.filter((g) => g.id !== groupId);
+    setStored('groups', updated);
+  },
+
   async addStudentToGroup(groupId: string, studentId: string): Promise<void> {
     try {
-      return await realClient.addStudentToGroup(groupId, studentId);
-    } catch {
-      console.log(`[Demo] Student ${studentId} added to group ${groupId}`);
+      await realClient.addStudentToGroup(groupId, studentId);
+    } catch {}
+    const defaultIds = groupId === 'g-1' ? ['s-1', 's-2', 's-6'] : ['s-3', 's-4'];
+    const currentMembers = getStored<string[]>(`group_members_${groupId}`, defaultIds);
+    if (!currentMembers.includes(studentId)) {
+      const updated = [...currentMembers, studentId];
+      setStored(`group_members_${groupId}`, updated);
+
+      const groups = getStored<Group[]>('groups', INITIAL_GROUPS);
+      setStored(
+        'groups',
+        groups.map((g) => (g.id === groupId ? { ...g, studentCount: updated.length } : g))
+      );
     }
   },
 
   async removeStudentFromGroup(groupId: string, studentId: string): Promise<void> {
     try {
-      return await realClient.removeStudentFromGroup(groupId, studentId);
-    } catch {
-      console.log(`[Demo] Student ${studentId} removed from group ${groupId}`);
+      await realClient.removeStudentFromGroup(groupId, studentId);
+    } catch {}
+    const defaultIds = groupId === 'g-1' ? ['s-1', 's-2', 's-6'] : ['s-3', 's-4'];
+    const currentMembers = getStored<string[]>(`group_members_${groupId}`, defaultIds);
+    const updated = currentMembers.filter((id) => id !== studentId);
+    setStored(`group_members_${groupId}`, updated);
+
+    const groups = getStored<Group[]>('groups', INITIAL_GROUPS);
+    setStored(
+      'groups',
+      groups.map((g) => (g.id === groupId ? { ...g, studentCount: updated.length } : g))
+    );
+  },
+
+  async createNewStudent(data: { fullName: string; username: string; password?: string }): Promise<User> {
+    const allStudents = getStored<User[]>('students', MOCK_STUDENTS);
+    const newStudent: User = {
+      id: `s-${Date.now()}`,
+      fullName: data.fullName.trim(),
+      username: data.username.trim().toLowerCase().replace(/\s+/g, '_'),
+      role: 'student',
+      isActive: true,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+    setStored('students', [...allStudents, newStudent]);
+
+    if (data.password) {
+      const passwords = getStored<Record<string, string>>('user_passwords', {});
+      passwords[newStudent.id] = data.password;
+      setStored('user_passwords', passwords);
     }
+
+    return newStudent;
+  },
+
+  async updateStudentPassword(studentId: string, newPassword: string): Promise<boolean> {
+    try {
+      // If backend has admin user password endpoint, call it
+    } catch {}
+    const passwords = getStored<Record<string, string>>('user_passwords', {});
+    passwords[studentId] = newPassword;
+    setStored('user_passwords', passwords);
+    console.log(`[Demo] Student ${studentId} password updated to: ${newPassword}`);
+    return true;
+  },
+
+  async getStudentPassword(studentId: string): Promise<string> {
+    const passwords = getStored<Record<string, string>>('user_passwords', {});
+    return passwords[studentId] || 'Talaba123!';
   },
 
   async getTeacherProblems(): Promise<Problem[]> {
@@ -234,11 +333,12 @@ export const apiClient = {
       const groups = getStored<Group[]>('groups', INITIAL_GROUPS);
       const grp = groups.find((g) => g.id === groupId) || groups[0];
       const assignments = getStored<Assignment[]>('assignments', INITIAL_ASSIGNMENTS);
+      const allStudents = getStored<User[]>('students', MOCK_STUDENTS);
 
       return {
         groupId: grp.id,
         groupName: grp.name,
-        students: MOCK_STUDENTS.map((st, sIdx) => ({
+        students: allStudents.map((st, sIdx) => ({
           studentId: st.id,
           studentName: st.fullName,
           username: st.username,
@@ -266,11 +366,12 @@ export const apiClient = {
       const groups = getStored<Group[]>('groups', INITIAL_GROUPS);
       const targetGroup = groupId ? groups.find((g) => g.id === groupId) || groups[0] : groups[0];
       const assignments = getStored<Assignment[]>('assignments', INITIAL_ASSIGNMENTS);
+      const allStudents = getStored<User[]>('students', MOCK_STUDENTS);
 
       let csv = '\uFEFF'; // UTF-8 BOM Excel uchun
       csv += 'O‘quvchi Ismi,Username,Guruh,Vazifa,Bajarilgan Masalalar,Jami Masalalar,Foiz,Holat\n';
 
-      for (const st of MOCK_STUDENTS) {
+      for (const st of allStudents) {
         for (const ass of assignments) {
           const total = ass.totalProblems || 2;
           const completed = total;

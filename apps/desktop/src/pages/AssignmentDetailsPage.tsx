@@ -9,7 +9,7 @@ interface Props {
   assignmentId: string;
   onBack: () => void;
   onStartProblem: (problemId: string) => void;
-  onNavigateTab: (tab: 'dashboard' | 'assignment_details' | 'code_editor') => void;
+  onNavigateTab: (tab: any) => void;
   onRequestExit: () => void;
 }
 

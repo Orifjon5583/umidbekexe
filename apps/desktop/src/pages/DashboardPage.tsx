@@ -16,7 +16,7 @@ import {
 
 interface Props {
   onSelectAssignment: (assignmentId: string) => void;
-  onNavigateTab: (tab: 'dashboard' | 'assignment_details' | 'code_editor') => void;
+  onNavigateTab: (tab: any) => void;
   onShowGuide: () => void;
   onRequestExit: () => void;
   onViewResults: () => void;

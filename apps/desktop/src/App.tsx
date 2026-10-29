@@ -3,8 +3,11 @@ import { ThemeProvider } from './context/ThemeContext';
 import { LoginPage } from './pages/LoginPage';
 import { GuidePage } from './pages/GuidePage';
 import { DashboardPage } from './pages/DashboardPage';
+import { AssignmentsPage } from './pages/AssignmentsPage';
 import { AssignmentDetailsPage } from './pages/AssignmentDetailsPage';
 import { CodeEditorPage } from './pages/CodeEditorPage';
+import { ResultsPage } from './pages/ResultsPage';
+import { ProfilePage } from './pages/ProfilePage';
 import { SubmissionResultPage } from './pages/SubmissionResultPage';
 import { ExitModal } from './components/ExitModal';
 
@@ -12,8 +15,11 @@ type AppScreen =
   | 'login'
   | 'guide'
   | 'dashboard'
+  | 'assignments'
   | 'assignment_details'
   | 'code_editor'
+  | 'results'
+  | 'profile'
   | 'submission_result';
 
 export const App: React.FC = () => {
@@ -133,10 +139,21 @@ export const App: React.FC = () => {
         />
       )}
 
+      {currentScreen === 'assignments' && (
+        <AssignmentsPage
+          onSelectAssignment={(id) => {
+            setSelectedAssignmentId(id);
+            setCurrentScreen('assignment_details');
+          }}
+          onNavigateTab={(tab) => setCurrentScreen(tab)}
+          onRequestExit={() => setIsExitModalOpen(true)}
+        />
+      )}
+
       {currentScreen === 'assignment_details' && selectedAssignmentId && (
         <AssignmentDetailsPage
           assignmentId={selectedAssignmentId}
-          onBack={() => setCurrentScreen('dashboard')}
+          onBack={() => setCurrentScreen('assignments')}
           onStartProblem={(pId) => {
             setSelectedProblemId(pId);
             setCurrentScreen('code_editor');
@@ -153,7 +170,26 @@ export const App: React.FC = () => {
           onBackToAssignment={() => setCurrentScreen('assignment_details')}
           onNavigateTab={(tab) => setCurrentScreen(tab)}
           onRequestExit={() => setIsExitModalOpen(true)}
-          onFinishAssignment={() => setCurrentScreen('submission_result')}
+          onFinishAssignment={() => setCurrentScreen('results')}
+        />
+      )}
+
+      {currentScreen === 'results' && (
+        <ResultsPage
+          onNavigateTab={(tab) => setCurrentScreen(tab)}
+          onRequestExit={() => setIsExitModalOpen(true)}
+          onOpenCodeEditor={(assignId, probId) => {
+            setSelectedAssignmentId(assignId);
+            setSelectedProblemId(probId);
+            setCurrentScreen('code_editor');
+          }}
+        />
+      )}
+
+      {currentScreen === 'profile' && (
+        <ProfilePage
+          onNavigateTab={(tab) => setCurrentScreen(tab)}
+          onRequestExit={() => setIsExitModalOpen(true)}
         />
       )}
 

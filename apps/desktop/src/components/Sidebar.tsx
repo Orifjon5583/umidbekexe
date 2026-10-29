@@ -1,17 +1,19 @@
 import React from 'react';
-import { Home, FileCode, CheckSquare, BarChart2, Settings, LogOut, Sparkles } from 'lucide-react';
+import { Home, FileCode, CheckSquare, BarChart2, User, LogOut, Sparkles } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 
+export type DesktopNavTab = 'dashboard' | 'assignments' | 'assignment_details' | 'code_editor' | 'results' | 'profile';
+
 interface Props {
-  currentTab: 'dashboard' | 'assignment_details' | 'code_editor';
-  onNavigate: (tab: 'dashboard' | 'assignment_details' | 'code_editor') => void;
+  currentTab: DesktopNavTab;
+  onNavigate: (tab: DesktopNavTab) => void;
   onRequestExit?: () => void;
 }
 
 export const Sidebar: React.FC<Props> = ({ currentTab, onNavigate, onRequestExit }) => {
   const { theme } = useTheme();
 
-  const navItems = [
+  const mainNavItems = [
     {
       id: 'dashboard' as const,
       label: 'Bosh sahifa',
@@ -19,17 +21,29 @@ export const Sidebar: React.FC<Props> = ({ currentTab, onNavigate, onRequestExit
       badge: null,
     },
     {
-      id: 'assignment_details' as const,
-      label: 'Vazifalar',
+      id: 'assignments' as const,
+      label: 'Topshiriqlar',
       icon: CheckSquare,
       badge: '4 ta',
     },
     {
       id: 'code_editor' as const,
-      label: 'Kod laboratoriyasi',
+      label: 'Kod muharriri',
       icon: FileCode,
       badge: 'Faol',
-      badgeColor: 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20',
+      badgeColor: 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30',
+    },
+    {
+      id: 'results' as const,
+      label: 'Natijalar',
+      icon: BarChart2,
+      badge: null,
+    },
+    {
+      id: 'profile' as const,
+      label: 'Profil va muhit',
+      icon: User,
+      badge: null,
     },
   ];
 
@@ -64,13 +78,13 @@ export const Sidebar: React.FC<Props> = ({ currentTab, onNavigate, onRequestExit
           </div>
         </div>
 
-        {/* Navigation Items */}
+        {/* Asosiy bo‘limlar ro‘yxati */}
         <nav className="space-y-1">
           <div className="px-2.5 pb-1 text-[10px] font-bold uppercase tracking-wider text-slate-400">
             Asosiy bo‘limlar
           </div>
 
-          {navItems.map((item) => {
+          {mainNavItems.map((item) => {
             const Icon = item.icon;
             const isActive = currentTab === item.id;
             return (
@@ -107,34 +121,6 @@ export const Sidebar: React.FC<Props> = ({ currentTab, onNavigate, onRequestExit
               </button>
             );
           })}
-
-          <div className="pt-3 px-2.5 pb-1 text-[10px] font-bold uppercase tracking-wider text-slate-400">
-            Qo‘shimcha
-          </div>
-
-          <button
-            onClick={() => alert("Natijalar: Barcha topshiriqlar va darslar bo'yicha baholar jurnali")}
-            className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-medium transition cursor-pointer ${
-              theme === 'dark'
-                ? 'text-slate-400 hover:text-white hover:bg-white/5'
-                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
-            }`}
-          >
-            <BarChart2 className="w-4 h-4 text-slate-400" />
-            <span>Natijalar jurnali</span>
-          </button>
-
-          <button
-            onClick={() => alert("Sozlamalar: Monaco editor mavzusi, shriftlar va klaviatura sozlamalari")}
-            className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-medium transition cursor-pointer ${
-              theme === 'dark'
-                ? 'text-slate-400 hover:text-white hover:bg-white/5'
-                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
-            }`}
-          >
-            <Settings className="w-4 h-4 text-slate-400" />
-            <span>Sozlamalar</span>
-          </button>
         </nav>
       </div>
 
@@ -152,7 +138,7 @@ export const Sidebar: React.FC<Props> = ({ currentTab, onNavigate, onRequestExit
             <span>AI Murabbiy faol</span>
           </div>
           <p className="text-[10px] text-slate-400 leading-tight">
-            Har qanday savol bo‘yicha kod muharririda yordam oling.
+            Kod va xatolarni tushuntirish uchun doimo yordamga tayyor.
           </p>
         </div>
 

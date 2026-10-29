@@ -7,7 +7,7 @@ import { CheckCircle2, Clock, Award, ArrowLeft, ArrowRight, Sparkles } from 'luc
 
 interface Props {
   onBackToDashboard: () => void;
-  onNavigateTab: (tab: 'dashboard' | 'assignment_details' | 'code_editor') => void;
+  onNavigateTab: (tab: any) => void;
   onRequestExit: () => void;
   onReviewCode?: () => void;
 }

@@ -65,19 +65,30 @@ export const ExitModal: React.FC<Props> = ({ isOpen, onClose, onConfirmExit }) =
                 if (e.key === 'Escape') onClose();
               }}
               placeholder="Ruxsat kodini kiriting"
-              className={`w-full h-11 pl-4 pr-11 text-center tracking-widest font-mono text-base font-bold rounded-xl border focus:outline-none focus:ring-2 focus:ring-blue-500/40 transition ${
+              style={{
+                color: theme === 'dark' ? '#FFFFFF' : '#0F172A',
+                WebkitTextFillColor: theme === 'dark' ? '#FFFFFF' : '#0F172A',
+                caretColor: theme === 'dark' ? '#3B82F6' : '#2563EB',
+                backgroundColor: theme === 'dark' ? '#0E1528' : '#F1F5F9',
+                colorScheme: theme === 'dark' ? 'dark' : 'light',
+              }}
+              className={`w-full h-12 pl-4 pr-11 text-center tracking-widest font-mono text-lg font-bold rounded-xl border focus:outline-none focus:ring-2 focus:ring-blue-500/40 transition ${
                 theme === 'dark'
-                  ? 'bg-[#0E1528] border-white/10 text-white placeholder-slate-500 focus:border-blue-500'
-                  : 'bg-slate-100 border-slate-300 text-slate-900 placeholder-slate-400 focus:border-blue-600 focus:bg-white'
+                  ? 'border-white/15 placeholder-slate-500 focus:border-blue-500'
+                  : 'border-slate-300 placeholder-slate-400 focus:border-blue-600 focus:bg-white shadow-inner'
               }`}
             />
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white transition p-1 cursor-pointer"
-              title={showPassword ? 'Yashirish' : 'Ko‘rsatish'}
+              className={`absolute right-3 top-1/2 -translate-y-1/2 transition p-1.5 rounded-lg cursor-pointer ${
+                theme === 'dark'
+                  ? 'text-slate-400 hover:text-white hover:bg-white/10'
+                  : 'text-slate-500 hover:text-slate-900 hover:bg-slate-200'
+              }`}
+              title={showPassword ? 'Kodni yashirish' : 'Kodni ko‘rsatish'}
             >
-              {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
             </button>
           </div>
 

@@ -43,7 +43,7 @@ interface Props {
   assignmentId: string;
   problemId: string;
   onBackToAssignment: () => void;
-  onNavigateTab: (tab: 'dashboard' | 'assignment_details' | 'code_editor') => void;
+  onNavigateTab: (tab: any) => void;
   onRequestExit: () => void;
   onFinishAssignment: () => void;
 }
@@ -119,11 +119,11 @@ int main() {
   const [activeLeftTab, setActiveLeftTab] = useState<'masala' | 'urinishlar' | 'statistika' | 'yechganlar'>('masala');
   const [activeBottomTab, setActiveBottomTab] = useState<'namuna' | 'konsol'>('namuna');
 
-  // 5 Test Cases
+  // 10 Test Cases (TZ 6.3: namunaviy, chegara va tasodifiy testlar seed bilan)
   const [testCases, setTestCases] = useState<TestCaseItem[]>([
     {
       id: 1,
-      title: 'Test #1',
+      title: 'Test #1 (Namuna 1)',
       input: '2\n2',
       displayInput: '2, 2',
       expected: '4',
@@ -134,7 +134,7 @@ int main() {
     },
     {
       id: 2,
-      title: 'Test #2',
+      title: 'Test #2 (Namuna 2)',
       input: '15\n27',
       displayInput: '15, 27',
       expected: '42',
@@ -145,7 +145,7 @@ int main() {
     },
     {
       id: 3,
-      title: 'Test #3',
+      title: 'Test #3 (Namuna 3)',
       input: '100\n250',
       displayInput: '100, 250',
       expected: '350',
@@ -156,7 +156,18 @@ int main() {
     },
     {
       id: 4,
-      title: 'Test #4',
+      title: 'Test #4 (Namuna 4)',
+      input: '999\n1',
+      displayInput: '999, 1',
+      expected: '1000',
+      actual: '1000',
+      status: 'passed',
+      time: '24 ms',
+      memory: '12.7 MB',
+    },
+    {
+      id: 5,
+      title: 'Test #5 (Chegara: 0)',
       input: '0\n0',
       displayInput: '0, 0',
       expected: '0',
@@ -166,15 +177,59 @@ int main() {
       memory: '12.3 MB',
     },
     {
-      id: 5,
-      title: 'Test #5',
-      input: '999\n1',
-      displayInput: '999, 1',
-      expected: '1000',
-      actual: '1000',
+      id: 6,
+      title: 'Test #6 (Chegara: Manfiy)',
+      input: '-45\n20',
+      displayInput: '-45, 20',
+      expected: '-25',
+      actual: '-25',
       status: 'passed',
-      time: '24 ms',
-      memory: '12.7 MB',
+      time: '19 ms',
+      memory: '12.4 MB',
+    },
+    {
+      id: 7,
+      title: 'Test #7 (Chegara: -A, -B)',
+      input: '-300\n-700',
+      displayInput: '-300, -700',
+      expected: '-1000',
+      actual: '-1000',
+      status: 'passed',
+      time: '18 ms',
+      memory: '12.4 MB',
+    },
+    {
+      id: 8,
+      title: 'Test #8 (Tasodifiy #8491)',
+      input: '482\n619',
+      displayInput: '482, 619 [Seed: 8491]',
+      expected: '1101',
+      actual: '1101',
+      status: 'passed',
+      time: '22 ms',
+      memory: '12.5 MB',
+    },
+    {
+      id: 9,
+      title: 'Test #9 (Tasodifiy #2304)',
+      input: '8341\n1659',
+      displayInput: '8341, 1659 [Seed: 2304]',
+      expected: '10000',
+      actual: '10000',
+      status: 'passed',
+      time: '20 ms',
+      memory: '12.5 MB',
+    },
+    {
+      id: 10,
+      title: 'Test #10 (Chegara & Stress)',
+      input: '1000000\n2000000',
+      displayInput: '1000000, 2000000 [Seed: 9912]',
+      expected: '3000000',
+      actual: '3000000',
+      status: 'passed',
+      time: '25 ms',
+      memory: '12.8 MB',
     },
   ]);
 
@@ -209,7 +264,7 @@ int main() {
     },
     {
       sender: 'ai',
-      text: 'Albatta! Masala juda sodda: berilgan 2 ta butun sonni o‘qib olib, ularning yig‘indisini topishingiz kerak.\n\nPython tilida:\n`son1 = int(input())`\n`son2 = int(input())`\n`print(son1 + son2)`\n\nC++ tilida esa `cin >> son1 >> son2;` va `cout << son1 + son2 << endl;` dan foydalanishingiz mumkin.',
+      text: 'Albatta! Masala chiziqli algoritmlarga oid. Sizga ikkita butun son beriladi.\n\nYechim topish uchun quyidagi mantiqiy qadamlarni bajaring:\n1. Standart kirish oqimidan ikkita sonni o‘qing.\n2. Ularni butun son (int) sifatida qabul qiling.\n3. Ularning arifmetik yig‘indisini hisoblab, ekranga chiqaring.\n\nEslatma: CodePractice qoidasiga muvofiq, men to‘liq tayyor kod yozib bermayman, ammo xatolik yuz bersa (SyntaxError, Runtime, Indentation) sababini tushuntirib beraman!',
       time: '14:31 • AI Murabbiy',
     },
   ]);
@@ -332,7 +387,7 @@ int main() {
     }
   };
 
-  // TESTLASH (All 5 test cases)
+  // TESTLASH (Barcha 10 ta test)
   const handleTestAllCases = async () => {
     setIsTestingAll(true);
     try {
@@ -370,7 +425,7 @@ int main() {
 
       const passedCount = updated.filter((t) => t.status === 'passed').length;
       setConsoleOutput(
-        `> Barcha 5 ta test tekshirildi (${passedCount}/${updated.length} muvaffaqiyatli)\n` +
+        `> Barcha 10 ta test tekshirildi (${passedCount}/${updated.length} muvaffaqiyatli)\n` +
           updated
             .map(
               (t) =>
@@ -994,7 +1049,7 @@ int main() {
                   }`}
                 >
                   <CheckSquare className="w-3.5 h-3.5" />
-                  <span>Namuna Natijalari (5 ta test)</span>
+                  <span>Test Natijalari (10 ta test)</span>
                 </button>
 
                 <button
@@ -1015,18 +1070,18 @@ int main() {
                 onClick={handleTestAllCases}
                 disabled={isTestingAll || isRunning}
                 className="h-7 px-4 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-xs flex items-center gap-1.5 shadow-md shadow-blue-500/20 active:scale-95 transition disabled:opacity-50 cursor-pointer"
-                title="Barcha 5 ta testni bir vaqtda tekshirish"
+                title="Barcha 10 ta testni bir vaqtda tekshirish"
               >
                 <CheckSquare className={`w-3.5 h-3.5 ${isTestingAll ? 'animate-spin' : ''}`} />
                 <span>{isTestingAll ? 'Tekshirilmoqda...' : 'Testlash'}</span>
               </button>
             </div>
 
-            {/* Content: Left 5 Test Cases + Right Values */}
+            {/* Content: Left 10 Test Cases + Right Values */}
             <div className="flex-1 min-h-0 flex overflow-hidden">
-              {/* Left 5 Test Cases Sub-Column */}
+              {/* Left 10 Test Cases Sub-Column */}
               <div
-                className={`w-[240px] flex flex-col flex-shrink-0 overflow-y-auto border-r ${
+                className={`w-[260px] flex flex-col flex-shrink-0 overflow-y-auto border-r ${
                   theme === 'dark' ? 'bg-[#05070E] border-white/5' : 'bg-slate-100 border-slate-200'
                 }`}
               >
@@ -1035,9 +1090,9 @@ int main() {
                     theme === 'dark' ? 'border-white/5 text-slate-400' : 'border-slate-200 text-slate-600'
                   }`}
                 >
-                  <span>Tekshirish testlari</span>
+                  <span>Tekshirish testlari (10 ta)</span>
                   <span className="text-[10px] font-mono text-emerald-400 font-bold">
-                    {testCases.filter((t) => t.status === 'passed').length}/5 to‘g‘ri
+                    {testCases.filter((t) => t.status === 'passed').length}/10 to‘g‘ri
                   </span>
                 </div>
 

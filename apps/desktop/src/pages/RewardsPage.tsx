@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { TitleBar } from '../components/TitleBar';
 import { TopHeader } from '../components/TopHeader';
-import { Sidebar, DesktopNavTab } from '../components/Sidebar';
+import { Sidebar } from '../components/Sidebar';
 import { useTheme } from '../context/ThemeContext';
 import {
   Gift,
@@ -24,6 +24,15 @@ import {
   Headphones,
   Laptop,
   BookOpen,
+  ShieldCheck,
+  Edit3,
+  Plus,
+  Trash2,
+  Power,
+  RotateCcw,
+  Check,
+  Tag,
+  Lock,
 } from 'lucide-react';
 
 interface Props {
@@ -31,7 +40,7 @@ interface Props {
   onRequestExit: () => void;
 }
 
-interface RewardItem {
+export interface RewardItem {
   id: string;
   title: string;
   category: 'merch' | 'gadgets' | 'digital' | 'books';
@@ -40,10 +49,137 @@ interface RewardItem {
   priceCoins: number;
   inStock: number;
   tag?: string;
-  icon: any;
+  iconName: 'shirt' | 'laptop' | 'headphones' | 'package' | 'book' | 'award' | 'sparkles' | 'gift';
   color: string;
   bgGradient: string;
 }
+
+const defaultCatalogRewards: RewardItem[] = [
+  {
+    id: 'rew-1',
+    title: 'CodePractice Maxsus Xudisi ("Clean Code")',
+    category: 'merch',
+    categoryLabel: 'Kiyim & Merch',
+    description: 'Yuqori sifatli paxtadan tayyorlangan, CodePractice brendli qulay dasturchi xudisi (S, M, L, XL).',
+    priceCoins: 1200,
+    inStock: 8,
+    tag: 'Ommabop',
+    iconName: 'shirt',
+    color: 'text-blue-400',
+    bgGradient: 'from-blue-600/20 to-indigo-600/10',
+  },
+  {
+    id: 'rew-2',
+    title: 'Mexanik Klaviatura (RGB Gamer & Programmer)',
+    category: 'gadgets',
+    categoryLabel: 'Elektronika',
+    description: 'Tez va qulay kod yozish uchun maxsus mexanik tugmachalar va RGB yoritgichli klaviatura.',
+    priceCoins: 2500,
+    inStock: 3,
+    tag: 'Super Sovg‘a',
+    iconName: 'laptop',
+    color: 'text-purple-400',
+    bgGradient: 'from-purple-600/20 to-pink-600/10',
+  },
+  {
+    id: 'rew-3',
+    title: 'CodePractice Maxsus Futbolkasi ("Code. Sleep. Repeat")',
+    category: 'merch',
+    categoryLabel: 'Kiyim & Merch',
+    description: '100% paxta, nafas oluvchi va zamonaviy printli dasturchilar futbolkasi.',
+    priceCoins: 600,
+    inStock: 15,
+    tag: 'Zo‘r tanlov',
+    iconName: 'shirt',
+    color: 'text-cyan-400',
+    bgGradient: 'from-cyan-600/20 to-blue-600/10',
+  },
+  {
+    id: 'rew-4',
+    title: 'Simsiz Quloqchin (Wireless TWS Earbuds)',
+    category: 'gadgets',
+    categoryLabel: 'Elektronika',
+    description: 'Darslarni shovqinsiz eshitish va kod yozayotganda diqqatni jamlash uchun qulay quloqchin.',
+    priceCoins: 1800,
+    inStock: 5,
+    tag: 'Premium',
+    iconName: 'headphones',
+    color: 'text-amber-400',
+    bgGradient: 'from-amber-600/20 to-orange-600/10',
+  },
+  {
+    id: 'rew-5',
+    title: 'Brendli Termos / Suv idishi (Harorat ko‘rsatuvchi)',
+    category: 'merch',
+    categoryLabel: 'Aksessuarlar',
+    description: '500ml sig‘imli, haroratni saqlovchi va sensorli ekranli zamonaviy metall termos.',
+    priceCoins: 450,
+    inStock: 12,
+    tag: 'Foydali',
+    iconName: 'package',
+    color: 'text-emerald-400',
+    bgGradient: 'from-emerald-600/20 to-teal-600/10',
+  },
+  {
+    id: 'rew-6',
+    title: 'Python & Algoritmlar bo‘yicha Amaliy Kitob',
+    category: 'books',
+    categoryLabel: 'Kitoblar',
+    description: 'Dasturlash sirlari va Olimpiada masalalarini o‘zbek tilida tushuntiruvchi sara kitob.',
+    priceCoins: 500,
+    inStock: 10,
+    iconName: 'book',
+    color: 'text-rose-400',
+    bgGradient: 'from-rose-600/20 to-orange-600/10',
+  },
+  {
+    id: 'rew-7',
+    title: 'Oltin Profil Nishoni va VIP Ramka (Digital)',
+    category: 'digital',
+    categoryLabel: 'Raqamli Sovg‘a',
+    description: 'CodePractice profilingiz uchun maxsus porlovchi oltin ramka va 1 oylik "A‘lochi Dasturchi" statusi.',
+    priceCoins: 300,
+    inStock: 999,
+    tag: 'Tezkor',
+    iconName: 'award',
+    color: 'text-amber-400',
+    bgGradient: 'from-amber-500/20 to-yellow-500/10',
+  },
+  {
+    id: 'rew-8',
+    title: 'CodePractice Dasturchi Stikerlari to‘plami (30 dona)',
+    category: 'merch',
+    categoryLabel: 'Aksessuarlar',
+    description: 'Noutbuk va telefon g‘iloflari uchun suvga chidamli dasturchilar stikerlari to‘plami.',
+    priceCoins: 150,
+    inStock: 40,
+    tag: 'Oson',
+    iconName: 'sparkles',
+    color: 'text-emerald-400',
+    bgGradient: 'from-emerald-500/20 to-cyan-500/10',
+  },
+];
+
+const renderIcon = (name: string, className: string) => {
+  switch (name) {
+    case 'shirt':
+      return <Shirt className={className} />;
+    case 'laptop':
+      return <Laptop className={className} />;
+    case 'headphones':
+      return <Headphones className={className} />;
+    case 'package':
+      return <Package className={className} />;
+    case 'book':
+      return <BookOpen className={className} />;
+    case 'award':
+      return <Award className={className} />;
+    case 'sparkles':
+      return <Sparkles className={className} />;
+    default:
+      return <Gift className={className} />;
+  }
+};
 
 export const RewardsPage: React.FC<Props> = ({ onNavigateTab, onRequestExit }) => {
   const { theme } = useTheme();
@@ -57,7 +193,144 @@ export const RewardsPage: React.FC<Props> = ({ onNavigateTab, onRequestExit }) =
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
 
-  // Selected reward for claim modal
+  // ===================== ADMIN STATE =====================
+  // 1. Admin mode toggle
+  const [isAdminMode, setIsAdminMode] = useState<boolean>(false);
+  const [adminPinInput, setAdminPinInput] = useState<string>('');
+  const [isAdminAuthModalOpen, setIsAdminAuthModalOpen] = useState<boolean>(false);
+  const [adminAuthError, setAdminAuthError] = useState<boolean>(false);
+
+  // 2. Store Open/Close state (persisted in localStorage)
+  const [isStoreOpen, setIsStoreOpen] = useState<boolean>(() => {
+    const saved = localStorage.getItem('cp_rewards_store_open');
+    return saved !== null ? saved === 'true' : true;
+  });
+
+  // 3. Rewards Catalog (persisted in localStorage)
+  const [rewards, setRewards] = useState<RewardItem[]>(() => {
+    const saved = localStorage.getItem('cp_rewards_catalog');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch {}
+    }
+    return defaultCatalogRewards;
+  });
+
+  // Save to localStorage whenever catalog changes
+  useEffect(() => {
+    localStorage.setItem('cp_rewards_catalog', JSON.stringify(rewards));
+  }, [rewards]);
+
+  // Save store open/close state
+  const handleToggleStore = () => {
+    const newState = !isStoreOpen;
+    setIsStoreOpen(newState);
+    localStorage.setItem('cp_rewards_store_open', String(newState));
+  };
+
+  // Reset to default catalog
+  const handleResetCatalog = () => {
+    if (confirm('Barcha sovg‘alar narxlari va ro‘yxatini standart holatga qaytarishni tasdiqlaysizmi?')) {
+      setRewards(defaultCatalogRewards);
+      localStorage.setItem('cp_rewards_catalog', JSON.stringify(defaultCatalogRewards));
+      setIsStoreOpen(true);
+      localStorage.setItem('cp_rewards_store_open', 'true');
+    }
+  };
+
+  // ===================== EDIT PRICE MODAL =====================
+  const [editingReward, setEditingReward] = useState<RewardItem | null>(null);
+  const [editPriceValue, setEditPriceValue] = useState<number>(0);
+  const [editStockValue, setEditStockValue] = useState<number>(0);
+  const [editTagValue, setEditTagValue] = useState<string>('');
+  const [isEditModalOpen, setIsEditModalOpen] = useState<boolean>(false);
+
+  const handleOpenEditModal = (reward: RewardItem) => {
+    setEditingReward(reward);
+    setEditPriceValue(reward.priceCoins);
+    setEditStockValue(reward.inStock);
+    setEditTagValue(reward.tag || '');
+    setIsEditModalOpen(true);
+  };
+
+  const handleSaveEditedReward = () => {
+    if (!editingReward) return;
+    const newPrice = Math.max(1, Number(editPriceValue) || 1);
+    const newStock = Math.max(0, Number(editStockValue) || 0);
+
+    setRewards((prev) =>
+      prev.map((item) =>
+        item.id === editingReward.id
+          ? {
+              ...item,
+              priceCoins: newPrice,
+              inStock: newStock,
+              tag: editTagValue.trim() || undefined,
+            }
+          : item
+      )
+    );
+
+    setIsEditModalOpen(false);
+    setEditingReward(null);
+  };
+
+  // Delete reward
+  const handleDeleteReward = (id: string, title: string) => {
+    if (confirm(`Haqiqatan ham "${title}" sovg‘asini o‘chirmoqchimisiz?`)) {
+      setRewards((prev) => prev.filter((r) => r.id !== id));
+    }
+  };
+
+  // ===================== ADD NEW REWARD MODAL =====================
+  const [isAddModalOpen, setIsAddModalOpen] = useState<boolean>(false);
+  const [newTitle, setNewTitle] = useState('');
+  const [newCategory, setNewCategory] = useState<'merch' | 'gadgets' | 'digital' | 'books'>('merch');
+  const [newPrice, setNewPrice] = useState<number>(500);
+  const [newStock, setNewStock] = useState<number>(10);
+  const [newTag, setNewTag] = useState('Yangi');
+  const [newDesc, setNewDesc] = useState('');
+
+  const handleAddNewReward = () => {
+    if (!newTitle.trim()) {
+      alert('Iltimos, sovg‘a nomini kiriting!');
+      return;
+    }
+
+    const catLabels: Record<string, string> = {
+      merch: 'Kiyim & Merch',
+      gadgets: 'Elektronika & Gadjetlar',
+      digital: 'Raqamli Sovg‘a',
+      books: 'Kitoblar & Qo‘llanmalar',
+    };
+
+    const newId = `rew-${Date.now()}`;
+    const newReward: RewardItem = {
+      id: newId,
+      title: newTitle.trim(),
+      category: newCategory,
+      categoryLabel: catLabels[newCategory] || 'Sovg‘a',
+      description: newDesc.trim() || 'CodePractice maxsus mukofoti',
+      priceCoins: Math.max(1, Number(newPrice) || 100),
+      inStock: Math.max(1, Number(newStock) || 1),
+      tag: newTag.trim() || undefined,
+      iconName: newCategory === 'merch' ? 'shirt' : newCategory === 'gadgets' ? 'laptop' : newCategory === 'books' ? 'book' : 'award',
+      color: newCategory === 'gadgets' ? 'text-purple-400' : 'text-blue-400',
+      bgGradient: 'from-blue-600/20 to-indigo-600/10',
+    };
+
+    setRewards((prev) => [newReward, ...prev]);
+    setIsAddModalOpen(false);
+    // Reset form
+    setNewTitle('');
+    setNewDesc('');
+    setNewPrice(500);
+    setNewStock(10);
+    setNewTag('Yangi');
+  };
+
+  // ===================== STUDENT CLAIM MODAL =====================
   const [selectedReward, setSelectedReward] = useState<RewardItem | null>(null);
   const [isClaimModalOpen, setIsClaimModalOpen] = useState(false);
   const [claimSuccess, setClaimSuccess] = useState(false);
@@ -92,120 +365,11 @@ export const RewardsPage: React.FC<Props> = ({ onNavigateTab, onRequestExit }) =
     },
   ]);
 
-  const catalogRewards: RewardItem[] = [
-    {
-      id: 'rew-1',
-      title: 'CodePractice Maxsus Xudisi ("Clean Code")',
-      category: 'merch',
-      categoryLabel: 'Kiyim & Merch',
-      description: 'Yuqori sifatli paxtadan tayyorlangan, CodePractice brendli qulay dasturchi xudisi (S, M, L, XL).',
-      priceCoins: 1200,
-      inStock: 8,
-      tag: 'Ommabop',
-      icon: Shirt,
-      color: 'text-blue-400',
-      bgGradient: 'from-blue-600/20 to-indigo-600/10',
-    },
-    {
-      id: 'rew-2',
-      title: 'Mexanik Klaviatura (RGB Gamer & Programmer)',
-      category: 'gadgets',
-      categoryLabel: 'Elektronika',
-      description: 'Tez va qulay kod yozish uchun maxsus mexanik tugmachalar va RGB yoritgichli klaviatura.',
-      priceCoins: 2500,
-      inStock: 3,
-      tag: 'Super Sovg‘a',
-      icon: Laptop,
-      color: 'text-purple-400',
-      bgGradient: 'from-purple-600/20 to-pink-600/10',
-    },
-    {
-      id: 'rew-3',
-      title: 'CodePractice Maxsus Futbolkasi ("Code. Sleep. Repeat")',
-      category: 'merch',
-      categoryLabel: 'Kiyim & Merch',
-      description: '100% paxta, nafas oluvchi va zamonaviy printli dasturchilar futbolkasi.',
-      priceCoins: 600,
-      inStock: 15,
-      tag: 'Zo‘r tanlov',
-      icon: Shirt,
-      color: 'text-cyan-400',
-      bgGradient: 'from-cyan-600/20 to-blue-600/10',
-    },
-    {
-      id: 'rew-4',
-      title: 'Simsiz Quloqchin (Wireless TWS Earbuds)',
-      category: 'gadgets',
-      categoryLabel: 'Elektronika',
-      description: 'Darslarni shovqinsiz eshitish va kod yozayotganda diqqatni jamlash uchun qulay quloqchin.',
-      priceCoins: 1800,
-      inStock: 5,
-      tag: 'Premium',
-      icon: Headphones,
-      color: 'text-amber-400',
-      bgGradient: 'from-amber-600/20 to-orange-600/10',
-    },
-    {
-      id: 'rew-5',
-      title: 'Brendli Termos / Suv idishi (Harorat ko‘rsatuvchi)',
-      category: 'merch',
-      categoryLabel: 'Aksessuarlar',
-      description: '500ml sig‘imli, haroratni saqlovchi va sensorli ekranli zamonaviy metall termos.',
-      priceCoins: 450,
-      inStock: 12,
-      tag: 'Foydali',
-      icon: Package,
-      color: 'text-emerald-400',
-      bgGradient: 'from-emerald-600/20 to-teal-600/10',
-    },
-    {
-      id: 'rew-6',
-      title: 'Python & Algoritmlar bo‘yicha Amaliy Kitob',
-      category: 'books',
-      categoryLabel: 'Kitoblar',
-      description: 'Dasturlash sirlari va Olimpiada masalalarini o‘zbek tilida tushuntiruvchi sara kitob.',
-      priceCoins: 500,
-      inStock: 10,
-      icon: BookOpen,
-      color: 'text-rose-400',
-      bgGradient: 'from-rose-600/20 to-orange-600/10',
-    },
-    {
-      id: 'rew-7',
-      title: 'Oltin Profil Nishoni va VIP Ramka (Digital)',
-      category: 'digital',
-      categoryLabel: 'Raqamli Sovg‘a',
-      description: 'CodePractice profilingiz uchun maxsus porlovchi oltin ramka va 1 oylik "A‘lochi Dasturchi" statusi.',
-      priceCoins: 300,
-      inStock: 999,
-      tag: 'Tezkor',
-      icon: Award,
-      color: 'text-amber-400',
-      bgGradient: 'from-amber-500/20 to-yellow-500/10',
-    },
-    {
-      id: 'rew-8',
-      title: 'CodePractice Dasturchi Stikerlari to‘plami (30 dona)',
-      category: 'merch',
-      categoryLabel: 'Aksessuarlar',
-      description: 'Noutbuk va telefon g‘iloflari uchun suvga chidamli dasturchilar stikerlari to‘plami.',
-      priceCoins: 150,
-      inStock: 40,
-      tag: 'Oson',
-      icon: Sparkles,
-      color: 'text-emerald-400',
-      bgGradient: 'from-emerald-500/20 to-cyan-500/10',
-    },
-  ];
-
-  const filteredRewards = catalogRewards.filter((item) => {
-    const matchesCategory = selectedCategory === 'all' || item.category === selectedCategory;
-    const matchesSearch = item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.description.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesCategory && matchesSearch;
-  });
-
   const handleOpenClaimModal = (reward: RewardItem) => {
+    if (!isStoreOpen) {
+      alert("Sovg'alar do'koni vaqtincha yopilgan!");
+      return;
+    }
     setSelectedReward(reward);
     setClaimSuccess(false);
     setIsClaimModalOpen(true);
@@ -218,10 +382,15 @@ export const RewardsPage: React.FC<Props> = ({ onNavigateTab, onRequestExit }) =
       return;
     }
 
-    // Deduct coins
     setStudentCoins((prev) => prev - selectedReward.priceCoins);
 
-    // Add to claimed rewards
+    // Reduce stock
+    setRewards((prev) =>
+      prev.map((r) =>
+        r.id === selectedReward.id ? { ...r, inStock: Math.max(0, r.inStock - 1) } : r
+      )
+    );
+
     const newClaim = {
       id: `claim-${Date.now()}`,
       rewardTitle: selectedReward.title,
@@ -235,6 +404,25 @@ export const RewardsPage: React.FC<Props> = ({ onNavigateTab, onRequestExit }) =
     setClaimedRewards((prev) => [newClaim, ...prev]);
     setClaimSuccess(true);
   };
+
+  // Admin auth check
+  const handleAdminAuthSubmit = () => {
+    if (adminPinInput.trim() === '4826' || adminPinInput.trim() === 'admin') {
+      setIsAdminMode(true);
+      setIsAdminAuthModalOpen(false);
+      setAdminPinInput('');
+      setAdminAuthError(false);
+    } else {
+      setAdminAuthError(true);
+    }
+  };
+
+  const filteredRewards = rewards.filter((item) => {
+    const matchesCategory = selectedCategory === 'all' || item.category === selectedCategory;
+    const matchesSearch = item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      item.description.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesCategory && matchesSearch;
+  });
 
   return (
     <div
@@ -270,10 +458,25 @@ export const RewardsPage: React.FC<Props> = ({ onNavigateTab, onRequestExit }) =
             <div className="absolute right-0 top-0 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
 
             <div className="space-y-2 relative z-10 max-w-xl">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold bg-amber-500/15 text-amber-400 border border-amber-500/30 font-mono">
-                <Sparkles className="w-3.5 h-3.5" />
-                <span>CODEPRACTICE SOVG‘ALAR VA MERCH DO‘KONI</span>
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-500/15 text-amber-400 border border-amber-500/30 font-mono">
+                  <Sparkles className="w-3.5 h-3.5" />
+                  <span>CODEPRACTICE SOVG‘ALAR VA MERCH DO‘KONI</span>
+                </span>
+
+                {/* Status Badge */}
+                <span
+                  className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold font-mono border ${
+                    isStoreOpen
+                      ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30'
+                      : 'bg-rose-500/15 text-rose-400 border-rose-500/30'
+                  }`}
+                >
+                  <span className={`w-2 h-2 rounded-full ${isStoreOpen ? 'bg-emerald-400 animate-pulse' : 'bg-rose-400'}`} />
+                  <span>{isStoreOpen ? 'DO‘KON OCHIQ' : 'DO‘KON VAQTINCHA YOPIQ'}</span>
+                </span>
               </div>
+
               <h1 className="text-2xl md:text-3xl font-black tracking-tight">
                 Bilimingiz evaziga qimmatbaho sovg‘alarni qo‘lga kiriting!
               </h1>
@@ -282,8 +485,8 @@ export const RewardsPage: React.FC<Props> = ({ onNavigateTab, onRequestExit }) =
               </p>
             </div>
 
-            {/* Balance cards */}
-            <div className="flex items-center gap-3 relative z-10">
+            {/* Right Side: Balances & Admin Mode Button */}
+            <div className="flex flex-col sm:flex-row items-center gap-3 relative z-10">
               {/* Tangalar (Coins) */}
               <div
                 className={`p-4 rounded-2xl border text-center min-w-[130px] ${
@@ -319,8 +522,136 @@ export const RewardsPage: React.FC<Props> = ({ onNavigateTab, onRequestExit }) =
                 </div>
                 <div className="text-[10px] text-slate-400 mt-0.5">Umumiy XP</div>
               </div>
+
+              {/* Admin Mode Toggle Button */}
+              <button
+                onClick={() => {
+                  if (isAdminMode) {
+                    setIsAdminMode(false);
+                  } else {
+                    setIsAdminAuthModalOpen(true);
+                  }
+                }}
+                className={`h-full min-h-[76px] px-3.5 py-3 rounded-2xl border flex flex-col items-center justify-center gap-1 text-xs font-bold transition cursor-pointer ${
+                  isAdminMode
+                    ? 'bg-amber-500 text-slate-950 border-amber-400 shadow-lg shadow-amber-500/25'
+                    : theme === 'dark'
+                    ? 'bg-slate-900/80 hover:bg-slate-800 border-white/10 text-slate-300'
+                    : 'bg-white hover:bg-slate-100 border-slate-300 text-slate-700 shadow-sm'
+                }`}
+                title={isAdminMode ? 'Admin rejimidan chiqish' : 'Admin boshqaruv panelini ochish'}
+              >
+                <ShieldCheck className={`w-5 h-5 ${isAdminMode ? 'text-slate-950' : 'text-amber-400'}`} />
+                <span className="text-[11px] whitespace-nowrap">
+                  {isAdminMode ? 'Admin: FAOL' : 'Admin Rejimi'}
+                </span>
+              </button>
             </div>
           </div>
+
+          {/* ===================== ADMIN MANAGEMENT TOOLBAR (Visible in Admin Mode) ===================== */}
+          {isAdminMode && (
+            <div
+              className={`p-5 rounded-3xl border space-y-4 animate-in fade-in duration-200 ${
+                theme === 'dark'
+                  ? 'bg-amber-950/25 border-amber-500/30 shadow-xl'
+                  : 'bg-amber-50/80 border-amber-300 shadow-md'
+              }`}
+            >
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-400 border border-amber-500/30 flex items-center justify-center">
+                    <ShieldCheck className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-extrabold tracking-tight flex items-center gap-2">
+                      <span>Administrator Sovg‘alar Boshqaruv Paneli</span>
+                      <span className="text-[10px] bg-amber-500 text-slate-950 px-2 py-0.5 rounded-full font-bold">
+                        ADMIN
+                      </span>
+                    </h3>
+                    <p className="text-xs text-slate-400 mt-0.5">
+                      Sovg‘alar do‘konini yopish/ochish, narxlarini (bahosini) almashtirish va yangi sovg‘alar kiritish
+                    </p>
+                  </div>
+                </div>
+
+                {/* Admin Actions */}
+                <div className="flex items-center gap-2.5 flex-wrap">
+                  {/* DO'KONNI YOPIB / OCHISH TUGMASI */}
+                  <button
+                    onClick={handleToggleStore}
+                    className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition shadow-md active:scale-95 cursor-pointer ${
+                      isStoreOpen
+                        ? 'bg-rose-600 hover:bg-rose-500 text-white shadow-rose-600/20'
+                        : 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-emerald-600/20'
+                    }`}
+                  >
+                    <Power className="w-4 h-4" />
+                    <span>{isStoreOpen ? 'Do‘konni yopish (O‘chirish)' : 'Do‘konni ochish (Yoqish)'}</span>
+                  </button>
+
+                  {/* YANGI SOVG'A QO'SHISH */}
+                  <button
+                    onClick={() => setIsAddModalOpen(true)}
+                    className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs flex items-center gap-2 shadow-md shadow-blue-600/20 active:scale-95 transition cursor-pointer"
+                  >
+                    <Plus className="w-4 h-4" />
+                    <span>Yangi sovg‘a qo‘shish</span>
+                  </button>
+
+                  {/* RESET CATALOG */}
+                  <button
+                    onClick={handleResetCatalog}
+                    className={`px-3 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 border transition cursor-pointer ${
+                      theme === 'dark'
+                        ? 'bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white border-white/10'
+                        : 'bg-white hover:bg-slate-100 text-slate-600 border-slate-300'
+                    }`}
+                    title="Barcha narxlarni standart holatga qaytarish"
+                  >
+                    <RotateCcw className="w-3.5 h-3.5" />
+                    <span>Asliga qaytarish</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Admin Info Banner */}
+              <div
+                className={`p-3 rounded-2xl border text-xs flex items-center justify-between ${
+                  theme === 'dark'
+                    ? 'bg-[#0E1528] border-white/10 text-slate-300'
+                    : 'bg-white border-slate-200 text-slate-700'
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  <span className="font-mono text-amber-400 font-bold">Holat:</span>
+                  <span>
+                    Do‘kon hozirda <strong>{isStoreOpen ? 'barcha o‘quvchilar uchun ochiq va faol' : 'vaqtincha yopilgan (o‘quvchilar buyurtma bera olmaydi)'}</strong>.
+                    Har bir sovg‘a kartasidagi <strong className="text-blue-400">"Bahosini o‘zgartirish"</strong> tugmasi orqali narxlarni o‘zgartirishingiz mumkin.
+                  </span>
+                </div>
+                <div className="font-mono text-xs font-bold text-slate-400 whitespace-nowrap">
+                  {rewards.length} ta mahsulot
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* STORE CLOSED NOTICE (If store is closed and not admin) */}
+          {!isStoreOpen && !isAdminMode && (
+            <div className="p-5 rounded-3xl border border-rose-500/30 bg-rose-500/10 text-rose-300 flex items-center gap-4">
+              <div className="w-12 h-12 rounded-2xl bg-rose-500/20 text-rose-400 flex items-center justify-center flex-shrink-0">
+                <AlertCircle className="w-6 h-6" />
+              </div>
+              <div className="space-y-1">
+                <h3 className="text-base font-extrabold text-white">Sovg‘alar do‘koni vaqtincha yopilgan</h3>
+                <p className="text-xs text-slate-300">
+                  Administrator yangi sovg‘alar va narxlarni yangilamoqda. Tez orada qayta ochiladi. To‘plangan tangalaringiz o‘z joyida saqlanadi!
+                </p>
+              </div>
+            </div>
+          )}
 
           {/* Nav Tabs & Filters */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -408,14 +739,13 @@ export const RewardsPage: React.FC<Props> = ({ onNavigateTab, onRequestExit }) =
               {/* Grid of Reward Cards */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
                 {filteredRewards.map((item) => {
-                  const Icon = item.icon;
                   const canAfford = studentCoins >= item.priceCoins;
                   const progressPct = Math.min(100, Math.round((studentCoins / item.priceCoins) * 100));
 
                   return (
                     <div
                       key={item.id}
-                      className={`p-5 rounded-3xl border flex flex-col justify-between transition-all duration-200 group hover:shadow-2xl hover:-translate-y-1 ${
+                      className={`p-5 rounded-3xl border flex flex-col justify-between transition-all duration-200 group hover:shadow-2xl hover:-translate-y-1 relative ${
                         theme === 'dark'
                           ? 'glass-card-dark border-white/10 hover:border-blue-500/40'
                           : 'glass-card-light border-slate-200 hover:border-blue-500/50 shadow-sm'
@@ -430,18 +760,31 @@ export const RewardsPage: React.FC<Props> = ({ onNavigateTab, onRequestExit }) =
                             {item.categoryLabel}
                           </span>
 
-                          {item.tag && (
-                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-400 border border-amber-500/30">
-                              {item.tag}
-                            </span>
-                          )}
+                          <div className="flex items-center gap-1.5">
+                            {item.tag && (
+                              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-400 border border-amber-500/30">
+                                {item.tag}
+                              </span>
+                            )}
+
+                            {/* Admin Delete Icon */}
+                            {isAdminMode && (
+                              <button
+                                onClick={() => handleDeleteReward(item.id, item.title)}
+                                className="p-1 rounded-lg text-rose-400 hover:bg-rose-500/15 transition cursor-pointer"
+                                title="Sovg‘ani o‘chirish"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            )}
+                          </div>
                         </div>
 
                         {/* Icon / Image preview box */}
                         <div
                           className={`w-full h-36 rounded-2xl bg-gradient-to-br ${item.bgGradient} flex items-center justify-center p-4 border border-white/5 transition-transform group-hover:scale-105 duration-300`}
                         >
-                          <Icon className={`w-16 h-16 ${item.color} drop-shadow-md`} />
+                          {renderIcon(item.iconName, `w-16 h-16 ${item.color} drop-shadow-md`)}
                         </div>
 
                         {/* Details */}
@@ -473,8 +816,8 @@ export const RewardsPage: React.FC<Props> = ({ onNavigateTab, onRequestExit }) =
                           </span>
                         </div>
 
-                        {/* Progress toward goal */}
-                        {!canAfford && (
+                        {/* Progress toward goal (for students) */}
+                        {!isAdminMode && !canAfford && isStoreOpen && (
                           <div className="space-y-1">
                             <div className="flex items-center justify-between text-[10px] text-slate-400">
                               <span>To‘plandi: {progressPct}%</span>
@@ -489,27 +832,44 @@ export const RewardsPage: React.FC<Props> = ({ onNavigateTab, onRequestExit }) =
                           </div>
                         )}
 
-                        {/* Action Button */}
-                        <button
-                          onClick={() => handleOpenClaimModal(item)}
-                          disabled={!canAfford || item.inStock <= 0}
-                          className={`w-full py-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition active:scale-95 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${
-                            canAfford
-                              ? 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white shadow-lg shadow-blue-500/25'
-                              : theme === 'dark'
-                              ? 'bg-white/5 text-slate-500 border border-white/5'
-                              : 'bg-slate-200 text-slate-500'
-                          }`}
-                        >
-                          {canAfford ? (
-                            <>
-                              <Gift className="w-3.5 h-3.5" />
-                              <span>Sovg‘ani olish</span>
-                            </>
-                          ) : (
-                            <span>Yana tanga kerak</span>
-                          )}
-                        </button>
+                        {/* ADMIN BUTTONS */}
+                        {isAdminMode ? (
+                          <div className="space-y-2 pt-1">
+                            <button
+                              onClick={() => handleOpenEditModal(item)}
+                              className="w-full py-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 bg-amber-500 hover:bg-amber-400 text-slate-950 shadow-md transition active:scale-95 cursor-pointer"
+                            >
+                              <Edit3 className="w-3.5 h-3.5" />
+                              <span>Bahosini o‘zgartirish</span>
+                            </button>
+                          </div>
+                        ) : (
+                          /* STUDENT ACTION BUTTON */
+                          <button
+                            onClick={() => handleOpenClaimModal(item)}
+                            disabled={!isStoreOpen || !canAfford || item.inStock <= 0}
+                            className={`w-full py-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition active:scale-95 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${
+                              !isStoreOpen
+                                ? 'bg-slate-800 text-slate-500 border border-white/5'
+                                : canAfford
+                                ? 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white shadow-lg shadow-blue-500/25'
+                                : theme === 'dark'
+                                ? 'bg-white/5 text-slate-500 border border-white/5'
+                                : 'bg-slate-200 text-slate-500'
+                            }`}
+                          >
+                            {!isStoreOpen ? (
+                              <span>Do‘kon yopiq</span>
+                            ) : canAfford ? (
+                              <>
+                                <Gift className="w-3.5 h-3.5" />
+                                <span>Sovg‘ani olish</span>
+                              </>
+                            ) : (
+                              <span>Yana tanga kerak</span>
+                            )}
+                          </button>
+                        )}
                       </div>
                     </div>
                   );
@@ -573,7 +933,338 @@ export const RewardsPage: React.FC<Props> = ({ onNavigateTab, onRequestExit }) =
         </main>
       </div>
 
-      {/* ===================== CLAIM CONFIRMATION MODAL ===================== */}
+      {/* ===================== ADMIN AUTH PIN MODAL ===================== */}
+      {isAdminAuthModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-md flex items-center justify-center p-4">
+          <div
+            className={`w-full max-w-sm rounded-3xl p-6 shadow-2xl space-y-4 text-center animate-in fade-in zoom-in-95 duration-200 border ${
+              theme === 'dark'
+                ? 'glass-card-dark border-white/10 text-white'
+                : 'bg-white border-slate-200 text-slate-900 shadow-2xl'
+            }`}
+          >
+            <div className="w-14 h-14 rounded-2xl bg-amber-500/20 text-amber-400 border border-amber-500/30 flex items-center justify-center mx-auto">
+              <Lock className="w-7 h-7" />
+            </div>
+
+            <div>
+              <h3 className="text-lg font-extrabold">Admin Boshqaruvi</h3>
+              <p className="text-xs text-slate-400 mt-1">
+                Sovg‘alar narxi va do‘kon holatini boshqarish uchun o‘qituvchi/admin parolini kiriting
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <input
+                type="password"
+                autoFocus
+                value={adminPinInput}
+                onChange={(e) => {
+                  setAdminPinInput(e.target.value);
+                  setAdminAuthError(false);
+                }}
+                onKeyDown={(e) => e.key === 'Enter' && handleAdminAuthSubmit()}
+                placeholder="Parolni kiriting (4826)"
+                style={{
+                  color: theme === 'dark' ? '#FFFFFF' : '#0F172A',
+                  WebkitTextFillColor: theme === 'dark' ? '#FFFFFF' : '#0F172A',
+                }}
+                className={`w-full h-11 px-4 text-center font-mono text-base font-bold rounded-xl border focus:outline-none focus:ring-2 focus:ring-amber-500/40 transition ${
+                  theme === 'dark'
+                    ? 'bg-[#0E1528] border-white/10 placeholder-slate-500'
+                    : 'bg-slate-100 border-slate-300 placeholder-slate-400'
+                }`}
+              />
+
+              <div className="text-[11px] text-slate-400 font-mono">
+                Standart parol: <strong className="text-amber-400">4826</strong>
+              </div>
+
+              {adminAuthError && (
+                <p className="text-xs text-rose-500 font-medium">Noto‘g‘ri parol! (Parol: 4826)</p>
+              )}
+            </div>
+
+            <div className="flex items-center gap-2 pt-1">
+              <button
+                onClick={handleAdminAuthSubmit}
+                className="flex-1 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs shadow-md transition cursor-pointer"
+              >
+                Kirish
+              </button>
+              <button
+                onClick={() => {
+                  setIsAdminAuthModalOpen(false);
+                  setAdminPinInput('');
+                  setAdminAuthError(false);
+                }}
+                className="flex-1 py-2.5 rounded-xl border border-white/10 text-slate-400 hover:text-white font-semibold text-xs transition cursor-pointer"
+              >
+                Bekor qilish
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ===================== EDIT REWARD PRICE MODAL ===================== */}
+      {isEditModalOpen && editingReward && (
+        <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-md flex items-center justify-center p-4">
+          <div
+            className={`w-full max-w-md rounded-3xl p-6 shadow-2xl space-y-4 animate-in fade-in zoom-in-95 duration-200 border ${
+              theme === 'dark'
+                ? 'glass-card-dark border-white/10 text-white'
+                : 'bg-white border-slate-200 text-slate-900 shadow-2xl'
+            }`}
+          >
+            <div className="flex items-center justify-between border-b border-white/10 pb-3">
+              <div className="flex items-center gap-2">
+                <Edit3 className="w-5 h-5 text-amber-400" />
+                <h3 className="font-extrabold text-base">Sovg‘a bahosini tahrirlash</h3>
+              </div>
+              <button
+                onClick={() => setIsEditModalOpen(false)}
+                className="p-1 rounded-lg text-slate-400 hover:text-white transition cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="space-y-3 text-xs">
+              <div>
+                <label className="text-slate-400 block mb-1 font-semibold">Sovg‘a nomi:</label>
+                <input
+                  type="text"
+                  disabled
+                  value={editingReward.title}
+                  className="w-full h-9 px-3 rounded-xl border border-white/10 bg-white/5 text-slate-300 font-medium"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-amber-400 block mb-1 font-bold flex items-center gap-1">
+                    <Coins className="w-3.5 h-3.5" />
+                    <span>Yangi bahosi (tanga):</span>
+                  </label>
+                  <input
+                    type="number"
+                    min="1"
+                    value={editPriceValue}
+                    onChange={(e) => setEditPriceValue(Number(e.target.value))}
+                    style={{
+                      color: theme === 'dark' ? '#F8FAFC' : '#0F172A',
+                      WebkitTextFillColor: theme === 'dark' ? '#F8FAFC' : '#0F172A',
+                    }}
+                    className={`w-full h-10 px-3 rounded-xl font-mono text-base font-black border focus:outline-none focus:ring-2 focus:ring-amber-500/40 ${
+                      theme === 'dark' ? 'bg-[#0E1528] border-amber-500/40 text-amber-400' : 'bg-slate-100 border-amber-400'
+                    }`}
+                  />
+                </div>
+
+                <div>
+                  <label className="text-slate-400 block mb-1 font-semibold">Ombordagi soni (ta):</label>
+                  <input
+                    type="number"
+                    min="0"
+                    value={editStockValue}
+                    onChange={(e) => setEditStockValue(Number(e.target.value))}
+                    style={{
+                      color: theme === 'dark' ? '#F8FAFC' : '#0F172A',
+                      WebkitTextFillColor: theme === 'dark' ? '#F8FAFC' : '#0F172A',
+                    }}
+                    className={`w-full h-10 px-3 rounded-xl font-mono text-base font-bold border focus:outline-none focus:ring-2 focus:ring-blue-500/40 ${
+                      theme === 'dark' ? 'bg-[#0E1528] border-white/15' : 'bg-slate-100 border-slate-300'
+                    }`}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="text-slate-400 block mb-1 font-semibold">Maxsus yorliq (Badge):</label>
+                <input
+                  type="text"
+                  placeholder="Masalan: Ommabop, Chegirma -30%, Yangi"
+                  value={editTagValue}
+                  onChange={(e) => setEditTagValue(e.target.value)}
+                  style={{
+                    color: theme === 'dark' ? '#F8FAFC' : '#0F172A',
+                    WebkitTextFillColor: theme === 'dark' ? '#F8FAFC' : '#0F172A',
+                  }}
+                  className={`w-full h-9 px-3 rounded-xl border focus:outline-none focus:ring-2 focus:ring-blue-500/30 ${
+                    theme === 'dark' ? 'bg-[#0E1528] border-white/10' : 'bg-slate-100 border-slate-300'
+                  }`}
+                />
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3 pt-3 border-t border-white/10">
+              <button
+                onClick={handleSaveEditedReward}
+                className="flex-1 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs shadow-md transition cursor-pointer"
+              >
+                Bahoni Saqlash
+              </button>
+              <button
+                onClick={() => setIsEditModalOpen(false)}
+                className="flex-1 py-2.5 rounded-xl border border-white/10 text-slate-400 hover:text-white font-semibold text-xs transition cursor-pointer"
+              >
+                Bekor qilish
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ===================== ADD NEW REWARD MODAL ===================== */}
+      {isAddModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-md flex items-center justify-center p-4">
+          <div
+            className={`w-full max-w-md rounded-3xl p-6 shadow-2xl space-y-4 animate-in fade-in zoom-in-95 duration-200 border ${
+              theme === 'dark'
+                ? 'glass-card-dark border-white/10 text-white'
+                : 'bg-white border-slate-200 text-slate-900 shadow-2xl'
+            }`}
+          >
+            <div className="flex items-center justify-between border-b border-white/10 pb-3">
+              <div className="flex items-center gap-2">
+                <Plus className="w-5 h-5 text-blue-400" />
+                <h3 className="font-extrabold text-base">Yangi sovg‘a qo‘shish</h3>
+              </div>
+              <button
+                onClick={() => setIsAddModalOpen(false)}
+                className="p-1 rounded-lg text-slate-400 hover:text-white transition cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="space-y-3 text-xs">
+              <div>
+                <label className="text-slate-400 block mb-1 font-semibold">Sovg‘a nomi *:</label>
+                <input
+                  type="text"
+                  placeholder="Masalan: Dasturchi ryukzaki, Smart soat..."
+                  value={newTitle}
+                  onChange={(e) => setNewTitle(e.target.value)}
+                  style={{
+                    color: theme === 'dark' ? '#F8FAFC' : '#0F172A',
+                    WebkitTextFillColor: theme === 'dark' ? '#F8FAFC' : '#0F172A',
+                  }}
+                  className={`w-full h-9 px-3 rounded-xl border focus:outline-none focus:ring-2 focus:ring-blue-500/30 ${
+                    theme === 'dark' ? 'bg-[#0E1528] border-white/10' : 'bg-slate-100 border-slate-300'
+                  }`}
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-slate-400 block mb-1 font-semibold">Toifasi:</label>
+                  <select
+                    value={newCategory}
+                    onChange={(e) => setNewCategory(e.target.value as any)}
+                    className={`w-full h-9 px-3 rounded-xl border focus:outline-none ${
+                      theme === 'dark' ? 'bg-[#0E1528] border-white/10 text-white' : 'bg-slate-100 border-slate-300 text-slate-900'
+                    }`}
+                  >
+                    <option value="merch">Kiyim & Merch</option>
+                    <option value="gadgets">Elektronika & Gadjet</option>
+                    <option value="books">Kitoblar</option>
+                    <option value="digital">Raqamli Sovg‘a</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="text-amber-400 block mb-1 font-bold">Narxi (tangada) *:</label>
+                  <input
+                    type="number"
+                    min="1"
+                    value={newPrice}
+                    onChange={(e) => setNewPrice(Number(e.target.value))}
+                    style={{
+                      color: theme === 'dark' ? '#F8FAFC' : '#0F172A',
+                      WebkitTextFillColor: theme === 'dark' ? '#F8FAFC' : '#0F172A',
+                    }}
+                    className={`w-full h-9 px-3 rounded-xl font-mono font-bold border focus:outline-none ${
+                      theme === 'dark' ? 'bg-[#0E1528] border-amber-500/40 text-amber-400' : 'bg-slate-100 border-amber-400'
+                    }`}
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-slate-400 block mb-1 font-semibold">Ombordagi soni:</label>
+                  <input
+                    type="number"
+                    min="1"
+                    value={newStock}
+                    onChange={(e) => setNewStock(Number(e.target.value))}
+                    style={{
+                      color: theme === 'dark' ? '#F8FAFC' : '#0F172A',
+                      WebkitTextFillColor: theme === 'dark' ? '#F8FAFC' : '#0F172A',
+                    }}
+                    className={`w-full h-9 px-3 rounded-xl font-mono border focus:outline-none ${
+                      theme === 'dark' ? 'bg-[#0E1528] border-white/10' : 'bg-slate-100 border-slate-300'
+                    }`}
+                  />
+                </div>
+
+                <div>
+                  <label className="text-slate-400 block mb-1 font-semibold">Yorliq (Tag):</label>
+                  <input
+                    type="text"
+                    placeholder="Masalan: Yangi, Top"
+                    value={newTag}
+                    onChange={(e) => setNewTag(e.target.value)}
+                    style={{
+                      color: theme === 'dark' ? '#F8FAFC' : '#0F172A',
+                      WebkitTextFillColor: theme === 'dark' ? '#F8FAFC' : '#0F172A',
+                    }}
+                    className={`w-full h-9 px-3 rounded-xl border focus:outline-none ${
+                      theme === 'dark' ? 'bg-[#0E1528] border-white/10' : 'bg-slate-100 border-slate-300'
+                    }`}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="text-slate-400 block mb-1 font-semibold">Qisqacha tavsifi:</label>
+                <textarea
+                  rows={2}
+                  placeholder="Sovg‘a haqida qisqacha ma’lumot..."
+                  value={newDesc}
+                  onChange={(e) => setNewDesc(e.target.value)}
+                  style={{
+                    color: theme === 'dark' ? '#F8FAFC' : '#0F172A',
+                    WebkitTextFillColor: theme === 'dark' ? '#F8FAFC' : '#0F172A',
+                  }}
+                  className={`w-full p-2.5 rounded-xl border focus:outline-none resize-none ${
+                    theme === 'dark' ? 'bg-[#0E1528] border-white/10' : 'bg-slate-100 border-slate-300'
+                  }`}
+                />
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3 pt-3 border-t border-white/10">
+              <button
+                onClick={handleAddNewReward}
+                className="flex-1 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow-md transition cursor-pointer"
+              >
+                Qo‘shish
+              </button>
+              <button
+                onClick={() => setIsAddModalOpen(false)}
+                className="flex-1 py-2.5 rounded-xl border border-white/10 text-slate-400 hover:text-white font-semibold text-xs transition cursor-pointer"
+              >
+                Bekor qilish
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ===================== CLAIM CONFIRMATION MODAL (Student) ===================== */}
       {isClaimModalOpen && selectedReward && (
         <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-md flex items-center justify-center p-4">
           <div

@@ -51,7 +51,7 @@ export const LoginPage: React.FC<Props> = ({ onLoginSuccess }) => {
 
   return (
     <div
-      className={`h-screen w-screen flex flex-col select-none overflow-hidden font-sans relative ${
+      className={`h-screen w-screen flex flex-col select-none overflow-hidden font-sans relative transition-colors duration-200 ${
         theme === 'dark' ? 'mesh-bg-dark text-slate-100' : 'mesh-bg-light text-slate-800'
       }`}
     >
@@ -131,8 +131,8 @@ export const LoginPage: React.FC<Props> = ({ onLoginSuccess }) => {
             <div
               className={`w-full max-w-[420px] rounded-3xl p-8 border shadow-2xl transition-all duration-300 ${
                 theme === 'dark'
-                  ? 'glass-panel-dark border-white/10 glow-border-blue'
-                  : 'glass-panel-light border-slate-200 shadow-slate-200/50'
+                  ? 'glass-card-dark border-white/10 glow-blue'
+                  : 'glass-card-light border-slate-200 shadow-slate-200/50'
               }`}
             >
               <div className="mb-6">
@@ -229,7 +229,7 @@ export const LoginPage: React.FC<Props> = ({ onLoginSuccess }) => {
                   <button
                     type="button"
                     onClick={handleQuickDemoLogin}
-                    className="text-blue-500 hover:text-blue-400 font-semibold text-[11px] hover:underline"
+                    className="text-blue-500 hover:text-blue-400 font-semibold text-[11px] hover:underline cursor-pointer"
                   >
                     Demo ma'lumotlar
                   </button>

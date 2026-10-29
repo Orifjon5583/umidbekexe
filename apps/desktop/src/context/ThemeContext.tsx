@@ -20,7 +20,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       const saved = localStorage.getItem('cp_theme');
       if (saved === 'dark' || saved === 'light') return saved;
     } catch {}
-    return 'dark'; // Modern Premium Dark default
+    return 'dark'; // Modern Premium Dark by default
   });
 
   useEffect(() => {

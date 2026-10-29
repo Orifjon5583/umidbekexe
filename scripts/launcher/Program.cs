@@ -98,8 +98,8 @@ namespace CodePractice
 
             var psi = new ProcessStartInfo
             {
-                FileName = "node.exe",
-                Arguments = "\"" + scriptPath + "\"",
+                FileName = "cmd.exe",
+                Arguments = "/c node \"" + scriptPath + "\"",
                 WorkingDirectory = baseDir,
                 WindowStyle = ProcessWindowStyle.Hidden,
                 CreateNoWindow = true,

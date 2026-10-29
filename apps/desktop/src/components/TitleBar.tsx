@@ -50,13 +50,13 @@ export const TitleBar: React.FC<Props> = ({
       data-tauri-drag-region
       className={`h-8 flex items-center justify-between px-3 select-none flex-shrink-0 text-xs font-medium z-50 border-b transition-colors duration-200 ${
         theme === 'dark'
-          ? 'bg-[#05070E] text-slate-300 border-white/10'
+          ? 'bg-[#060913] text-slate-300 border-white/10'
           : 'bg-white text-slate-700 border-slate-200'
       }`}
     >
-      {/* Title & Official Brand Pill */}
-      <div className="flex items-center gap-2.5 pointer-events-none">
-        <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-gradient-to-r from-blue-500/20 to-indigo-500/20 border border-blue-500/30">
+      {/* Brand Title Pill */}
+      <div className="flex items-center gap-2 pointer-events-none">
+        <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-blue-500/10 border border-blue-500/20">
           <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
           <span className="text-[10px] font-bold tracking-wider uppercase text-blue-400">
             CodePractice
@@ -65,12 +65,16 @@ export const TitleBar: React.FC<Props> = ({
 
         <span className="text-slate-400">•</span>
 
-        <span className={`font-medium tracking-tight text-[11px] truncate ${theme === 'dark' ? 'text-slate-300' : 'text-slate-600'}`}>
+        <span
+          className={`font-medium tracking-tight text-[11px] truncate ${
+            theme === 'dark' ? 'text-slate-300' : 'text-slate-600'
+          }`}
+        >
           {title}
         </span>
       </div>
 
-      {/* Right Controls: Theme Switcher & Windows Controls */}
+      {/* Right Controls: Theme Toggle & Windows Controls */}
       <div className="flex items-center gap-1 -mr-3 h-full">
         {/* Quick Theme Switcher */}
         <button
@@ -95,7 +99,7 @@ export const TitleBar: React.FC<Props> = ({
           )}
         </button>
 
-        {/* Windows 11 Control Buttons */}
+        {/* Windows Controls */}
         <button
           onClick={handleMinimize}
           className={`h-full px-3 transition flex items-center justify-center ${
@@ -122,7 +126,7 @@ export const TitleBar: React.FC<Props> = ({
 
         <button
           onClick={handleClose}
-          className="h-full px-3.5 hover:bg-red-600 text-slate-400 hover:text-white transition flex items-center justify-center"
+          className="h-full px-3.5 hover:bg-red-600 text-slate-400 hover:text-white transition flex items-center justify-center cursor-pointer"
           title="Yopish (PIN kod talab qilinadi)"
         >
           <X className="w-3.5 h-3.5" />

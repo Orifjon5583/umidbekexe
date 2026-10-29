@@ -31,7 +31,7 @@ export const ExitModal: React.FC<Props> = ({ isOpen, onClose, onConfirmExit }) =
       <div
         className={`w-full max-w-sm rounded-3xl p-6 shadow-2xl text-center space-y-4 animate-in fade-in zoom-in-95 duration-200 border transition-all ${
           theme === 'dark'
-            ? 'glass-panel-dark border-white/10 glow-border-blue text-white'
+            ? 'glass-card-dark border-white/10 glow-blue text-white'
             : 'bg-white border-slate-200 text-slate-900 shadow-2xl'
         }`}
       >

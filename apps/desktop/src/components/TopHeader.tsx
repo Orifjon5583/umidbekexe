@@ -1,5 +1,5 @@
 import React from 'react';
-import { User, LogOut, Bell, Sparkles } from 'lucide-react';
+import { LogOut } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 
 interface Props {
@@ -21,11 +21,11 @@ export const TopHeader: React.FC<Props> = ({
     <header
       className={`h-12 px-6 flex items-center justify-between flex-shrink-0 select-none z-10 border-b transition-colors duration-200 ${
         theme === 'dark'
-          ? 'bg-[#060810]/80 backdrop-blur-md border-white/5 text-slate-200'
+          ? 'bg-[#060913]/90 backdrop-blur-md border-white/5 text-slate-200'
           : 'bg-white border-slate-200 text-slate-800'
       }`}
     >
-      {/* Breadcrumb / Title with sleek gradient icon */}
+      {/* Breadcrumb Navigation */}
       <div className="flex items-center gap-2 text-xs font-semibold">
         <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
         <span className={theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}>CodePractice</span>
@@ -33,9 +33,9 @@ export const TopHeader: React.FC<Props> = ({
         <span className={theme === 'dark' ? 'text-white' : 'text-slate-800'}>{breadcrumb}</span>
       </div>
 
-      {/* Student Profile Pill & Exit */}
+      {/* Right Controls: Live status, Student profile, Exit button */}
       <div className="flex items-center gap-3">
-        {/* Live Status Pill */}
+        {/* Live Server Indicator */}
         <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-mono">
           <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
           <span>Server faol</span>

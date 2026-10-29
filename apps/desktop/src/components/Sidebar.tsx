@@ -22,7 +22,7 @@ export const Sidebar: React.FC<Props> = ({ currentTab, onNavigate, onRequestExit
       id: 'assignment_details' as const,
       label: 'Vazifalar',
       icon: CheckSquare,
-      badge: '4',
+      badge: '4 ta',
     },
     {
       id: 'code_editor' as const,
@@ -37,21 +37,19 @@ export const Sidebar: React.FC<Props> = ({ currentTab, onNavigate, onRequestExit
     <aside
       className={`w-60 flex flex-col justify-between flex-shrink-0 select-none p-4 border-r transition-colors duration-200 ${
         theme === 'dark'
-          ? 'bg-[#080B14]/90 backdrop-blur-xl border-white/5 text-slate-300'
+          ? 'bg-[#080C1A]/95 backdrop-blur-xl border-white/5 text-slate-300'
           : 'bg-white border-slate-200 text-slate-700'
       }`}
     >
       <div className="space-y-6">
         {/* Brand Header */}
         <div className="flex items-center gap-3 px-2 pt-1 pb-3 border-b border-white/5">
-          <div className="relative group">
-            <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-blue-600 to-cyan-500 flex items-center justify-center p-1.5 shadow-md shadow-blue-500/20">
-              <img
-                src="/icon.png"
-                alt="CodePractice"
-                className="w-full h-full object-contain filter brightness-110"
-              />
-            </div>
+          <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-blue-600 to-cyan-500 flex items-center justify-center p-1.5 shadow-md shadow-blue-500/20">
+            <img
+              src="/icon.png"
+              alt="CodePractice"
+              className="w-full h-full object-contain filter brightness-110"
+            />
           </div>
           <div>
             <div className="flex items-center gap-1 font-extrabold text-sm tracking-tight">

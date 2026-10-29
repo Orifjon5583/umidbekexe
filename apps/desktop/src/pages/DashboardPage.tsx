@@ -11,8 +11,6 @@ import {
   CheckCircle2,
   Clock,
   Sparkles,
-  Layers,
-  ChevronRight,
   Play,
 } from 'lucide-react';
 
@@ -44,21 +42,21 @@ export const DashboardPage: React.FC<Props> = ({
     {
       title: 'Jami to‘plangan ball',
       value: '1,240 XP',
-      sub: 'Guruhda 2-o‘rin',
+      sub: 'Guruhda 2-o‘rin 🏆',
       icon: Trophy,
       color: 'text-blue-400 bg-blue-500/10 border-blue-500/20',
     },
     {
       title: 'Yechilgan masalalar',
       value: '18 / 24',
-      sub: '75% umumiy natija',
+      sub: '75% umumiy natija ⚡',
       icon: CheckCircle2,
       color: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
     },
     {
       title: 'O‘rtacha aniqlik',
       value: '94.8%',
-      sub: 'Birinchi urinishda',
+      sub: 'Birinchi urinishda ✨',
       icon: Sparkles,
       color: 'text-indigo-400 bg-indigo-500/10 border-indigo-500/20',
     },
@@ -157,24 +155,24 @@ export const DashboardPage: React.FC<Props> = ({
           />
 
           <main className="flex-1 overflow-y-auto p-6 lg:p-8 space-y-6">
-            {/* Top Stat Cards Row (Cursor / Linear style) */}
+            {/* Top Stat Cards Row */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
               {stats.map((st, i) => {
                 const Icon = st.icon;
                 return (
                   <div
                     key={i}
-                    className={`p-4 rounded-2xl border transition-all duration-200 hover:-translate-y-0.5 ${
+                    className={`p-4 rounded-3xl border transition-all duration-200 hover:-translate-y-0.5 ${
                       theme === 'dark'
-                        ? 'glass-panel-dark border-white/5 hover:border-white/10 shadow-lg'
-                        : 'glass-panel-light border-slate-200 shadow-xs'
+                        ? 'glass-card-dark border-white/5 hover:border-white/10 shadow-lg'
+                        : 'glass-card-light border-slate-200 shadow-xs'
                     }`}
                   >
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-[11px] font-semibold text-slate-400">
                         {st.title}
                       </span>
-                      <div className={`p-1.5 rounded-lg border ${st.color}`}>
+                      <div className={`p-1.5 rounded-xl border ${st.color}`}>
                         <Icon className="w-3.5 h-3.5" />
                       </div>
                     </div>
@@ -191,21 +189,21 @@ export const DashboardPage: React.FC<Props> = ({
 
             {/* Featured Action Banner */}
             <div
-              className={`p-5 rounded-2xl border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 relative overflow-hidden ${
+              className={`p-6 rounded-3xl border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 relative overflow-hidden ${
                 theme === 'dark'
-                  ? 'bg-gradient-to-r from-blue-950/60 via-indigo-950/40 to-slate-900/60 border-blue-500/20 shadow-xl'
+                  ? 'bg-gradient-to-r from-blue-950/70 via-indigo-950/50 to-slate-900/70 border-blue-500/20 shadow-xl'
                   : 'bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200 shadow-sm'
               }`}
             >
-              <div className="space-y-1 z-10">
+              <div className="space-y-1.5 z-10">
                 <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-500/20 text-blue-400 border border-blue-500/30">
                   <Flame className="w-3 h-3 text-amber-400" />
                   <span>KUNLIK AMALIYOT MASHQI</span>
                 </div>
-                <h3 className="text-base font-bold text-white tracking-tight">
-                  1. Ikki sonni yig'indisi (Python 3.12)
+                <h3 className="text-lg font-bold text-white tracking-tight">
+                  1. Ikki sonni yig'indisi (Python 3.12 & C++)
                 </h3>
-                <p className="text-xs text-slate-400">
+                <p className="text-xs text-slate-300">
                   Matematik amallarni bajarish va test holatlarini tekshirish laboratoriyasi.
                 </p>
               </div>
@@ -276,10 +274,10 @@ export const DashboardPage: React.FC<Props> = ({
               {filtered.map((item) => (
                 <div
                   key={item.id}
-                  className={`p-5 rounded-2xl border transition-all duration-200 hover:border-blue-500/40 flex flex-col md:flex-row md:items-center justify-between gap-4 ${
+                  className={`p-5 rounded-3xl border transition-all duration-200 hover:border-blue-500/40 flex flex-col md:flex-row md:items-center justify-between gap-4 ${
                     theme === 'dark'
-                      ? 'glass-panel-dark border-white/5 hover:bg-slate-900/60 shadow-lg'
-                      : 'glass-panel-light border-slate-200 hover:bg-slate-50 shadow-xs'
+                      ? 'glass-card-dark border-white/5 hover:bg-slate-900/60 shadow-lg'
+                      : 'glass-card-light border-slate-200 hover:bg-slate-50 shadow-xs'
                   }`}
                 >
                   {/* Left: Info */}

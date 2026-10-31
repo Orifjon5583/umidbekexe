@@ -11,7 +11,7 @@ interface Props {
 export const LoginPage: React.FC<Props> = ({ onLoginSuccess }) => {
   const { theme } = useTheme();
   const [username, setUsername] = useState('student1');
-  const [password, setPassword] = useState('Student123!');
+  const [password, setPassword] = useState('Talaba123!');
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
   const [loading, setLoading] = useState(false);
@@ -37,8 +37,8 @@ export const LoginPage: React.FC<Props> = ({ onLoginSuccess }) => {
 
       localStorage.setItem('cp_student_user', JSON.stringify(res.user));
       onLoginSuccess(res.user);
-    } catch {
-      setError('Login yoki parol noto‘g‘ri kiritildi');
+    } catch (err: any) {
+      setError(err?.message || 'Login yoki parol noto‘g‘ri kiritildi');
     } finally {
       setLoading(false);
     }
@@ -46,7 +46,8 @@ export const LoginPage: React.FC<Props> = ({ onLoginSuccess }) => {
 
   const handleQuickDemoLogin = () => {
     setUsername('student1');
-    setPassword('Student123!');
+    setPassword('Talaba123!');
+    setError(null);
   };
 
   return (
@@ -264,7 +265,7 @@ export const LoginPage: React.FC<Props> = ({ onLoginSuccess }) => {
                 <span>Standart hisob:</span>
                 <span className="font-mono text-blue-400 font-semibold">student1</span>
                 <span>/</span>
-                <span className="font-mono text-blue-400 font-semibold">Student123!</span>
+                <span className="font-mono text-blue-400 font-semibold">Talaba123!</span>
               </div>
             </div>
           </div>

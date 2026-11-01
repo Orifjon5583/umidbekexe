@@ -86,94 +86,94 @@ export const DashboardPage: React.FC = () => {
       {/* Stats Cards (Different for Admin vs Teacher) */}
       {isAdmin ? (
         /* ================= ADMIN KPI CARDS ================= */
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
-          <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center flex-shrink-0">
-              <GraduationCap className="w-6 h-6" />
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4 lg:gap-5">
+          <div className="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200 shadow-xs flex items-center gap-3.5 sm:gap-4">
+            <div className="w-11 sm:w-12 h-11 sm:h-12 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center flex-shrink-0">
+              <GraduationCap className="w-5 sm:w-6 h-5 sm:h-6" />
             </div>
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">Jami O‘qituvchilar</p>
-              <p className="text-2xl font-extrabold text-slate-900 mt-0.5">3 nafar</p>
+            <div className="min-w-0">
+              <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-slate-400 truncate">Jami O‘qituvchilar</p>
+              <p className="text-xl sm:text-2xl font-extrabold text-slate-900 mt-0.5">3 nafar</p>
               <span className="text-[11px] text-emerald-600 font-bold">2 nafari faol</span>
             </div>
           </div>
 
-          <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center flex-shrink-0">
-              <Users className="w-6 h-6" />
+          <div className="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200 shadow-xs flex items-center gap-3.5 sm:gap-4">
+            <div className="w-11 sm:w-12 h-11 sm:h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center flex-shrink-0">
+              <Users className="w-5 sm:w-6 h-5 sm:h-6" />
             </div>
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">Barcha O‘quvchilar</p>
-              <p className="text-2xl font-extrabold text-slate-900 mt-0.5">{stats?.totalStudents ?? 48} nafar</p>
+            <div className="min-w-0">
+              <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-slate-400 truncate">Barcha O‘quvchilar</p>
+              <p className="text-xl sm:text-2xl font-extrabold text-slate-900 mt-0.5">{stats?.totalStudents ?? 48} nafar</p>
               <span className="text-[11px] text-slate-500">3 ta guruhda</span>
             </div>
           </div>
 
-          <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center flex-shrink-0">
-              <FolderKanban className="w-6 h-6" />
+          <div className="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200 shadow-xs flex items-center gap-3.5 sm:gap-4">
+            <div className="w-11 sm:w-12 h-11 sm:h-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center flex-shrink-0">
+              <FolderKanban className="w-5 sm:w-6 h-5 sm:h-6" />
             </div>
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">O‘quv Guruhlari</p>
-              <p className="text-2xl font-extrabold text-slate-900 mt-0.5">3 ta guruh</p>
-              <span className="text-[11px] text-indigo-600 font-bold">Python, C++, Olimpiada</span>
+            <div className="min-w-0">
+              <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-slate-400 truncate">O‘quv Guruhlari</p>
+              <p className="text-xl sm:text-2xl font-extrabold text-slate-900 mt-0.5">3 ta guruh</p>
+              <span className="text-[11px] text-indigo-600 font-bold truncate block">Python, C++, Olimpiada</span>
             </div>
           </div>
 
-          <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center flex-shrink-0">
-              <ShieldCheck className="w-6 h-6" />
+          <div className="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200 shadow-xs flex items-center gap-3.5 sm:gap-4">
+            <div className="w-11 sm:w-12 h-11 sm:h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center flex-shrink-0">
+              <ShieldCheck className="w-5 sm:w-6 h-5 sm:h-6" />
             </div>
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">Infratuzilma (AWS)</p>
-              <p className="text-2xl font-extrabold text-emerald-700 mt-0.5">100%</p>
+            <div className="min-w-0">
+              <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-slate-400 truncate">Infratuzilma (AWS)</p>
+              <p className="text-xl sm:text-2xl font-extrabold text-emerald-700 mt-0.5">100%</p>
               <span className="text-[11px] text-emerald-600 font-semibold">Tizim barqaror</span>
             </div>
           </div>
         </div>
       ) : (
         /* ================= TEACHER KPI CARDS ================= */
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
-          <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center flex-shrink-0">
-              <Users className="w-6 h-6" />
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4 lg:gap-5">
+          <div className="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200 shadow-xs flex items-center gap-3.5 sm:gap-4">
+            <div className="w-11 sm:w-12 h-11 sm:h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center flex-shrink-0">
+              <Users className="w-5 sm:w-6 h-5 sm:h-6" />
             </div>
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">Mening o‘quvchilarim</p>
-              <p className="text-2xl font-extrabold text-slate-900 mt-0.5">34 nafar</p>
+            <div className="min-w-0">
+              <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-slate-400 truncate">Mening o‘quvchilarim</p>
+              <p className="text-xl sm:text-2xl font-extrabold text-slate-900 mt-0.5">34 nafar</p>
               <span className="text-[11px] text-blue-600 font-semibold">2 ta guruhda</span>
             </div>
           </div>
 
-          <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center flex-shrink-0">
-              <Clock className="w-6 h-6" />
+          <div className="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200 shadow-xs flex items-center gap-3.5 sm:gap-4">
+            <div className="w-11 sm:w-12 h-11 sm:h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center flex-shrink-0">
+              <Clock className="w-5 sm:w-6 h-5 sm:h-6" />
             </div>
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">Faol vazifalarim</p>
-              <p className="text-2xl font-extrabold text-slate-900 mt-0.5">{stats?.activeAssignments ?? 2} ta</p>
+            <div className="min-w-0">
+              <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-slate-400 truncate">Faol vazifalarim</p>
+              <p className="text-xl sm:text-2xl font-extrabold text-slate-900 mt-0.5">{stats?.activeAssignments ?? 2} ta</p>
               <span className="text-[11px] text-amber-600 font-semibold">Muddat faol</span>
             </div>
           </div>
 
-          <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center flex-shrink-0">
-              <CheckCircle2 className="w-6 h-6" />
+          <div className="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200 shadow-xs flex items-center gap-3.5 sm:gap-4">
+            <div className="w-11 sm:w-12 h-11 sm:h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center flex-shrink-0">
+              <CheckCircle2 className="w-5 sm:w-6 h-5 sm:h-6" />
             </div>
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">Bajarilgan topshiriqlar</p>
-              <p className="text-2xl font-extrabold text-slate-900 mt-0.5">{stats?.completedAssignments ?? 112} ta</p>
+            <div className="min-w-0">
+              <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-slate-400 truncate">Bajarilgan topshiriqlar</p>
+              <p className="text-xl sm:text-2xl font-extrabold text-slate-900 mt-0.5">{stats?.completedAssignments ?? 112} ta</p>
               <span className="text-[11px] text-emerald-600 font-semibold">Testlardan o‘tgan</span>
             </div>
           </div>
 
-          <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center flex-shrink-0">
-              <AlertTriangle className="w-6 h-6" />
+          <div className="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200 shadow-xs flex items-center gap-3.5 sm:gap-4">
+            <div className="w-11 sm:w-12 h-11 sm:h-12 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center flex-shrink-0">
+              <AlertTriangle className="w-5 sm:w-6 h-5 sm:h-6" />
             </div>
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">Muddati o‘tganlar</p>
-              <p className="text-2xl font-extrabold text-slate-900 mt-0.5">{stats?.overdueAssignments ?? 3} ta</p>
+            <div className="min-w-0">
+              <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-slate-400 truncate">Muddati o‘tganlar</p>
+              <p className="text-xl sm:text-2xl font-extrabold text-slate-900 mt-0.5">{stats?.overdueAssignments ?? 3} ta</p>
               <span className="text-[11px] text-rose-600 font-semibold">Eslatma yuborish</span>
             </div>
           </div>
@@ -182,13 +182,13 @@ export const DashboardPage: React.FC = () => {
 
       {/* Admin Quick Action Banners */}
       {isAdmin && (
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3.5 sm:gap-4">
           <div className="p-4 rounded-2xl bg-gradient-to-r from-purple-900 to-indigo-900 text-white shadow-md flex items-center justify-between">
             <div>
               <h4 className="font-bold text-sm">O‘qituvchilar Nazorati</h4>
               <p className="text-xs text-purple-200 mt-0.5">Yangi o‘qituvchi ochish yoki guruh biriktirish</p>
             </div>
-            <span className="p-2 bg-white/10 rounded-xl">
+            <span className="p-2 bg-white/10 rounded-xl flex-shrink-0">
               <GraduationCap className="w-5 h-5 text-purple-200" />
             </span>
           </div>
@@ -198,17 +198,17 @@ export const DashboardPage: React.FC = () => {
               <h4 className="font-bold text-sm">Xavfsizlik Jurnali</h4>
               <p className="text-xs text-slate-400 mt-0.5">Clipboard va shubhali urinishlar monitoringi</p>
             </div>
-            <span className="p-2 bg-white/10 rounded-xl">
+            <span className="p-2 bg-white/10 rounded-xl flex-shrink-0">
               <ShieldAlert className="w-5 h-5 text-amber-400" />
             </span>
           </div>
 
-          <div className="p-4 rounded-2xl bg-gradient-to-r from-blue-900 to-cyan-900 text-white shadow-md flex items-center justify-between">
+          <div className="p-4 rounded-2xl bg-gradient-to-r from-blue-900 to-cyan-900 text-white shadow-md flex items-center justify-between sm:col-span-2 md:col-span-1">
             <div>
               <h4 className="font-bold text-sm">Tizim Sozlamalari</h4>
               <p className="text-xs text-blue-200 mt-0.5">Dasturlash tillari va AI token kvotalari</p>
             </div>
-            <span className="p-2 bg-white/10 rounded-xl">
+            <span className="p-2 bg-white/10 rounded-xl flex-shrink-0">
               <Sliders className="w-5 h-5 text-cyan-200" />
             </span>
           </div>
@@ -217,27 +217,27 @@ export const DashboardPage: React.FC = () => {
 
       {/* Recent Submissions Table */}
       <div className="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
-        <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
-          <div>
-            <h3 className="font-bold text-slate-900 text-base">Oxirgi topshirilgan natijalar</h3>
-            <p className="text-xs text-slate-500 mt-0.5">O‘quvchilar tomonidan yuborilgan so‘nggi urinishlar va test xulosalari</p>
+        <div className="px-4 sm:px-6 py-3.5 sm:py-4 border-b border-slate-100 flex items-center justify-between">
+          <div className="min-w-0 pr-2">
+            <h3 className="font-bold text-slate-900 text-sm sm:text-base truncate">Oxirgi topshirilgan natijalar</h3>
+            <p className="text-xs text-slate-500 mt-0.5 truncate">O‘quvchilar tomonidan yuborilgan so‘nggi urinishlar va test xulosalari</p>
           </div>
-          <span className="text-xs font-semibold text-slate-400">Jonli oqim</span>
+          <span className="text-xs font-semibold text-slate-400 flex-shrink-0">Jonli oqim</span>
         </div>
 
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse text-sm">
             <thead>
-              <tr className="bg-slate-50 text-slate-600 border-b border-slate-200 text-xs uppercase tracking-wider">
-                <th className="px-6 py-3.5 font-semibold">O‘quvchi</th>
-                <th className="px-6 py-3.5 font-semibold">Guruh</th>
-                <th className="px-6 py-3.5 font-semibold">Vazifa & Masala</th>
-                <th className="px-6 py-3.5 font-semibold">Natija</th>
-                <th className="px-6 py-3.5 font-semibold">Testlar</th>
-                <th className="px-6 py-3.5 font-semibold">Topshirilgan vaqt</th>
+              <tr className="bg-slate-50 text-slate-600 border-b border-slate-200 text-xs uppercase tracking-wider whitespace-nowrap">
+                <th className="px-4 sm:px-6 py-3 sm:py-3.5 font-semibold">O‘quvchi</th>
+                <th className="px-4 sm:px-6 py-3 sm:py-3.5 font-semibold">Guruh</th>
+                <th className="px-4 sm:px-6 py-3 sm:py-3.5 font-semibold">Vazifa & Masala</th>
+                <th className="px-4 sm:px-6 py-3 sm:py-3.5 font-semibold">Natija</th>
+                <th className="px-4 sm:px-6 py-3 sm:py-3.5 font-semibold">Testlar</th>
+                <th className="px-4 sm:px-6 py-3 sm:py-3.5 font-semibold">Topshirilgan vaqt</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-slate-100 whitespace-nowrap">
               {stats?.recentSubmissions && stats.recentSubmissions.length > 0 ? (
                 stats.recentSubmissions.map((sub) => (
                   <tr key={sub.id} className="hover:bg-slate-50/75 transition">

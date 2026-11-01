@@ -61,37 +61,40 @@ export const ReportsPage: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-slate-900 tracking-tight">Natijalar va Hisobotlar</h2>
-          <p className="text-sm text-slate-500 mt-1">O‘quvchilar progressi va topshiriqlar tahlili</p>
+          <h2 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
+            <BarChart3 className="w-6 sm:w-7 h-6 sm:h-7 text-blue-600 flex-shrink-0" />
+            Natijalar va Hisobotlar
+          </h2>
+          <p className="text-xs sm:text-sm text-slate-500 mt-1">O‘quvchilar progressi va topshiriqlar tahlili</p>
         </div>
         <button
           onClick={handleExportCsv}
           disabled={exporting}
-          className="h-11 px-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-medium flex items-center gap-2 shadow-sm transition disabled:opacity-50"
+          className="h-11 px-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-semibold flex items-center gap-2 shadow-sm transition disabled:opacity-50 w-full sm:w-auto justify-center"
         >
-          <Download className="w-4 h-4" />
+          <Download className="w-4 h-4 flex-shrink-0" />
           {exporting ? 'Eksport qilinmoqda...' : 'CSV Eksport qilish'}
         </button>
       </div>
 
       {error && (
-        <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+        <div className="p-4 bg-red-50 border border-red-200 rounded-2xl text-red-700 text-sm">
           {error}
         </div>
       )}
 
       {/* Filter Bar */}
-      <div className="bg-white p-4 rounded-lg border border-slate-200 shadow-sm flex items-center gap-4">
-        <div className="flex items-center gap-2 text-slate-500 text-sm">
-          <Filter className="w-4 h-4" />
+      <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4">
+        <div className="flex items-center gap-2 text-slate-600 text-sm font-medium">
+          <Filter className="w-4 h-4 text-slate-400 flex-shrink-0" />
           <span>Guruhni tanlang:</span>
         </div>
         <select
           value={selectedGroupId}
           onChange={(e) => setSelectedGroupId(e.target.value)}
-          className="h-10 px-3 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-[200px]"
+          className="h-10 px-3 border border-slate-300 rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 flex-1 sm:max-w-xs"
         >
           {groups.map((g) => (
             <option key={g.id} value={g.id}>
@@ -102,9 +105,9 @@ export const ReportsPage: React.FC = () => {
       </div>
 
       {/* Group Progress Table */}
-      <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden">
-        <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
-          <h3 className="font-semibold text-slate-900">
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+        <div className="px-4 sm:px-6 py-3.5 sm:py-4 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <h3 className="font-bold text-slate-900 text-sm sm:text-base">
             {groupProgress?.groupName || 'Guruh'} bo‘yicha o‘quvchilar progressi
           </h3>
           <span className="text-xs text-slate-400">

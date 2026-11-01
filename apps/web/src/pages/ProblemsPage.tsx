@@ -114,75 +114,81 @@ export const ProblemsPage: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-slate-900 tracking-tight">Masalalar banki</h2>
-          <p className="text-sm text-slate-500 mt-1">Dasturlash topshiriqlari va avtomatik testlar boshqaruvi</p>
+          <h2 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
+            <Code2 className="w-6 sm:w-7 h-6 sm:h-7 text-blue-600 flex-shrink-0" />
+            Masalalar banki
+          </h2>
+          <p className="text-xs sm:text-sm text-slate-500 mt-1">Dasturlash topshiriqlari va avtomatik testlar boshqaruvi</p>
         </div>
         <button
           onClick={() => setIsModalOpen(true)}
-          className="h-11 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium flex items-center gap-2 shadow-sm"
+          className="h-11 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-semibold flex items-center gap-2 shadow-sm transition w-full sm:w-auto justify-center"
         >
-          <Plus className="w-4 h-4" />
+          <Plus className="w-4 h-4 flex-shrink-0" />
           Yangi masala yaratish
         </button>
       </div>
 
       {error && (
-        <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+        <div className="p-4 bg-red-50 border border-red-200 rounded-2xl text-red-700 text-sm">
           {error}
         </div>
       )}
 
       {/* Filters Bar */}
-      <div className="bg-white p-4 rounded-lg border border-slate-200 shadow-sm flex flex-wrap items-center gap-4">
-        <div className="flex-1 min-w-[240px] relative">
+      <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4">
+        <div className="flex-1 relative">
           <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Masala nomini qidirish..."
-            className="w-full h-10 pl-10 pr-3 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full h-10 pl-10 pr-3 border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
 
-        <select
-          value={langFilter}
-          onChange={(e) => setLangFilter(e.target.value)}
-          className="h-10 px-3 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-        >
-          <option value="all">Barcha tillar</option>
-          <option value="python">Python</option>
-          <option value="cpp">C++</option>
-        </select>
+        <div className="flex items-center gap-2">
+          <select
+            value={langFilter}
+            onChange={(e) => setLangFilter(e.target.value)}
+            className="h-10 px-3 border border-slate-300 rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 flex-1 sm:flex-initial"
+          >
+            <option value="all">Barcha tillar</option>
+            <option value="python">Python</option>
+            <option value="cpp">C++</option>
+          </select>
 
-        <select
-          value={diffFilter}
-          onChange={(e) => setDiffFilter(e.target.value)}
-          className="h-10 px-3 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-        >
-          <option value="all">Barcha qiyinlik darajalari</option>
-          <option value="easy">Oson</option>
-          <option value="medium">O‘rta</option>
-          <option value="hard">Qiyin</option>
-        </select>
+          <select
+            value={diffFilter}
+            onChange={(e) => setDiffFilter(e.target.value)}
+            className="h-10 px-3 border border-slate-300 rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 flex-1 sm:flex-initial"
+          >
+            <option value="all">Barcha qiyinlik</option>
+            <option value="easy">Oson</option>
+            <option value="medium">O‘rta</option>
+            <option value="hard">Qiyin</option>
+          </select>
+        </div>
       </div>
 
       {/* Problems List */}
-      <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden">
-        <table className="w-full text-left border-collapse text-sm">
-          <thead>
-            <tr className="bg-slate-50 text-slate-600 border-b border-slate-200">
-              <th className="px-6 py-3 font-medium">Masala nomi</th>
-              <th className="px-6 py-3 font-medium">Dasturlash tili</th>
-              <th className="px-6 py-3 font-medium">Qiyinlik</th>
-              <th className="px-6 py-3 font-medium">Limitlar</th>
-              <th className="px-6 py-3 font-medium">Versiya</th>
-              <th className="px-6 py-3 font-medium">Holat</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-200">
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse text-sm">
+            <thead>
+              <tr className="bg-slate-50 text-slate-600 border-b border-slate-200 whitespace-nowrap">
+                <th className="px-4 sm:px-6 py-3 sm:py-3.5 font-medium">Masala nomi</th>
+                <th className="px-4 sm:px-6 py-3 sm:py-3.5 font-medium">Dasturlash tili</th>
+                <th className="px-4 sm:px-6 py-3 sm:py-3.5 font-medium">Qiyinlik</th>
+                <th className="px-4 sm:px-6 py-3 sm:py-3.5 font-medium">Limitlar</th>
+                <th className="px-4 sm:px-6 py-3 sm:py-3.5 font-medium">Versiya</th>
+                <th className="px-4 sm:px-6 py-3 sm:py-3.5 font-medium">Holat</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-200 whitespace-nowrap">
             {filteredProblems.map((prob) => (
               <tr key={prob.id} className="hover:bg-slate-50 transition">
                 <td className="px-6 py-4">
@@ -242,6 +248,7 @@ export const ProblemsPage: React.FC = () => {
             )}
           </tbody>
         </table>
+        </div>
       </div>
 
       {/* Modal: Yangi masala yaratish */}

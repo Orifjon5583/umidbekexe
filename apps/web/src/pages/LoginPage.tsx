@@ -58,31 +58,31 @@ export const LoginPage: React.FC<Props> = ({ onLoginSuccess }) => {
   };
 
   return (
-    <div className="min-h-screen bg-[#070D1E] flex items-center justify-center p-6 font-sans">
-      <div className="w-full max-w-4xl flex flex-col md:flex-row items-center justify-between gap-12">
+    <div className="min-h-screen bg-[#070D1E] flex items-center justify-center p-4 sm:p-6 font-sans">
+      <div className="w-full max-w-4xl flex flex-col md:flex-row items-center justify-between gap-8 md:gap-12 py-4">
         {/* Left: Brand with squircle icon and O'qituvchi paneli */}
         <div className="flex-1 flex flex-col items-center md:items-start text-center md:text-left">
-          <div className="w-24 h-24 rounded-3xl bg-[#0F1E36] border border-blue-500/20 shadow-2xl flex items-center justify-center mb-6 p-4">
+          <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-3xl bg-[#0F1E36] border border-blue-500/20 shadow-2xl flex items-center justify-center mb-4 sm:mb-6 p-3.5 sm:p-4">
             <img
               src="/icon.png"
               alt="Mintera"
-              className="w-16 h-16 object-contain"
+              className="w-14 h-14 sm:w-16 sm:h-16 object-contain"
             />
           </div>
 
-          <h1 className="text-3xl font-extrabold text-white tracking-tight mb-1">
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight mb-1">
             Mintera
           </h1>
-          <p className="text-sm tracking-wider text-blue-400 font-medium">
+          <p className="text-xs sm:text-sm tracking-wider text-blue-400 font-medium">
             O‘qituvchi va Boshqaruv paneli
           </p>
-          <p className="text-xs text-slate-400 mt-3 max-w-xs leading-relaxed">
+          <p className="text-xs text-slate-400 mt-2 sm:mt-3 max-w-xs leading-relaxed">
             O‘quvchilar guruhlari, topshiriqlar, masalalar banki, test natijalari va sovg‘alar do‘koni boshqaruvi.
           </p>
         </div>
 
         {/* Right: Login Card */}
-        <div className="w-full max-w-sm bg-white rounded-2xl p-8 shadow-2xl border border-slate-200">
+        <div className="w-full max-w-sm bg-white rounded-2xl p-5 sm:p-8 shadow-2xl border border-slate-200">
           <div className="flex items-center justify-between mb-5">
             <h2 className="text-lg font-bold text-slate-900">
               Tizimga kirish

@@ -75,20 +75,20 @@ export const SystemSettingsPage: React.FC = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
-            <Sliders className="w-7 h-7 text-purple-600" />
+          <h2 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
+            <Sliders className="w-6 sm:w-7 h-6 sm:h-7 text-purple-600 flex-shrink-0" />
             Tizim va Platforma Sozlamalari
           </h2>
-          <p className="text-sm text-slate-500 mt-1">
+          <p className="text-xs sm:text-sm text-slate-500 mt-1">
             Dasturlash tillari, AI kvotalari, xavfsizlik cheklovlari va AWS bulut infratuzilmasi boshqaruvi
           </p>
         </div>
 
         <button
           onClick={handleSave}
-          className="h-11 px-5 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-sm font-bold flex items-center gap-2 shadow-md shadow-purple-600/20 transition cursor-pointer"
+          className="h-11 px-5 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-sm font-bold flex items-center gap-2 shadow-md shadow-purple-600/20 transition cursor-pointer w-full sm:w-auto justify-center"
         >
-          <Save className="w-4 h-4" />
+          <Save className="w-4 h-4 flex-shrink-0" />
           Sozlamalarni saqlash
         </button>
       </div>

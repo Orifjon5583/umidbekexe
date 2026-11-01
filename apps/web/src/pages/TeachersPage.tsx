@@ -191,26 +191,26 @@ export const TeachersPage: React.FC = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
-            <GraduationCap className="w-7 h-7 text-purple-600" />
+          <h2 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
+            <GraduationCap className="w-6 sm:w-7 h-6 sm:h-7 text-purple-600 flex-shrink-0" />
             O‘qituvchilar hisoblarini boshqarish
           </h2>
-          <p className="text-sm text-slate-500 mt-1">
+          <p className="text-xs sm:text-sm text-slate-500 mt-1">
             Platformadagi o‘qituvchilarni ro‘yxatga olish, guruhlarga biriktirish, parollarni yangilash va huquqlarni boshqarish
           </p>
         </div>
 
         <button
           onClick={handleOpenCreateModal}
-          className="h-11 px-4 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-sm font-semibold flex items-center gap-2 shadow-sm transition"
+          className="h-11 px-4 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-sm font-semibold flex items-center gap-2 shadow-sm transition w-full sm:w-auto justify-center"
         >
-          <Plus className="w-4 h-4" />
+          <Plus className="w-4 h-4 flex-shrink-0" />
           Yangi o‘qituvchi qo‘shish
         </button>
       </div>
 
       {/* Filter and Search Bar */}
-      <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-4">
         <div className="relative w-full sm:w-80">
           <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
           <input
@@ -218,16 +218,16 @@ export const TeachersPage: React.FC = () => {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Ism, login yoki fan bo‘yicha qidirish..."
-            className="w-full h-10 pl-9 pr-3 border border-slate-200 rounded-lg text-xs font-medium focus:outline-none focus:border-purple-600"
+            className="w-full h-10 pl-9 pr-3 border border-slate-200 rounded-xl text-xs font-medium focus:outline-none focus:border-purple-600"
           />
         </div>
 
-        <div className="flex items-center gap-2 w-full sm:w-auto">
+        <div className="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-start">
           <span className="text-xs font-semibold text-slate-500">Holat:</span>
           <select
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value as any)}
-            className="h-10 px-3 border border-slate-200 rounded-lg text-xs font-medium bg-white focus:outline-none focus:border-purple-600"
+            className="h-10 px-3 border border-slate-200 rounded-xl text-xs font-medium bg-white focus:outline-none focus:border-purple-600 flex-1 sm:flex-initial"
           >
             <option value="all">Barchasi ({teachers.length})</option>
             <option value="active">Faollar ({teachers.filter((t) => t.isActive).length})</option>
@@ -237,25 +237,25 @@ export const TeachersPage: React.FC = () => {
       </div>
 
       {/* Teachers Table */}
-      <div className="bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden">
-        <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
-          <h3 className="font-bold text-slate-900">O‘qituvchilar ro‘yxati</h3>
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
+        <div className="px-4 sm:px-6 py-3.5 sm:py-4 border-b border-slate-100 flex items-center justify-between">
+          <h3 className="font-bold text-slate-900 text-sm sm:text-base">O‘qituvchilar ro‘yxati</h3>
           <span className="text-xs text-slate-400">Jami: {filteredTeachers.length} nafar</span>
         </div>
 
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse text-sm">
             <thead>
-              <tr className="bg-slate-50 text-slate-600 border-b border-slate-200 text-xs uppercase tracking-wider">
-                <th className="px-6 py-3.5 font-semibold">O‘qituvchi</th>
-                <th className="px-6 py-3.5 font-semibold">Mutaxassislik / Fan</th>
-                <th className="px-6 py-3.5 font-semibold">Biriktirilgan guruhlar</th>
-                <th className="px-6 py-3.5 font-semibold">O‘quvchilar</th>
-                <th className="px-6 py-3.5 font-semibold">Holat</th>
-                <th className="px-6 py-3.5 font-semibold text-right">Amallar</th>
+              <tr className="bg-slate-50 text-slate-600 border-b border-slate-200 text-xs uppercase tracking-wider whitespace-nowrap">
+                <th className="px-4 sm:px-6 py-3 sm:py-3.5 font-semibold">O‘qituvchi</th>
+                <th className="px-4 sm:px-6 py-3 sm:py-3.5 font-semibold">Mutaxassislik / Fan</th>
+                <th className="px-4 sm:px-6 py-3 sm:py-3.5 font-semibold">Biriktirilgan guruhlar</th>
+                <th className="px-4 sm:px-6 py-3 sm:py-3.5 font-semibold">O‘quvchilar</th>
+                <th className="px-4 sm:px-6 py-3 sm:py-3.5 font-semibold">Holat</th>
+                <th className="px-4 sm:px-6 py-3 sm:py-3.5 font-semibold text-right">Amallar</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-slate-100 whitespace-nowrap">
               {filteredTeachers.map((t) => (
                 <tr key={t.id} className="hover:bg-slate-50/80 transition">
                   <td className="px-6 py-4">

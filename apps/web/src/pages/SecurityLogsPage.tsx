@@ -48,75 +48,77 @@ export const SecurityLogsPage: React.FC = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
-            <ShieldAlert className="w-7 h-7 text-purple-600" />
+          <h2 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
+            <ShieldAlert className="w-6 sm:w-7 h-6 sm:h-7 text-purple-600 flex-shrink-0" />
             Faollik jurnali va Xavfsizlik hodisalari (TZ 2.1)
           </h2>
-          <p className="text-sm text-slate-500 mt-1">
+          <p className="text-xs sm:text-sm text-slate-500 mt-1">
             Foydalanuvchilar kirishi, clipboard cheklovlarini buzish urinishlari va tizim audit qaydlari
           </p>
         </div>
 
         <button
           onClick={fetchLogs}
-          className="h-10 px-4 bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 rounded-xl text-xs font-semibold flex items-center gap-2 shadow-xs transition"
+          className="h-10 px-4 bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 rounded-xl text-xs font-semibold flex items-center gap-2 shadow-xs transition w-full sm:w-auto justify-center"
         >
           <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
           Jurnalni yangilash
         </button>
       </div>
 
-      {/* KPI Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center font-bold">
+      {/* KPI Cards (2x2 on Mobile, 4 cols on Tablet & Desktop) */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
+        <div className="bg-white p-3.5 sm:p-4 rounded-2xl border border-slate-200 shadow-xs flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center font-bold flex-shrink-0">
             <AlertTriangle className="w-5 h-5" />
           </div>
-          <div>
-            <p className="text-xs text-slate-500 font-medium">Clipboard urinishlari</p>
-            <p className="text-xl font-bold text-slate-900">
+          <div className="min-w-0">
+            <p className="text-[10px] sm:text-xs text-slate-500 font-medium truncate">Clipboard urinishlari</p>
+            <p className="text-lg sm:text-xl font-bold text-slate-900">
               {logs.filter((l) => l.eventType === 'clipboard_violation').length} ta
             </p>
           </div>
         </div>
 
-        <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center font-bold">
+        <div className="bg-white p-3.5 sm:p-4 rounded-2xl border border-slate-200 shadow-xs flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center font-bold flex-shrink-0">
             <ShieldAlert className="w-5 h-5" />
           </div>
-          <div>
-            <p className="text-xs text-slate-500 font-medium">Shubhali kirishlar</p>
-            <p className="text-xl font-bold text-slate-900">
+          <div className="min-w-0">
+            <p className="text-[10px] sm:text-xs text-slate-500 font-medium truncate">Shubhali kirishlar</p>
+            <p className="text-lg sm:text-xl font-bold text-slate-900">
               {logs.filter((l) => l.eventType === 'failed_login').length} ta
             </p>
           </div>
         </div>
 
-        <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold">
+        <div className="bg-white p-3.5 sm:p-4 rounded-2xl border border-slate-200 shadow-xs flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold flex-shrink-0">
             <CheckCircle className="w-5 h-5" />
           </div>
-          <div>
-            <p className="text-xs text-slate-500 font-medium">Muvaffaqiyatli seanslar</p>
-            <p className="text-xl font-bold text-slate-900">
+          <div className="min-w-0">
+            <p className="text-[10px] sm:text-xs text-slate-500 font-medium truncate">Muvaffaqiyatli seanslar</p>
+            <p className="text-lg sm:text-xl font-bold text-slate-900">
               {logs.filter((l) => l.eventType === 'login_success').length} ta
             </p>
           </div>
         </div>
 
-        <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center font-bold">
+        <div className="bg-white p-3.5 sm:p-4 rounded-2xl border border-slate-200 shadow-xs flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold flex-shrink-0">
             <Info className="w-5 h-5" />
           </div>
-          <div>
-            <p className="text-xs text-slate-500 font-medium">Jami qaydlar</p>
-            <p className="text-xl font-bold text-slate-900">{logs.length} ta</p>
+          <div className="min-w-0">
+            <p className="text-[10px] sm:text-xs text-slate-500 font-medium truncate">Jami qaydlar</p>
+            <p className="text-lg sm:text-xl font-bold text-slate-900">
+              {logs.length} ta
+            </p>
           </div>
         </div>
       </div>
 
       {/* Filter and Search Bar */}
-      <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-4">
         <div className="relative w-full sm:w-80">
           <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
           <input
@@ -124,45 +126,45 @@ export const SecurityLogsPage: React.FC = () => {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Foydalanuvchi, IP yoki hodisa bo‘yicha qidirish..."
-            className="w-full h-10 pl-9 pr-3 border border-slate-200 rounded-lg text-xs font-medium focus:outline-none focus:border-purple-600"
+            className="w-full h-10 pl-9 pr-3 border border-slate-200 rounded-xl text-xs font-medium focus:outline-none focus:border-purple-600"
           />
         </div>
 
-        <div className="flex items-center gap-2 w-full sm:w-auto">
+        <div className="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-start">
           <span className="text-xs font-semibold text-slate-500">Hodisa darajasi:</span>
           <select
             value={severityFilter}
             onChange={(e) => setSeverityFilter(e.target.value as any)}
-            className="h-10 px-3 border border-slate-200 rounded-lg text-xs font-medium bg-white focus:outline-none focus:border-purple-600"
+            className="h-10 px-3 border border-slate-200 rounded-xl text-xs font-medium bg-white focus:outline-none focus:border-purple-600 flex-1 sm:flex-initial"
           >
-            <option value="all">Barcha hodisalar</option>
+            <option value="all">Barchasi ({logs.length})</option>
             <option value="danger">Xavfli (Qizil)</option>
             <option value="warning">Ogohlantirish (Sariq)</option>
-            <option value="info">Ma’lumot (Moviy)</option>
+            <option value="info">Ma’lumot (Ko‘k)</option>
             <option value="success">Muvaffaqiyatli (Yashil)</option>
           </select>
         </div>
       </div>
 
       {/* Logs Table */}
-      <div className="bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden">
-        <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
-          <h3 className="font-bold text-slate-900">Hodisalar ro‘yxati</h3>
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
+        <div className="px-4 sm:px-6 py-3.5 sm:py-4 border-b border-slate-100 flex items-center justify-between">
+          <h3 className="font-bold text-slate-900 text-sm sm:text-base">Hodisalar ro‘yxati</h3>
           <span className="text-xs text-slate-400">Filtrlangan: {filteredLogs.length} ta</span>
         </div>
 
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse text-sm">
             <thead>
-              <tr className="bg-slate-50 text-slate-600 border-b border-slate-200 text-xs uppercase tracking-wider">
-                <th className="px-6 py-3.5 font-semibold">Vaqt</th>
-                <th className="px-6 py-3.5 font-semibold">Foydalanuvchi & Rol</th>
-                <th className="px-6 py-3.5 font-semibold">Hodisa turi</th>
-                <th className="px-6 py-3.5 font-semibold">Tafsilotlar</th>
-                <th className="px-6 py-3.5 font-semibold">IP Manzil</th>
+              <tr className="bg-slate-50 text-slate-600 border-b border-slate-200 text-xs uppercase tracking-wider whitespace-nowrap">
+                <th className="px-4 sm:px-6 py-3 sm:py-3.5 font-semibold">Vaqt</th>
+                <th className="px-4 sm:px-6 py-3 sm:py-3.5 font-semibold">Foydalanuvchi & Rol</th>
+                <th className="px-4 sm:px-6 py-3 sm:py-3.5 font-semibold">Hodisa turi</th>
+                <th className="px-4 sm:px-6 py-3 sm:py-3.5 font-semibold">Tafsilotlar</th>
+                <th className="px-4 sm:px-6 py-3 sm:py-3.5 font-semibold">IP Manzil</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-slate-100 whitespace-nowrap">
               {filteredLogs.map((log) => {
                 const badgeClass =
                   log.severity === 'danger'

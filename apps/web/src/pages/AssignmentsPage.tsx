@@ -86,28 +86,31 @@ export const AssignmentsPage: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-slate-900 tracking-tight">Uy vazifalari</h2>
-          <p className="text-sm text-slate-500 mt-1">Guruhlarga topshiriqlar biriktirish va muddatlarini belgilash</p>
+          <h2 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
+            <CheckSquare className="w-6 sm:w-7 h-6 sm:h-7 text-blue-600 flex-shrink-0" />
+            Uy vazifalari va Topshiriqlar
+          </h2>
+          <p className="text-xs sm:text-sm text-slate-500 mt-1">Guruhlarga topshiriqlar biriktirish va muddatlarini belgilash</p>
         </div>
         <button
           onClick={() => setIsModalOpen(true)}
-          className="h-11 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium flex items-center gap-2 shadow-sm"
+          className="h-11 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-semibold flex items-center gap-2 shadow-sm transition w-full sm:w-auto justify-center"
         >
-          <Plus className="w-4 h-4" />
+          <Plus className="w-4 h-4 flex-shrink-0" />
           Yangi vazifa tayinlash
         </button>
       </div>
 
       {error && (
-        <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+        <div className="p-4 bg-red-50 border border-red-200 rounded-2xl text-red-700 text-sm">
           {error}
         </div>
       )}
 
       {/* Assignments Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
         {assignments.map((a) => (
           <div key={a.id} className="bg-white rounded-lg border border-slate-200 shadow-sm p-6 flex flex-col justify-between">
             <div>

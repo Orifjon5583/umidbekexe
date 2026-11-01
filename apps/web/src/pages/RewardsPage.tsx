@@ -509,102 +509,102 @@ export const RewardsPage: React.FC = () => {
       {/* Page Title & Store Controls */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
-            <Gift className="w-7 h-7 text-amber-500" />
+          <h2 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
+            <Gift className="w-6 sm:w-7 h-6 sm:h-7 text-amber-500 flex-shrink-0" />
             Sovg‘alar va ballar do‘koni {isAdmin ? 'boshqaruvi' : 'katalogi'}
           </h2>
-          <p className="text-sm text-slate-500 mt-1">
+          <p className="text-xs sm:text-sm text-slate-500 mt-1">
             {isAdmin
               ? 'Sovg‘alar rasmi, zaxirasi (qanchasi bor va qanchasi qoldi), narxi va buyurtmalarni nazorat qilish'
               : 'O‘quvchilar yig‘gan ballariga beriladigan sovg‘alar katalogi va buyurtmalar holati'}
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-2.5 sm:gap-3 w-full sm:w-auto">
           {isAdmin ? (
             <>
               <button
                 onClick={toggleStore}
-                className={`px-4 py-2.5 rounded-lg text-sm font-semibold flex items-center gap-2 transition shadow-sm ${
+                className={`px-3.5 sm:px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold flex items-center gap-2 transition shadow-xs flex-1 sm:flex-initial justify-center ${
                   isStoreOpen
                     ? 'bg-emerald-600 hover:bg-emerald-700 text-white'
                     : 'bg-rose-600 hover:bg-rose-700 text-white'
                 }`}
               >
-                <ShoppingBag className="w-4 h-4" />
-                Do‘kon holati: {isStoreOpen ? 'OCHIQ' : 'YOPIQ'}
+                <ShoppingBag className="w-4 h-4 flex-shrink-0" />
+                <span>Do‘kon: {isStoreOpen ? 'OCHIQ' : 'YOPIQ'}</span>
               </button>
 
               <button
                 onClick={handleOpenAddModal}
-                className="h-10 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-semibold flex items-center gap-2 shadow-sm transition"
+                className="h-10 px-3.5 sm:px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs sm:text-sm font-semibold flex items-center gap-2 shadow-xs transition flex-1 sm:flex-initial justify-center"
               >
-                <Plus className="w-4 h-4" />
-                Yangi sovg‘a qo‘shish
+                <Plus className="w-4 h-4 flex-shrink-0" />
+                <span>Yangi sovg‘a qo‘shish</span>
               </button>
             </>
           ) : (
             <div
-              className={`px-4 py-2.5 rounded-xl text-xs font-bold flex items-center gap-2 border shadow-xs ${
+              className={`px-3.5 sm:px-4 py-2.5 rounded-xl text-xs font-bold flex items-center gap-2 border shadow-xs w-full sm:w-auto ${
                 isStoreOpen
                   ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
                   : 'bg-rose-50 text-rose-700 border-rose-200'
               }`}
             >
-              <ShoppingBag className="w-4 h-4" />
-              Do‘kon holati: {isStoreOpen ? 'OCHIQ (O‘quvchilarga ko‘rinadi)' : 'YOPIQ'}
+              <ShoppingBag className="w-4 h-4 flex-shrink-0" />
+              <span>Do‘kon holati: {isStoreOpen ? 'OCHIQ' : 'YOPIQ'}</span>
             </div>
           )}
         </div>
       </div>
 
-      {/* Stats Summary */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
-        <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-xs flex items-center gap-4">
-          <div className="w-12 h-12 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center flex-shrink-0 text-2xl">
+      {/* Stats Summary (2x2 on Mobile, 4 columns on Tablet & Desktop) */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 lg:gap-5">
+        <div className="bg-white p-3.5 sm:p-5 rounded-2xl border border-slate-200 shadow-xs flex items-center gap-3 sm:gap-4">
+          <div className="w-10 sm:w-12 h-10 sm:h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center flex-shrink-0 text-xl sm:text-2xl">
             🎁
           </div>
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">Sovg‘a turlari</p>
-            <p className="text-2xl font-bold text-slate-900 mt-0.5">{rewards.length} ta</p>
+          <div className="min-w-0">
+            <p className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-slate-400 truncate">Sovg‘a turlari</p>
+            <p className="text-lg sm:text-2xl font-bold text-slate-900 mt-0.5">{rewards.length} ta</p>
           </div>
         </div>
 
-        <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-xs flex items-center gap-4">
-          <div className="w-12 h-12 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center flex-shrink-0">
-            <Package className="w-6 h-6" />
+        <div className="bg-white p-3.5 sm:p-5 rounded-2xl border border-slate-200 shadow-xs flex items-center gap-3 sm:gap-4">
+          <div className="w-10 sm:w-12 h-10 sm:h-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center flex-shrink-0">
+            <Package className="w-5 sm:w-6 h-5 sm:h-6" />
           </div>
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">Qolgan umumiy zaxira</p>
-            <p className="text-2xl font-bold text-slate-900 mt-0.5">
+          <div className="min-w-0">
+            <p className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-slate-400 truncate">Qolgan zaxira</p>
+            <p className="text-lg sm:text-2xl font-bold text-slate-900 mt-0.5 truncate">
               {rewards.reduce((acc, curr) => acc + curr.stockCount, 0)} dona
             </p>
           </div>
         </div>
 
-        <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-xs flex items-center gap-4">
-          <div className="w-12 h-12 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center flex-shrink-0">
-            <Clock className="w-6 h-6" />
+        <div className="bg-white p-3.5 sm:p-5 rounded-2xl border border-slate-200 shadow-xs flex items-center gap-3 sm:gap-4">
+          <div className="w-10 sm:w-12 h-10 sm:h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center flex-shrink-0">
+            <Clock className="w-5 sm:w-6 h-5 sm:h-6" />
           </div>
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">
-              {isAdmin ? 'Kutilayotgan so‘rovlar' : 'Kutilayotgan (guruhingiz)'}
+          <div className="min-w-0">
+            <p className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-slate-400 truncate">
+              {isAdmin ? 'Kutilayotgan' : 'Kutilmoqda'}
             </p>
-            <p className="text-2xl font-bold text-slate-900 mt-0.5">
+            <p className="text-lg sm:text-2xl font-bold text-slate-900 mt-0.5">
               {visibleOrders.filter((o) => o.status === 'pending').length} ta
             </p>
           </div>
         </div>
 
-        <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-xs flex items-center gap-4">
-          <div className="w-12 h-12 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center flex-shrink-0">
-            <CheckCircle className="w-6 h-6" />
+        <div className="bg-white p-3.5 sm:p-5 rounded-2xl border border-slate-200 shadow-xs flex items-center gap-3 sm:gap-4">
+          <div className="w-10 sm:w-12 h-10 sm:h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center flex-shrink-0">
+            <CheckCircle className="w-5 sm:w-6 h-5 sm:h-6" />
           </div>
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">
-              {isAdmin ? 'Topshirilgan sovg‘alar' : 'Topshirilgan (guruhingiz)'}
+          <div className="min-w-0">
+            <p className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-slate-400 truncate">
+              {isAdmin ? 'Topshirilgan' : 'Berildi'}
             </p>
-            <p className="text-2xl font-bold text-slate-900 mt-0.5">
+            <p className="text-lg sm:text-2xl font-bold text-slate-900 mt-0.5">
               {visibleOrders.filter((o) => o.status === 'delivered').length} ta
             </p>
           </div>
@@ -612,10 +612,10 @@ export const RewardsPage: React.FC = () => {
       </div>
 
       {/* Rewards Grid with Image / Emoji, Stock & Price Controls */}
-      <div className="bg-white rounded-xl border border-slate-200 shadow-xs p-6">
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-xs p-4 sm:p-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 mb-6 border-b border-slate-100 gap-3">
           <div>
-            <h3 className="font-bold text-slate-900 text-lg">Mavjud sovg‘alar va zaxira holati</h3>
+            <h3 className="font-bold text-slate-900 text-base sm:text-lg">Mavjud sovg‘alar va zaxira holati</h3>
             <p className="text-xs text-slate-500 mt-0.5">
               {isAdmin
                 ? 'Har bir kartada rasm, narx, jami keltirilgan va qolgan sonini bevosita o‘zgartirishingiz mumkin'
@@ -635,7 +635,7 @@ export const RewardsPage: React.FC = () => {
           )}
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5 sm:gap-5">
           {rewards.map((r) => {
             const isEditing = isAdmin && editingId === r.id;
             const givenCount = Math.max(0, r.totalStock - r.stockCount);
@@ -837,39 +837,39 @@ export const RewardsPage: React.FC = () => {
       </div>
 
       {/* Orders Table */}
-      <div className="bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden">
-        <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
-          <div>
-            <h3 className="font-semibold text-slate-900">
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
+        <div className="px-4 sm:px-6 py-3.5 sm:py-4 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="min-w-0">
+            <h3 className="font-bold text-slate-900 text-sm sm:text-base truncate">
               {isAdmin
                 ? 'O‘quvchilarning sovg‘a so‘rovlari (Barcha guruhlar)'
                 : 'Guruhingiz o‘quvchilarining sovg‘a so‘rovlari'}
             </h3>
-            <p className="text-xs text-slate-500 mt-0.5">
+            <p className="text-xs text-slate-500 mt-0.5 truncate">
               {isAdmin
                 ? 'Barcha guruh o‘quvchilarining topshiriqlardan to‘plangan ballari evaziga yuborgan sovg‘a so‘rovlari'
                 : 'Sizga biriktirilgan guruh o‘quvchilarining sovg‘a so‘rovlari'}
             </p>
           </div>
-          <span className="text-xs font-medium text-slate-500 bg-slate-100 px-3 py-1 rounded-full">
-            {isAdmin ? `Jami: ${orders.length} ta buyurtma` : `Guruhingizdan: ${visibleOrders.length} ta buyurtma`}
+          <span className="text-xs font-semibold text-slate-500 bg-slate-100 px-3 py-1 rounded-full self-start sm:self-auto flex-shrink-0">
+            {isAdmin ? `Jami: ${orders.length} ta` : `Guruhingizdan: ${visibleOrders.length} ta`}
           </span>
         </div>
 
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse text-sm">
             <thead>
-              <tr className="bg-slate-50 text-slate-600 border-b border-slate-200 text-xs uppercase tracking-wider">
-                <th className="px-6 py-3 font-semibold">O‘quvchi</th>
-                <th className="px-6 py-3 font-semibold">Guruh</th>
-                <th className="px-6 py-3 font-semibold">Tanlangan sovg‘a</th>
-                <th className="px-6 py-3 font-semibold">Yechilgan ball</th>
-                <th className="px-6 py-3 font-semibold">Buyurtma vaqti</th>
-                <th className="px-6 py-3 font-semibold">Holat</th>
-                {isAdmin && <th className="px-6 py-3 font-semibold text-right">Amal</th>}
+              <tr className="bg-slate-50 text-slate-600 border-b border-slate-200 text-xs uppercase tracking-wider whitespace-nowrap">
+                <th className="px-4 sm:px-6 py-3 sm:py-3.5 font-semibold">O‘quvchi</th>
+                <th className="px-4 sm:px-6 py-3 sm:py-3.5 font-semibold">Guruh</th>
+                <th className="px-4 sm:px-6 py-3 sm:py-3.5 font-semibold">Tanlangan sovg‘a</th>
+                <th className="px-4 sm:px-6 py-3 sm:py-3.5 font-semibold">Yechilgan ball</th>
+                <th className="px-4 sm:px-6 py-3 sm:py-3.5 font-semibold">Buyurtma vaqti</th>
+                <th className="px-4 sm:px-6 py-3 sm:py-3.5 font-semibold">Holat</th>
+                {isAdmin && <th className="px-4 sm:px-6 py-3 sm:py-3.5 font-semibold text-right">Amal</th>}
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-200">
+            <tbody className="divide-y divide-slate-200 whitespace-nowrap">
               {visibleOrders.length === 0 ? (
                 <tr>
                   <td colSpan={isAdmin ? 7 : 6} className="px-6 py-10 text-center text-slate-400 text-sm">

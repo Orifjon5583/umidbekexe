@@ -307,11 +307,11 @@ export const GroupsPage: React.FC = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
-            <Users className="w-7 h-7 text-blue-600" />
+          <h2 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
+            <Users className="w-6 sm:w-7 h-6 sm:h-7 text-blue-600 flex-shrink-0" />
             {isAdmin ? 'O‘quv guruhlari va o‘quvchilar boshqaruvi' : 'Mening guruhlarim va o‘quvchilarim'}
           </h2>
-          <p className="text-sm text-slate-500 mt-1">
+          <p className="text-xs sm:text-sm text-slate-500 mt-1">
             {isAdmin
               ? 'Guruhlar ochish, guruh nomini tahrirlash, yangi o‘quvchilarni ro‘yxatdan o‘tkazish va parollarni boshqarish'
               : 'Sizga biriktirilgan guruhlar va ulardagi o‘quvchilar tarkibini ko‘rish'}
@@ -321,33 +321,33 @@ export const GroupsPage: React.FC = () => {
         {isAdmin && (
           <button
             onClick={handleOpenCreateGroup}
-            className="h-11 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-semibold flex items-center gap-2 shadow-sm transition"
+            className="h-11 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-semibold flex items-center gap-2 shadow-sm transition w-full sm:w-auto justify-center"
           >
-            <Plus className="w-4 h-4" />
+            <Plus className="w-4 h-4 flex-shrink-0" />
             Yangi guruh ochish
           </button>
         )}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
         {/* Left 2 Cols: Groups Table with Name Edit and Delete */}
-        <div className="lg:col-span-2 bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden">
-          <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
-            <h3 className="font-bold text-slate-900">Mavjud guruhlar ro‘yxati</h3>
+        <div className="lg:col-span-2 bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
+          <div className="px-4 sm:px-6 py-3.5 sm:py-4 border-b border-slate-100 flex items-center justify-between">
+            <h3 className="font-bold text-slate-900 text-sm sm:text-base">Mavjud guruhlar ro‘yxati</h3>
             <span className="text-xs text-slate-400">Jami: {groups.length} ta guruh</span>
           </div>
 
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse text-sm">
               <thead>
-                <tr className="bg-slate-50 text-slate-600 border-b border-slate-200 text-xs uppercase tracking-wider">
-                  <th className="px-6 py-3.5 font-semibold">Guruh nomi</th>
-                  <th className="px-6 py-3.5 font-semibold">O‘quvchilar</th>
-                  <th className="px-6 py-3.5 font-semibold">Faol vazifalar</th>
-                  <th className="px-6 py-3.5 font-semibold text-right">Amallar</th>
+                <tr className="bg-slate-50 text-slate-600 border-b border-slate-200 text-xs uppercase tracking-wider whitespace-nowrap">
+                  <th className="px-4 sm:px-6 py-3 sm:py-3.5 font-semibold">Guruh nomi</th>
+                  <th className="px-4 sm:px-6 py-3 sm:py-3.5 font-semibold">O‘quvchilar</th>
+                  <th className="px-4 sm:px-6 py-3 sm:py-3.5 font-semibold">Faol vazifalar</th>
+                  <th className="px-4 sm:px-6 py-3 sm:py-3.5 font-semibold text-right">Amallar</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-slate-100 whitespace-nowrap">
                 {groups.map((g) => {
                   const isSelected = selectedGroup?.id === g.id;
                   return (
@@ -423,7 +423,7 @@ export const GroupsPage: React.FC = () => {
         </div>
 
         {/* Right 1 Col: Selected Group Details & Student Management */}
-        <div className="bg-white rounded-xl border border-slate-200 shadow-xs p-6 flex flex-col h-[560px]">
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-xs p-4 sm:p-6 flex flex-col min-h-[420px] lg:h-[560px]">
           {selectedGroup ? (
             <>
               {/* Group Name & Student Add Header */}

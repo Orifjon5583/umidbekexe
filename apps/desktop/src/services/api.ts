@@ -119,8 +119,8 @@ export const desktopApiClient = {
       }
 
       const prefix = isPlus
-        ? `✨ **[CodePractice AI Plus • Gemini 1.5 Pro]**\n\n`
-        : `🤖 **[CodePractice AI • Standart Flash]**\n\n`;
+        ? `✨ **[Mintera AI Plus • Gemini 1.5 Pro]**\n\n`
+        : `🤖 **[Mintera AI • Standart Flash]**\n\n`;
 
       let responseText = '';
 

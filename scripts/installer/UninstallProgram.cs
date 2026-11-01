@@ -15,8 +15,8 @@ namespace CodePracticeInstaller
             Application.SetCompatibleTextRenderingDefault(false);
 
             var dialog = MessageBox.Show(
-                "CodePractice v2.4.0 dasturini kompyuteringizdan butunlay o‘chirib tashlamoqchimisiz?",
-                "CodePractice — O‘chirish (Uninstall)",
+                "Mintera v2.4.0 dasturini kompyuteringizdan butunlay o‘chirib tashlamoqchimisiz?",
+                "Mintera — O‘chirish (Uninstall)",
                 MessageBoxButtons.YesNo,
                 MessageBoxIcon.Question
             );
@@ -27,14 +27,14 @@ namespace CodePracticeInstaller
             {
                 // 1. Ishchi stoldagi yorliqni o'chirish
                 string desktopPath = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
-                string desktopShortcut = Path.Combine(desktopPath, "CodePractice.lnk");
+                string desktopShortcut = Path.Combine(desktopPath, "Mintera.lnk");
                 if (File.Exists(desktopShortcut)) File.Delete(desktopShortcut);
 
                 // 2. Bosh menyudagi yorliqni o'chirish
                 string startMenuPath = Path.Combine(
                     Environment.GetFolderPath(Environment.SpecialFolder.StartMenu),
                     "Programs",
-                    "CodePractice"
+                    "Mintera"
                 );
                 if (Directory.Exists(startMenuPath)) Directory.Delete(startMenuPath, true);
 
@@ -43,22 +43,22 @@ namespace CodePracticeInstaller
                 {
                     using (RegistryKey key = Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Uninstall", true))
                     {
-                        if (key != null) key.DeleteSubKeyTree("CodePractice", false);
+                        if (key != null) key.DeleteSubKeyTree("Mintera", false);
                     }
                 }
                 catch {}
 
-                // 4. Standart o'rnatilgan ilova papkasini tozalash (AppData/Local/Programs/CodePractice)
+                // 4. Standart o'rnatilgan ilova papkasini tozalash (AppData/Local/Programs/Mintera)
                 string installedDir = Path.Combine(
                     Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
                     "Programs",
-                    "CodePractice"
+                    "Mintera"
                 );
 
                 string appDir = AppDomain.CurrentDomain.BaseDirectory.TrimEnd('\\');
 
                 // Qat'iy xavfsizlik himoyasi:
-                // Faqat o'rnatilgan "Programs\CodePractice" papkasini o'chirish!
+                // Faqat o'rnatilgan "Programs\Mintera" papkasini o'chirish!
                 // Loyiha / manba kodlari joylashgan papkani HECH QACHON o'chirmaslik!
                 if (Directory.Exists(installedDir))
                 {
@@ -78,8 +78,8 @@ namespace CodePracticeInstaller
                 }
 
                 MessageBox.Show(
-                    "CodePractice dasturi kompyuteringizdan muvaffaqiyatli o‘chirildi.",
-                    "CodePractice — O‘chirildi",
+                    "Mintera dasturi kompyuteringizdan muvaffaqiyatli o‘chirildi.",
+                    "Mintera — O‘chirildi",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Information
                 );

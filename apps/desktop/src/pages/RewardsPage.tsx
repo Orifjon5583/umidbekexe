@@ -57,10 +57,10 @@ export interface RewardItem {
 const defaultCatalogRewards: RewardItem[] = [
   {
     id: 'rew-1',
-    title: 'CodePractice Maxsus Xudisi ("Clean Code")',
+    title: 'Mintera Maxsus Xudisi ("Clean Code")',
     category: 'merch',
     categoryLabel: 'Kiyim & Merch',
-    description: 'Yuqori sifatli paxtadan tayyorlangan, CodePractice brendli qulay dasturchi xudisi (S, M, L, XL).',
+    description: 'Yuqori sifatli paxtadan tayyorlangan, Mintera brendli qulay dasturchi xudisi (S, M, L, XL).',
     priceCoins: 1200,
     inStock: 8,
     tag: 'Ommabop',
@@ -83,7 +83,7 @@ const defaultCatalogRewards: RewardItem[] = [
   },
   {
     id: 'rew-3',
-    title: 'CodePractice Maxsus Futbolkasi ("Code. Sleep. Repeat")',
+    title: 'Mintera Maxsus Futbolkasi ("Code. Sleep. Repeat")',
     category: 'merch',
     categoryLabel: 'Kiyim & Merch',
     description: '100% paxta, nafas oluvchi va zamonaviy printli dasturchilar futbolkasi.',
@@ -137,7 +137,7 @@ const defaultCatalogRewards: RewardItem[] = [
     title: 'Oltin Profil Nishoni va VIP Ramka (Digital)',
     category: 'digital',
     categoryLabel: 'Raqamli Sovg‘a',
-    description: 'CodePractice profilingiz uchun maxsus porlovchi oltin ramka va 1 oylik "A‘lochi Dasturchi" statusi.',
+    description: 'Mintera profilingiz uchun maxsus porlovchi oltin ramka va 1 oylik "A‘lochi Dasturchi" statusi.',
     priceCoins: 300,
     inStock: 999,
     tag: 'Tezkor',
@@ -147,7 +147,7 @@ const defaultCatalogRewards: RewardItem[] = [
   },
   {
     id: 'rew-8',
-    title: 'CodePractice Dasturchi Stikerlari to‘plami (30 dona)',
+    title: 'Mintera Dasturchi Stikerlari to‘plami (30 dona)',
     category: 'merch',
     categoryLabel: 'Aksessuarlar',
     description: 'Noutbuk va telefon g‘iloflari uchun suvga chidamli dasturchilar stikerlari to‘plami.',
@@ -311,7 +311,7 @@ export const RewardsPage: React.FC<Props> = ({ onNavigateTab, onRequestExit }) =
       title: newTitle.trim(),
       category: newCategory,
       categoryLabel: catLabels[newCategory] || 'Sovg‘a',
-      description: newDesc.trim() || 'CodePractice maxsus mukofoti',
+      description: newDesc.trim() || 'Mintera maxsus mukofoti',
       priceCoins: Math.max(1, Number(newPrice) || 100),
       inStock: Math.max(1, Number(newStock) || 1),
       tag: newTag.trim() || undefined,
@@ -347,16 +347,16 @@ export const RewardsPage: React.FC<Props> = ({ onNavigateTab, onRequestExit }) =
   }>>([
     {
       id: 'claim-1',
-      rewardTitle: 'CodePractice Dasturchi Stikerlari to‘plami (20 dona)',
+      rewardTitle: 'Mintera Dasturchi Stikerlari to‘plami (20 dona)',
       costCoins: 150,
       claimedDate: '24-Oktabr, 16:30',
       status: 'topshirildi',
       statusLabel: 'Topshirildi',
-      code: 'CP-STK-9021',
+      code: 'MIN-STK-9021',
     },
     {
       id: 'claim-2',
-      rewardTitle: 'CodePractice Maxsus Bloknot va Ruchka',
+      rewardTitle: 'Mintera Maxsus Bloknot va Ruchka',
       costCoins: 250,
       claimedDate: '27-Oktabr, 11:20',
       status: 'tayyor',
@@ -461,7 +461,7 @@ export const RewardsPage: React.FC<Props> = ({ onNavigateTab, onRequestExit }) =
               <div className="flex items-center gap-2 flex-wrap">
                 <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-500/15 text-amber-400 border border-amber-500/30 font-mono">
                   <Sparkles className="w-3.5 h-3.5" />
-                  <span>CODEPRACTICE SOVG‘ALAR VA MERCH DO‘KONI</span>
+                  <span>MINTERA SOVG‘ALAR VA MERCH DO‘KONI</span>
                 </span>
 
                 {/* Status Badge */}

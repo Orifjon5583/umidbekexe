@@ -104,13 +104,13 @@ const server = http.createServer((req, res) => {
 
 server.on('error', (err) => {
   if (err.code === 'EADDRINUSE') {
-    console.log(`[CodePractice Desktop Server] Port ${PORT} allaqachon band, davom etilmoqda`);
+    console.log(`[Mintera Desktop Server] Port ${PORT} allaqachon band, davom etilmoqda`);
   } else {
-    console.error(`[CodePractice Desktop Server] Xatolik: ${err.message}`);
+    console.error(`[Mintera Desktop Server] Xatolik: ${err.message}`);
   }
 });
 
 // 0.0.0.0 barcha interfeyslarda (IPv4 127.0.0.1 va localhost) tinglashni ta'minlaydi
 server.listen(PORT, '0.0.0.0', () => {
-  console.log(`[CodePractice Desktop Server] http://127.0.0.1:${PORT} da muvaffaqiyatli ishga tushdi`);
+  console.log(`[Mintera Desktop Server] http://127.0.0.1:${PORT} da muvaffaqiyatli ishga tushdi`);
 });

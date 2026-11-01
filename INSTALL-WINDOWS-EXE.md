@@ -1,4 +1,4 @@
-# CodePractice v2.4.0 — Windows 11 O‘rnatish va Ishga Tushirish Yo‘riqnomasi
+# Mintera v2.4.0 — Windows 11 O‘rnatish va Ishga Tushirish Yo‘riqnomasi
 
 Ushbu platforma o‘quvchilar uchun **Windows 11 o‘rnatiladigan desktop dasturi** (Setup Installer) sifatida ishlab chiqilgan.
 
@@ -6,7 +6,7 @@ Ushbu platforma o‘quvchilar uchun **Windows 11 o‘rnatiladigan desktop dastur
 
 ## 1. Dasturni Kompyuterga O‘rnatish (Setup Installer)
 
-Loyiha papkasida rasmiy **`CodePractice-Setup.exe`** o‘rnatish fayli mavjud:
+Loyiha papkasida rasmiy **`CodePractice-Setup.exe`** (Mintera) o‘rnatish fayli mavjud:
 
 ```text
 umitbekexe/
@@ -14,7 +14,7 @@ umitbekexe/
 ├── CodePractice.exe         <--- Asosiy desktop ilova (Portable launcher)
 ├── Uninstall.exe            <--- Dasturni to‘liq o‘chirish vositasi
 ├── assets/
-│   ├── logo.png             <--- Rasmiy CodePractice logotipi
+│   ├── logo.png             <--- Rasmiy Mintera logotipi
 │   ├── icon.png             <--- Squircle dastur piktogrammasi
 │   └── app.ico              <--- Windows piktogrammasi
 └── build-windows-exe.bat    <--- Avtomatik qayta yig‘ish skripti
@@ -23,10 +23,10 @@ umitbekexe/
 ### O‘rnatish bosqichlari:
 1. **`CodePractice-Setup.exe`** faylini ikki marta bosing.
 2. O‘rnatish oynasida (Setup Wizard):
-   - Rasmiy **CodePractice** logotipi va dastur ta’rifi chiqadi;
+   - Rasmiy **Mintera** logotipi va dastur ta’rifi chiqadi;
    - O‘rnatish papkasi tanlanadi (standart: `%LOCALAPPDATA%\Programs\CodePractice`);
    - Quyidagi qulayliklar avtomatik yoqilgan bo‘ladi:
-     - [✓] Ishchi stolda (Desktop) **CodePractice** yorlig‘ini yaratish;
+     - [✓] Ishchi stolda (Desktop) **Mintera** yorlig‘ini yaratish;
      - [✓] Bosh menyuda (Start Menu) dasturni ro‘yxatga olish;
      - [✓] O‘rnatish yakunlangach dasturni darhol ochish.
 3. **«O‘rnatish (Install)»** tugmasini bosing.
@@ -36,11 +36,11 @@ umitbekexe/
 
 ## 2. Bosh Ekran va Yangi Dizayn (Branding)
 
-Desktop ilovaning bosh ekrani (Kirish) rasmiy **CodePractice (`CODE • BUILD • IMPROVE`)** logotipi va zamonaviy to‘q navy-gradient vizual uslubida qayta ishlandi:
+Desktop ilovaning bosh ekrani (Kirish) rasmiy **Mintera** logotipi va zamonaviy to‘q navy-gradient vizual uslubida qayta ishlandi:
 
-- **Bosh ekran logotipi:** 682×389 yuqori tiniqlikdagi neon-ko‘k va binafsha gradientli `logo.png`;
+- **Bosh ekran logotipi:** Neon-ko‘k va binafsha gradientli brend;
 - **Windows TitleBar va Header:** Squircle shaklidagi `icon.png` dastur piktogrammasi;
-- **Tezkor test kirish:** `student1` / `Student123!` (1-bosishda avtomatik to‘ldirish tugmasi bilan);
+- **Tezkor test kirish:** `student1` / `Talaba123!` (1-bosishda avtomatik to‘ldirish tugmasi bilan);
 - **Chiqish xavfsizligi:** O‘qituvchi maxsus PIN kodi (`4826`);
 - **Mahalliy kompilyatsiya:** Python 3.11 va C++20 GCC, Windows Job Objects orqali xavfsiz chegaralangan (RAM: 128 MB, CPU: 2000 ms).
 

@@ -201,7 +201,7 @@ export const ProfilePage: React.FC<Props> = ({
                 </div>
 
                 <div className="pt-3 border-t border-white/10 flex items-center justify-between text-xs text-slate-400 font-mono">
-                  <span>CodePractice Desktop Versiyasi:</span>
+                  <span>Mintera Desktop Versiyasi:</span>
                   <span className="font-bold text-blue-500">v2.4.0 (Windows 11 Production)</span>
                 </div>
               </div>

@@ -65,13 +65,13 @@ export const LoginPage: React.FC<Props> = ({ onLoginSuccess }) => {
           <div className="w-24 h-24 rounded-3xl bg-[#0F1E36] border border-blue-500/20 shadow-2xl flex items-center justify-center mb-6 p-4">
             <img
               src="/icon.png"
-              alt="CodePractice"
+              alt="Mintera"
               className="w-16 h-16 object-contain"
             />
           </div>
 
           <h1 className="text-3xl font-extrabold text-white tracking-tight mb-1">
-            CodePractice
+            Mintera
           </h1>
           <p className="text-sm tracking-wider text-blue-400 font-medium">
             O‘qituvchi va Boshqaruv paneli

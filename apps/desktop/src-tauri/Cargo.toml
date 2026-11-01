@@ -1,8 +1,8 @@
 [package]
 name = "codepractice-desktop"
 version = "1.0.0"
-description = "CodePractice Windows 11 Student Desktop Application"
-authors = ["CodePractice Team"]
+description = "Mintera Windows 11 Student Desktop Application"
+authors = ["Mintera Team"]
 edition = "2021"
 
 [build-dependencies]

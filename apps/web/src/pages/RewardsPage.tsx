@@ -81,7 +81,7 @@ const DEFAULT_REWARDS: RewardItem[] = [
   },
   {
     id: '4',
-    name: 'CodePractice futbolkasi',
+    name: 'Mintera futbolkasi',
     category: 'Kiyim',
     price: 250,
     icon: '👕',
@@ -92,7 +92,7 @@ const DEFAULT_REWARDS: RewardItem[] = [
   },
   {
     id: '5',
-    name: 'CodePractice xudisi (Tolstovka)',
+    name: 'Mintera xudisi (Tolstovka)',
     category: 'Kiyim',
     price: 400,
     icon: '🧥',
@@ -119,7 +119,7 @@ const INITIAL_ORDERS: OrderItem[] = [
     id: 'ord-1',
     studentName: 'Aliyev Jasur',
     groupName: 'Guruh-101 (Python Asoslari)',
-    rewardName: 'CodePractice futbolkasi',
+    rewardName: 'Mintera futbolkasi',
     points: 250,
     orderedAt: '29.10.2026 14:30',
     status: 'pending',
@@ -182,7 +182,7 @@ export const RewardsPage: React.FC = () => {
   const [assignedGroups] = useState<string[]>(() => {
     if (isAdmin) return [];
     try {
-      const raw = localStorage.getItem('cp_web_teachers');
+      const raw = localStorage.getItem('cp_teachers') || localStorage.getItem('cp_web_teachers');
       if (raw) {
         const teachers: any[] = JSON.parse(raw);
         const match = teachers.find(
@@ -214,9 +214,10 @@ export const RewardsPage: React.FC = () => {
       const saved = localStorage.getItem('cp_web_rewards');
       if (saved) {
         const parsed = JSON.parse(saved);
-        // Ensure all items have totalStock and stockCount
+        // Ensure all items have totalStock and stockCount and "Mintera" brand
         return parsed.map((item: any) => ({
           ...item,
+          name: (item.name || '').replace(/CodePractice/gi, 'Mintera'),
           totalStock: item.totalStock ?? (item.stockCount ? item.stockCount + 5 : 10),
           stockCount: item.stockCount ?? 10,
           visualType: item.visualType || (item.imageUrl ? 'image' : 'emoji'),
@@ -233,10 +234,15 @@ export const RewardsPage: React.FC = () => {
       const saved = localStorage.getItem('cp_web_orders');
       if (saved) {
         const parsed: OrderItem[] = JSON.parse(saved);
-        if (!parsed.some((o) => o.id === 'ord-5')) {
-          return [...parsed, INITIAL_ORDERS[4]];
-        }
-        return parsed;
+        return parsed.map((o) => {
+          const isGroup101 = o.studentName === 'Aliyev Jasur' || o.studentName === 'Karimova Malika';
+          return {
+            ...o,
+            rewardName: (o.rewardName || '').replace(/CodePractice/gi, 'Mintera'),
+            groupName: o.groupName || (isGroup101 ? 'Guruh-101 (Python Asoslari)' : 'Guruh-102 (C++ Algoritmlar)'),
+            teacherUsername: o.teacherUsername || (isGroup101 ? 'teacher1' : 'dilnoza_k'),
+          };
+        });
       }
       return INITIAL_ORDERS;
     } catch {
@@ -247,8 +253,8 @@ export const RewardsPage: React.FC = () => {
   // O'quvchilarni o'qituvchiga biriktirilgan guruhlar bo'yicha filtrlash
   const visibleOrders = orders.filter((o) => {
     if (isAdmin) return true;
-    if (o.teacherUsername && user?.username) {
-      if (o.teacherUsername.toLowerCase() === user.username.toLowerCase()) return true;
+    if (o.teacherUsername && currentUsername) {
+      return o.teacherUsername.toLowerCase() === currentUsername.toLowerCase();
     }
     const orderGroup = (o.groupName || '').toLowerCase().trim();
     return assignedGroups.some((ag) => {
@@ -257,7 +263,7 @@ export const RewardsPage: React.FC = () => {
       if (teacherGroup.includes(orderGroup) || orderGroup.includes(teacherGroup)) return true;
       const cleanO = orderGroup.replace(/[^a-z0-9]/g, '');
       const cleanT = teacherGroup.replace(/[^a-z0-9]/g, '');
-      return cleanT.includes(cleanO) || cleanO.includes(cleanT);
+      return cleanT === cleanO || cleanT.includes(cleanO) || cleanO.includes(cleanT);
     });
   });
 
@@ -1065,7 +1071,7 @@ export const RewardsPage: React.FC = () => {
                   required
                   value={formName}
                   onChange={(e) => setFormName(e.target.value)}
-                  placeholder="Masalan: Termos krujka yoki CodePractice kepkasi"
+                  placeholder="Masalan: Termos krujka yoki Mintera kepkasi"
                   className="w-full h-10 px-3 border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>

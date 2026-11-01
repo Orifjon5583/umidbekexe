@@ -36,7 +36,7 @@ export const GuidePage: React.FC<Props> = ({ onProceed, onRequestExit }) => {
         theme === 'dark' ? 'mesh-bg-dark text-slate-100' : 'mesh-bg-light text-slate-800'
       }`}
     >
-      <TitleBar title="CodePractice — O‘quvchi qo‘llanmasi" onExitRequest={onRequestExit} />
+      <TitleBar title="Mintera — O‘quvchi qo‘llanmasi" onExitRequest={onRequestExit} />
 
       <div className="flex-1 flex items-center justify-center p-6 overflow-y-auto">
         <div

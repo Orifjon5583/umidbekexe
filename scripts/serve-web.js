@@ -98,12 +98,12 @@ const server = http.createServer((req, res) => {
 
 server.on('error', (err) => {
   if (err.code === 'EADDRINUSE') {
-    console.log(`[CodePractice Web Server] Port ${PORT} band, qayta ulanmoqda...`);
+    console.log(`[Mintera Web Server] Port ${PORT} band, qayta ulanmoqda...`);
   } else {
-    console.error(`[CodePractice Web Server] Xatolik: ${err.message}`);
+    console.error(`[Mintera Web Server] Xatolik: ${err.message}`);
   }
 });
 
 server.listen(PORT, '0.0.0.0', () => {
-  console.log(`[CodePractice Web Server] http://127.0.0.1:${PORT} da muvaffaqiyatli ishga tushdi`);
+  console.log(`[Mintera Web Server] http://127.0.0.1:${PORT} da muvaffaqiyatli ishga tushdi`);
 });

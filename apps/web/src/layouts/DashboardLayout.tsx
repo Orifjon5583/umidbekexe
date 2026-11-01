@@ -74,11 +74,11 @@ export const DashboardLayout: React.FC<Props> = ({ currentTab, onTabChange, chil
                 : 'bg-gradient-to-tr from-blue-600 to-cyan-600 ring-2 ring-blue-500/30'
             }`}
           >
-            {isAdmin ? <Shield className="w-5 h-5" /> : 'CP'}
+            {isAdmin ? <Shield className="w-5 h-5" /> : 'M'}
           </div>
           <div className="overflow-hidden">
             <h1 className="font-extrabold text-base tracking-tight text-white leading-tight truncate">
-              CodePractice
+              Mintera
             </h1>
             <p className="text-[11px] text-slate-400 font-medium truncate">
               {isAdmin ? 'Administrator Paneli' : 'O‘qituvchi Paneli'}

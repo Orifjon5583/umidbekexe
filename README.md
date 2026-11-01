@@ -1,6 +1,6 @@
-# CodePractice — Dasturlash Mashqlari Platformasi
+# Mintera — Dasturlash Mashqlari Platformasi
 
-CodePractice — o‘quvchilar uchun Windows 11 desktop ilovasi va o‘qituvchilar uchun web-paneldan iborat bo‘lgan, darsdan keyingi majburiy amaliy dasturlash mashqlarini bajarish platformasi.
+Mintera — o‘quvchilar uchun Windows 11 desktop ilovasi va o‘qituvchilar uchun web-paneldan iborat bo‘lgan, darsdan keyingi majburiy amaliy dasturlash mashqlarini bajarish platformasi.
 
 ---
 

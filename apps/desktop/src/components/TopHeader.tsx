@@ -28,7 +28,7 @@ export const TopHeader: React.FC<Props> = ({
       {/* Breadcrumb Navigation */}
       <div className="flex items-center gap-2 text-xs font-semibold">
         <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
-        <span className={theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}>CodePractice</span>
+        <span className={theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}>Mintera</span>
         <span className="text-slate-400">/</span>
         <span className={theme === 'dark' ? 'text-white' : 'text-slate-800'}>{breadcrumb}</span>
       </div>

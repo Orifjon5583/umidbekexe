@@ -56,7 +56,7 @@ export const LoginPage: React.FC<Props> = ({ onLoginSuccess }) => {
         theme === 'dark' ? 'mesh-bg-dark text-slate-100' : 'mesh-bg-light text-slate-800'
       }`}
     >
-      <TitleBar title="CodePractice — Tizimga Kirish" />
+      <TitleBar title="Mintera — Tizimga Kirish" />
 
       {/* Background Decorative Mesh Gradients */}
       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[350px] bg-gradient-to-tr from-blue-600/20 via-indigo-500/15 to-cyan-400/20 blur-[120px] pointer-events-none rounded-full" />
@@ -79,7 +79,7 @@ export const LoginPage: React.FC<Props> = ({ onLoginSuccess }) => {
               >
                 <img
                   src="/icon.png"
-                  alt="CodePractice"
+                  alt="Mintera"
                   className="w-16 h-16 object-contain drop-shadow"
                 />
               </div>
@@ -91,7 +91,7 @@ export const LoginPage: React.FC<Props> = ({ onLoginSuccess }) => {
                 <span>Next-Gen Coding Lab • v2.4</span>
               </div>
               <h1 className="text-3xl lg:text-4xl font-extrabold tracking-tight bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent">
-                CodePractice
+                Mintera
               </h1>
               <p
                 className={`text-xs mt-2 leading-relaxed max-w-sm ${

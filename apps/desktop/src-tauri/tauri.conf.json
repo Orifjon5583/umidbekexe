@@ -1,6 +1,6 @@
 {
   "$schema": "https://raw.githubusercontent.com/tauri-apps/tauri/dev/crates/tauri-cli/schema.json",
-  "productName": "CodePractice",
+  "productName": "Mintera",
   "version": "1.0.0",
   "identifier": "com.codepractice.desktop",
   "build": {
@@ -12,7 +12,7 @@
   "app": {
     "windows": [
       {
-        "title": "CodePractice — Dasturlash Mashqlari",
+        "title": "Mintera — Dasturlash Mashqlari",
         "width": 1440,
         "height": 900,
         "minWidth": 1024,

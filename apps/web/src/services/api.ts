@@ -443,7 +443,7 @@ export const apiClient = {
       id: `t-${Date.now()}`,
       fullName: dto.fullName.trim(),
       username: dto.username.trim().toLowerCase().replace(/\s+/g, '_'),
-      email: dto.email || `${dto.username.toLowerCase()}@codepractice.uz`,
+      email: dto.email || `${dto.username.toLowerCase()}@mintera.uz`,
       subject: dto.subject || 'Dasturlash asoslari',
       assignedGroups: dto.assignedGroups || [],
       studentCount: (dto.assignedGroups || []).length * 15,

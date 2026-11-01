@@ -31,8 +31,8 @@ async function bootstrap() {
 
   // Swagger API Documentation
   const config = new DocumentBuilder()
-    .setTitle('CodePractice API')
-    .setDescription('CodePractice o‘quvchilar va o‘qituvchilar tizimi uchun REST API hujjatlari')
+    .setTitle('Mintera API')
+    .setDescription('Mintera o‘quvchilar va o‘qituvchilar tizimi uchun REST API hujjatlari')
     .setVersion('1.0.0')
     .addBearerAuth()
     .build();
@@ -42,7 +42,7 @@ async function bootstrap() {
 
   const port = process.env.PORT || 4000;
   await app.listen(port);
-  console.log(`[CodePractice API] Server muvaffaqiyatli ishga tushdi: http://localhost:${port}/api/v1`);
+  console.log(`[Mintera API] Server muvaffaqiyatli ishga tushdi: http://localhost:${port}/api/v1`);
   console.log(`[CodePractice API] Swagger hujjatlari: http://localhost:${port}/api/docs`);
 }
 

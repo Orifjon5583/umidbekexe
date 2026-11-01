@@ -329,7 +329,7 @@ export const INITIAL_TEACHERS: TeacherRecord[] = [
     id: 't-1',
     fullName: 'Anvar Qodirov',
     username: 'teacher1',
-    email: 'anvar.qodirov@codepractice.uz',
+    email: 'anvar.qodirov@mintera.uz',
     subject: 'Python va Algoritmlar',
     assignedGroups: ['Guruh-101 (Python Asoslari)'],
     studentCount: 18,
@@ -340,7 +340,7 @@ export const INITIAL_TEACHERS: TeacherRecord[] = [
     id: 't-2',
     fullName: 'Dilnoza Karimova',
     username: 'dilnoza_k',
-    email: 'dilnoza.karimova@codepractice.uz',
+    email: 'dilnoza.karimova@mintera.uz',
     subject: 'C++ va Algoritmlar',
     assignedGroups: ['Guruh-102 (C++ Algoritmlar)'],
     studentCount: 16,
@@ -351,7 +351,7 @@ export const INITIAL_TEACHERS: TeacherRecord[] = [
     id: 't-3',
     fullName: 'Sardorbek Rahimov',
     username: 'sardor_r',
-    email: 'sardor.rahimov@codepractice.uz',
+    email: 'sardor.rahimov@mintera.uz',
     subject: 'Olimpiada dasturlash',
     assignedGroups: ['Guruh-103 (Olimpiada dasturlash)'],
     studentCount: 14,
@@ -386,7 +386,7 @@ export interface SystemSettingsData {
 }
 
 export const INITIAL_SYSTEM_SETTINGS: SystemSettingsData = {
-  appName: 'CodePractice Enterprise',
+  appName: 'Mintera Enterprise',
   systemVersion: 'v2.4 (Windows 11 + Web Panel)',
   pythonEnabled: true,
   cppEnabled: true,

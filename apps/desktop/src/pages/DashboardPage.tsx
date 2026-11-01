@@ -138,7 +138,7 @@ export const DashboardPage: React.FC<Props> = ({
         theme === 'dark' ? 'mesh-bg-dark text-slate-100' : 'mesh-bg-light text-slate-800'
       }`}
     >
-      <TitleBar title="CodePractice — O‘quvchi boshqaruv paneli" onExitRequest={onRequestExit} />
+      <TitleBar title="Mintera — O‘quvchi boshqaruv paneli" onExitRequest={onRequestExit} />
 
       <div className="flex-1 flex overflow-hidden">
         <Sidebar

@@ -229,7 +229,7 @@ export const SystemSettingsPage: React.FC = () => {
                   <div className="flex items-center gap-1.5 mb-1.5">
                     <Sparkles className="w-4 h-4 text-amber-500" />
                     <span className="font-extrabold text-slate-900 text-sm">
-                      ✨ CodePractice AI Plus (Gemini 1.5 Pro / GPT-4o)
+                      ✨ Mintera AI Plus (Gemini 1.5 Pro / GPT-4o)
                     </span>
                   </div>
                   <p className="text-xs text-slate-600 leading-relaxed">

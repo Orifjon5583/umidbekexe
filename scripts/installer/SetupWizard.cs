@@ -37,7 +37,7 @@ namespace CodePracticeInstaller
 
         private void InitializeComponent()
         {
-            this.Text = "CodePractice v2.4.0 — O‘rnatish ustasi (Setup)";
+            this.Text = "Mintera v2.4.0 — O‘rnatish ustasi (Setup)";
             this.Size = new Size(620, 500);
             this.FormBorderStyle = FormBorderStyle.FixedDialog;
             this.MaximizeBox = false;
@@ -49,7 +49,7 @@ namespace CodePracticeInstaller
             defaultInstallDir = Path.Combine(
                 Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
                 "Programs",
-                "CodePractice"
+                "Mintera"
             );
 
             // 1. Header Panel
@@ -77,7 +77,7 @@ namespace CodePracticeInstaller
 
             lblTitle = new Label
             {
-                Text = "CodePractice O‘quvchi Dasturi",
+                Text = "Mintera O‘quvchi Dasturi",
                 Font = new Font("Segoe UI", 13F, FontStyle.Bold),
                 ForeColor = Color.White,
                 Location = new Point(205, 22),
@@ -132,7 +132,7 @@ namespace CodePracticeInstaller
                     fbd.SelectedPath = txtInstallPath.Text;
                     if (fbd.ShowDialog() == DialogResult.OK)
                     {
-                        txtInstallPath.Text = Path.Combine(fbd.SelectedPath, "CodePractice");
+                        txtInstallPath.Text = Path.Combine(fbd.SelectedPath, "Mintera");
                     }
                 }
             };
@@ -140,7 +140,7 @@ namespace CodePracticeInstaller
             // Checkboxes
             chkDesktopShortcut = new CheckBox
             {
-                Text = "Ishchi stolda (Desktop) CodePractice yorlig‘ini yaratish",
+                Text = "Ishchi stolda (Desktop) Mintera yorlig‘ini yaratish",
                 Checked = true,
                 Location = new Point(25, 200),
                 AutoSize = true,
@@ -293,7 +293,7 @@ namespace CodePracticeInstaller
                 {
                     isInstalled = true;
                     progressBar.Value = 100;
-                    lblStatus.Text = "Tabriklaymiz! CodePractice v2.4.0 muvaffaqiyatli o‘rnatildi.";
+                    lblStatus.Text = "Tabriklaymiz! Mintera v2.4.0 muvaffaqiyatli o‘rnatildi.";
                     lblStatus.ForeColor = Color.FromArgb(16, 185, 129);
                     lblStatus.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
                     btnCancel.Visible = false;
@@ -363,8 +363,8 @@ namespace CodePracticeInstaller
             if (chkDesktopShortcut.Checked)
             {
                 string desktopDir = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
-                string shortcutPath = Path.Combine(desktopDir, "CodePractice.lnk");
-                CreateWindowsShortcut(shortcutPath, targetExe, targetDir, iconFile, "CodePractice Desktop Ilovasi");
+                string shortcutPath = Path.Combine(desktopDir, "Mintera.lnk");
+                CreateWindowsShortcut(shortcutPath, targetExe, targetDir, iconFile, "Mintera Desktop Ilovasi");
             }
 
             if (chkStartMenuShortcut.Checked)
@@ -372,15 +372,15 @@ namespace CodePracticeInstaller
                 string startMenuDir = Path.Combine(
                     Environment.GetFolderPath(Environment.SpecialFolder.StartMenu),
                     "Programs",
-                    "CodePractice"
+                    "Mintera"
                 );
                 Directory.CreateDirectory(startMenuDir);
-                string shortcutPath = Path.Combine(startMenuDir, "CodePractice.lnk");
-                CreateWindowsShortcut(shortcutPath, targetExe, targetDir, iconFile, "CodePractice Desktop Ilovasi");
+                string shortcutPath = Path.Combine(startMenuDir, "Mintera.lnk");
+                CreateWindowsShortcut(shortcutPath, targetExe, targetDir, iconFile, "Mintera Desktop Ilovasi");
 
                 // Uninstall yorlig'i
-                string uninsShortcut = Path.Combine(startMenuDir, "CodePractice dasturini o‘chirish.lnk");
-                CreateWindowsShortcut(uninsShortcut, Path.Combine(targetDir, "Uninstall.exe"), targetDir, iconFile, "CodePractice O‘chirish");
+                string uninsShortcut = Path.Combine(startMenuDir, "Mintera dasturini o‘chirish.lnk");
+                CreateWindowsShortcut(uninsShortcut, Path.Combine(targetDir, "Uninstall.exe"), targetDir, iconFile, "Mintera O‘chirish");
             }
 
             // 3. Windows Registry (Uninstall ma'lumotlari)
@@ -397,14 +397,14 @@ namespace CodePracticeInstaller
 
         private void RegisterInWindowsRegistry(string installDir)
         {
-            string uninstallKey = @"Software\Microsoft\Windows\CurrentVersion\Uninstall\CodePractice";
+            string uninstallKey = @"Software\Microsoft\Windows\CurrentVersion\Uninstall\Mintera";
             using (RegistryKey key = Registry.CurrentUser.CreateSubKey(uninstallKey))
             {
                 if (key != null)
                 {
-                    key.SetValue("DisplayName", "CodePractice (v2.4.0)");
+                    key.SetValue("DisplayName", "Mintera (v2.4.0)");
                     key.SetValue("DisplayVersion", "2.4.0");
-                    key.SetValue("Publisher", "CodePractice Team");
+                    key.SetValue("Publisher", "Mintera Team");
                     key.SetValue("DisplayIcon", Path.Combine(installDir, "assets", "app.ico"));
                     key.SetValue("InstallLocation", installDir);
                     key.SetValue("UninstallString", "\"" + Path.Combine(installDir, "Uninstall.exe") + "\"");

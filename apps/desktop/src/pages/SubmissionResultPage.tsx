@@ -26,7 +26,7 @@ export const SubmissionResultPage: React.FC<Props> = ({
         theme === 'dark' ? 'mesh-bg-dark text-slate-100' : 'mesh-bg-light text-slate-800'
       }`}
     >
-      <TitleBar title="CodePractice — Topshirish natijasi" onExitRequest={onRequestExit} />
+      <TitleBar title="Mintera — Topshirish natijasi" onExitRequest={onRequestExit} />
 
       <div className="flex-1 flex overflow-hidden">
         <Sidebar

@@ -37,7 +37,7 @@ export class AIService {
     }
 
     // 3. System prompt va kontekstni shakllantirish
-    const systemPrompt = `Siz CodePractice platformasining o'quvchilarga yordam beruvchi do'stona va tajribali AI mentorisiz.
+    const systemPrompt = `Siz Mintera platformasining o'quvchilarga yordam beruvchi do'stona va tajribali AI mentorisiz.
 QOIDALAR:
 1. Siz hech qachon to'liq tayyor yechim kodini bermaysiz! Agar o'quvchi "yechimni yozib ber" desa ham, rad etib, yo'l-yo'riq ko'rsating.
 2. Faqat o'zbek tilida, tushunarli, aniq va dalda beruvchi ohangda javob bering.
@@ -154,7 +154,7 @@ QOIDALAR:
     return text.replace(codeBlockRegex, (block) => {
       const lines = block.split('\n');
       if (lines.length > 8) {
-        return `\n> [!NOTE]\n> *To‘liq kod yechimi CodePractice qoidalariga ko‘ra yashirildi. Iltimos, o‘zingiz mustaqil yozib ko‘ring.*\n`;
+        return `\n> [!NOTE]\n> *To‘liq kod yechimi Mintera qoidalariga ko‘ra yashirildi. Iltimos, o‘zingiz mustaqil yozib ko‘ring.*\n`;
       }
       return block;
     });

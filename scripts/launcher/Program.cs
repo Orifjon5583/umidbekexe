@@ -43,8 +43,8 @@ namespace CodePractice
             catch (Exception ex)
             {
                 MessageBox.Show(
-                    "CodePractice ilovasini ishga tushirishda xatolik yuz berdi:\n\n" + ex.Message,
-                    "CodePractice v2.4 — Xatolik",
+                    "Mintera ilovasini ishga tushirishda xatolik yuz berdi:\n\n" + ex.Message,
+                    "Mintera v2.4 — Xatolik",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Error
                 );

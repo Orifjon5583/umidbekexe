@@ -277,7 +277,7 @@ int main() {
     },
     {
       sender: 'ai',
-      text: 'Albatta! Masala chiziqli algoritmlarga oid. Sizga ikkita butun son beriladi.\n\nYechim topish uchun quyidagi mantiqiy qadamlarni bajaring:\n1. Standart kirish oqimidan ikkita sonni o‘qing.\n2. Ularni butun son (int) sifatida qabul qiling.\n3. Ularning arifmetik yig‘indisini hisoblab, ekranga chiqaring.\n\nEslatma: CodePractice qoidasiga muvofiq, men to‘liq tayyor kod yozib bermayman, ammo xatolik yuz bersa (SyntaxError, Runtime, Indentation) sababini tushuntirib beraman!',
+      text: 'Albatta! Masala chiziqli algoritmlarga oid. Sizga ikkita butun son beriladi.\n\nYechim topish uchun quyidagi mantiqiy qadamlarni bajaring:\n1. Standart kirish oqimidan ikkita sonni o‘qing.\n2. Ularni butun son (int) sifatida qabul qiling.\n3. Ularning arifmetik yig‘indisini hisoblab, ekranga chiqaring.\n\nEslatma: Mintera qoidasiga muvofiq, men to‘liq tayyor kod yozib bermayman, ammo xatolik yuz bersa (SyntaxError, Runtime, Indentation) sababini tushuntirib beraman!',
       time: '14:31 • AI Murabbiy',
     },
   ]);

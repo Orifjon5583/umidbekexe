@@ -44,7 +44,7 @@ export const AIAssistantDrawer: React.FC<Props> = ({
     {
       id: 'welcome',
       sender: 'ai',
-      text: 'Salom! Men sizning sun’iy intellekt mentor sizman (✨ CodePractice AI Plus faol). Masala shartini tushunishda, murakkab algoritmik va sintaktik xatolarni tahlil qilishda yordam beraman. Qoidaga ko‘ra tayyor to‘liq yechimni yozib bermayman, ammo mustaqil yechishingizga qadam-baqadam yo‘naltiraman!',
+      text: 'Salom! Men sizning sun’iy intellekt mentor sizman (✨ Mintera AI Plus faol). Masala shartini tushunishda, murakkab algoritmik va sintaktik xatolarni tahlil qilishda yordam beraman. Qoidaga ko‘ra tayyor to‘liq yechimni yozib bermayman, ammo mustaqil yechishingizga qadam-baqadam yo‘naltiraman!',
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
     },
   ]);

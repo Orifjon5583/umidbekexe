@@ -8,7 +8,7 @@ interface Props {
 }
 
 export const TitleBar: React.FC<Props> = ({
-  title = "CodePractice — Dasturlash Laboratoriyasi",
+  title = "Mintera — Dasturlash Laboratoriyasi",
   onExitRequest,
 }) => {
   const { theme, toggleTheme } = useTheme();
@@ -59,7 +59,7 @@ export const TitleBar: React.FC<Props> = ({
         <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-blue-500/10 border border-blue-500/20">
           <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
           <span className="text-[10px] font-bold tracking-wider uppercase text-blue-400">
-            CodePractice
+            Mintera
           </span>
         </div>
 

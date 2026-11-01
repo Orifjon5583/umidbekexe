@@ -68,15 +68,15 @@ export const Sidebar: React.FC<Props> = ({ currentTab, onNavigate, onRequestExit
           <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-blue-600 to-cyan-500 flex items-center justify-center p-1.5 shadow-md shadow-blue-500/20">
             <img
               src="/icon.png"
-              alt="CodePractice"
+              alt="Mintera"
               className="w-full h-full object-contain filter brightness-110"
             />
           </div>
           <div>
             <div className="flex items-center gap-1 font-extrabold text-sm tracking-tight">
-              <span className={theme === 'dark' ? 'text-white' : 'text-slate-900'}>Code</span>
+              <span className={theme === 'dark' ? 'text-white' : 'text-slate-900'}>Min</span>
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-cyan-400">
-                Practice
+                tera
               </span>
             </div>
             <div className="text-[10px] text-slate-400 font-mono tracking-wider">

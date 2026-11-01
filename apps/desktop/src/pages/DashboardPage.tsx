@@ -38,28 +38,28 @@ export const DashboardPage: React.FC<Props> = ({
       value: '5 kun',
       sub: 'Ketma-ket amaliyot 🔥',
       icon: Flame,
-      color: 'text-amber-400 bg-amber-500/10 border-amber-500/20',
+      color: 'text-amber-400 bg-amber-500/15 border-amber-500/30',
     },
     {
       title: 'Jami to‘plangan ball',
       value: '1,240 XP',
       sub: 'Guruhda 2-o‘rin 🏆',
       icon: Trophy,
-      color: 'text-blue-400 bg-blue-500/10 border-blue-500/20',
+      color: 'text-amber-300 bg-amber-500/15 border-amber-500/30',
     },
     {
       title: 'Yechilgan masalalar',
       value: '18 / 24',
       sub: '75% umumiy natija ⚡',
       icon: CheckCircle2,
-      color: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
+      color: 'text-blue-400 bg-blue-500/15 border-blue-500/30',
     },
     {
       title: 'O‘rtacha aniqlik',
       value: '94.8%',
       sub: 'Birinchi urinishda ✨',
       icon: Sparkles,
-      color: 'text-indigo-400 bg-indigo-500/10 border-indigo-500/20',
+      color: 'text-cyan-400 bg-cyan-500/15 border-cyan-500/30',
     },
   ];
 
@@ -165,7 +165,7 @@ export const DashboardPage: React.FC<Props> = ({
                     key={i}
                     className={`p-4 rounded-3xl border transition-all duration-200 hover:-translate-y-0.5 ${
                       theme === 'dark'
-                        ? 'glass-card-dark border-white/5 hover:border-white/10 shadow-lg'
+                        ? 'glass-card-dark border-blue-500/15 hover:border-blue-500/35 shadow-lg shadow-blue-950/20'
                         : 'glass-card-light border-slate-200 shadow-xs'
                     }`}
                   >
@@ -188,16 +188,16 @@ export const DashboardPage: React.FC<Props> = ({
               })}
             </div>
 
-            {/* Featured Action Banner */}
+            {/* Featured Action Banner (Mintera Royal Blue & Cyan Theme) */}
             <div
               className={`p-6 rounded-3xl border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 relative overflow-hidden ${
                 theme === 'dark'
-                  ? 'bg-gradient-to-r from-blue-950/70 via-indigo-950/50 to-slate-900/70 border-blue-500/20 shadow-xl'
-                  : 'bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200 shadow-sm'
+                  ? 'bg-gradient-to-r from-[#0C1535] via-[#0D1942] to-[#0A122E] border-blue-500/30 shadow-xl shadow-blue-950/40'
+                  : 'bg-gradient-to-r from-blue-50 via-indigo-50 to-blue-50 border-blue-200 shadow-sm'
               }`}
             >
               <div className="space-y-1.5 z-10">
-                <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-500/20 text-blue-400 border border-blue-500/30">
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-500/20 text-blue-300 border border-blue-500/30">
                   <Flame className="w-3 h-3 text-amber-400" />
                   <span>KUNLIK AMALIYOT MASHQI</span>
                 </div>
@@ -211,33 +211,33 @@ export const DashboardPage: React.FC<Props> = ({
 
               <button
                 onClick={() => onNavigateTab('code_editor')}
-                className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-bold text-xs flex items-center gap-2 shadow-lg shadow-emerald-500/20 transition active:scale-95 cursor-pointer z-10 flex-shrink-0"
+                className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 via-blue-500 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 text-white font-bold text-xs flex items-center gap-2 shadow-lg shadow-blue-500/30 transition active:scale-95 cursor-pointer z-10 flex-shrink-0"
               >
                 <Play className="w-3.5 h-3.5 fill-current" />
                 <span>Muharrirni ochish</span>
               </button>
             </div>
 
-            {/* Sovg'alar va Yutuqlar Banner */}
+            {/* Sovg'alar va Yutuqlar Banner (Mintera Gold Star Theme) */}
             <div
               className={`p-5 rounded-3xl border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 relative overflow-hidden ${
                 theme === 'dark'
-                  ? 'bg-gradient-to-r from-amber-950/40 via-purple-950/30 to-indigo-950/40 border-amber-500/20'
+                  ? 'bg-gradient-to-r from-[#1E1708]/80 via-[#141B3B] to-[#0C1430] border-amber-500/30 shadow-xl shadow-amber-950/20'
                   : 'bg-gradient-to-r from-amber-50 via-purple-50 to-indigo-50 border-amber-200 shadow-sm'
               }`}
             >
               <div className="flex items-center gap-3.5 z-10">
-                <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-amber-500 to-yellow-400 flex items-center justify-center text-slate-950 shadow-md shadow-amber-500/20 flex-shrink-0">
+                <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-amber-500 via-yellow-400 to-amber-600 flex items-center justify-center text-slate-950 shadow-md shadow-amber-500/30 flex-shrink-0">
                   <Gift className="w-6 h-6" />
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="text-xs font-black text-amber-400 font-mono">850 TANGA MAVJUD 🪙</span>
-                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-400 font-bold border border-amber-500/20">
+                    <span className="text-xs font-black text-amber-300 font-mono">850 TANGA MAVJUD 🪙</span>
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-300 font-bold border border-amber-500/25">
                       Sovg‘alar do‘koni
                     </span>
                   </div>
-                  <h4 className="text-sm font-extrabold mt-0.5">
+                  <h4 className="text-sm font-extrabold mt-0.5 text-white">
                     Xudi, futbolkalar, mexanik klaviatura va stikerlarni yutib oling!
                   </h4>
                 </div>
@@ -245,7 +245,7 @@ export const DashboardPage: React.FC<Props> = ({
 
               <button
                 onClick={() => onNavigateTab('rewards')}
-                className="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-400 hover:from-amber-400 hover:to-yellow-300 text-slate-950 font-bold text-xs flex items-center gap-1.5 shadow-md shadow-amber-500/20 transition active:scale-95 cursor-pointer z-10 flex-shrink-0"
+                className="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-500 hover:from-amber-400 hover:to-yellow-300 text-slate-950 font-bold text-xs flex items-center gap-1.5 shadow-md shadow-amber-500/25 transition active:scale-95 cursor-pointer z-10 flex-shrink-0"
               >
                 <span>Sovg‘alarni ko‘rish</span>
                 <ArrowRight className="w-3.5 h-3.5" />
@@ -273,9 +273,9 @@ export const DashboardPage: React.FC<Props> = ({
               >
                 <button
                   onClick={() => setActiveFilter('all')}
-                  className={`px-3 py-1.5 rounded-lg transition cursor-pointer ${
+                  className={`px-3 py-1.5 rounded-lg transition font-semibold cursor-pointer ${
                     activeFilter === 'all'
-                      ? 'bg-blue-600 text-white shadow-xs'
+                      ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30 border border-blue-400/30'
                       : 'hover:text-white'
                   }`}
                 >
@@ -283,9 +283,9 @@ export const DashboardPage: React.FC<Props> = ({
                 </button>
                 <button
                   onClick={() => setActiveFilter('in_progress')}
-                  className={`px-3 py-1.5 rounded-lg transition cursor-pointer ${
+                  className={`px-3 py-1.5 rounded-lg transition font-semibold cursor-pointer ${
                     activeFilter === 'in_progress'
-                      ? 'bg-blue-600 text-white shadow-xs'
+                      ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30 border border-blue-400/30'
                       : 'hover:text-white'
                   }`}
                 >
@@ -293,9 +293,9 @@ export const DashboardPage: React.FC<Props> = ({
                 </button>
                 <button
                   onClick={() => setActiveFilter('completed')}
-                  className={`px-3 py-1.5 rounded-lg transition cursor-pointer ${
+                  className={`px-3 py-1.5 rounded-lg transition font-semibold cursor-pointer ${
                     activeFilter === 'completed'
-                      ? 'bg-blue-600 text-white shadow-xs'
+                      ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30 border border-blue-400/30'
                       : 'hover:text-white'
                   }`}
                 >

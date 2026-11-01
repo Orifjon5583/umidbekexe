@@ -33,23 +33,24 @@
 
 /* Linear / Vercel style mesh gradients */
 .mesh-bg-dark {
-  background: radial-gradient(ellipse 80% 50% at 50% -20%, rgba(59, 130, 246, 0.15), transparent 70%),
-              radial-gradient(circle at 10% 80%, rgba(99, 102, 241, 0.08), transparent 50%),
-              #060913;
+  background: radial-gradient(ellipse 90% 50% at 50% -20%, rgba(37, 99, 235, 0.22), transparent 70%),
+              radial-gradient(circle at 85% 15%, rgba(245, 158, 11, 0.08), transparent 45%),
+              radial-gradient(circle at 10% 80%, rgba(30, 58, 138, 0.15), transparent 50%),
+              #070B18;
 }
 
 .mesh-bg-light {
-  background: radial-gradient(ellipse 80% 50% at 50% -20%, rgba(59, 130, 246, 0.08), transparent 70%),
-              radial-gradient(circle at 10% 80%, rgba(99, 102, 241, 0.05), transparent 50%),
+  background: radial-gradient(ellipse 80% 50% at 50% -20%, rgba(37, 99, 235, 0.09), transparent 70%),
+              radial-gradient(circle at 85% 15%, rgba(245, 158, 11, 0.05), transparent 45%),
               #F8FAFC;
 }
 
 /* Glassmorphism surfaces */
 .glass-card-dark {
-  background: rgba(13, 19, 33, 0.75);
+  background: rgba(11, 19, 43, 0.78);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(59, 130, 246, 0.16);
 }
 
 .glass-card-light {

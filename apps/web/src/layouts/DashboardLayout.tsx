@@ -67,14 +67,14 @@ export const DashboardLayout: React.FC<Props> = ({ currentTab, onTabChange, chil
       {/* Sidebar */}
       <aside className="w-64 bg-slate-900 text-white flex flex-col flex-shrink-0 border-r border-slate-800">
         <div className="h-16 flex items-center px-6 gap-3 border-b border-slate-800 bg-slate-950">
-          <div className="w-10 h-10 rounded-xl bg-slate-900 border border-blue-500/30 flex items-center justify-center p-1 shadow-md shadow-blue-500/20 flex-shrink-0">
-            <img src="/icon.png" alt="Mintera" className="w-full h-full object-contain" />
+          <div className="w-10 h-10 rounded-xl bg-[#091128] border border-blue-500/30 flex items-center justify-center p-1 shadow-md shadow-blue-500/20 flex-shrink-0">
+            <img src="/icon.png" alt="Mintera" className="w-full h-full object-contain filter drop-shadow" />
           </div>
           <div className="overflow-hidden">
-            <h1 className="font-extrabold text-base tracking-tight text-white leading-tight truncate">
-              Mintera
+            <h1 className="font-extrabold text-base tracking-tight leading-none text-white truncate mb-1">
+              Min<span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-amber-300">tera</span>
             </h1>
-            <p className="text-[11px] text-slate-400 font-medium truncate">
+            <p className="text-[10px] text-amber-400 font-mono font-bold truncate">
               {isAdmin ? 'Administrator Paneli' : 'O‘qituvchi Paneli'}
             </p>
           </div>

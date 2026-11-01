@@ -56,16 +56,16 @@ export const Sidebar: React.FC<Props> = ({ currentTab, onNavigate, onRequestExit
 
   return (
     <aside
-      className={`w-60 flex flex-col justify-between flex-shrink-0 select-none p-4 border-r transition-colors duration-200 ${
+      className={`w-64 flex flex-col justify-between flex-shrink-0 select-none p-4 border-r transition-colors duration-200 ${
         theme === 'dark'
-          ? 'bg-[#080C1A]/95 backdrop-blur-xl border-white/5 text-slate-300'
+          ? 'bg-[#070B18] border-blue-500/10 text-slate-300'
           : 'bg-white border-slate-200 text-slate-700'
       }`}
     >
       <div className="space-y-6">
-        {/* Brand Header */}
-        <div className="flex items-center gap-3 px-2 pt-1 pb-3 border-b border-white/5">
-          <div className="w-9 h-9 rounded-xl bg-slate-900 border border-blue-500/20 flex items-center justify-center p-1 shadow-md shadow-blue-500/15 flex-shrink-0">
+        {/* Brand Header with 3D Mintera Emblem */}
+        <div className="flex items-center gap-3 px-2 pt-1 pb-3.5 border-b border-white/5">
+          <div className="w-10 h-10 rounded-2xl bg-[#0D1738] border border-blue-500/30 p-1 flex items-center justify-center shadow-lg shadow-blue-500/20 flex-shrink-0">
             <img
               src="/icon.png"
               alt="Mintera"
@@ -73,21 +73,21 @@ export const Sidebar: React.FC<Props> = ({ currentTab, onNavigate, onRequestExit
             />
           </div>
           <div>
-            <div className="flex items-center gap-1 font-extrabold text-sm tracking-tight">
+            <div className="flex items-center gap-1 font-extrabold text-base tracking-tight leading-none mb-1">
               <span className={theme === 'dark' ? 'text-white' : 'text-slate-900'}>Min</span>
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-cyan-400">
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-sky-300 to-amber-300">
                 tera
               </span>
             </div>
-            <div className="text-[10px] text-slate-400 font-mono tracking-wider">
+            <div className="text-[10px] text-amber-400/90 font-mono tracking-wider font-bold">
               STUDENT EDITION
             </div>
           </div>
         </div>
 
         {/* Asosiy bo‘limlar ro‘yxati */}
-        <nav className="space-y-1">
-          <div className="px-2.5 pb-1 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+        <nav className="space-y-1.5">
+          <div className="px-2.5 pb-1 text-[10px] font-bold uppercase tracking-wider text-slate-500">
             Asosiy bo‘limlar
           </div>
 
@@ -98,22 +98,22 @@ export const Sidebar: React.FC<Props> = ({ currentTab, onNavigate, onRequestExit
               <button
                 key={item.id}
                 onClick={() => onNavigate(item.id)}
-                className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold transition-all duration-150 cursor-pointer ${
+                className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all duration-150 cursor-pointer ${
                   isActive
-                    ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/25'
+                    ? 'bg-gradient-to-r from-blue-600 via-blue-500 to-blue-600 text-white shadow-lg shadow-blue-500/30 border-l-4 border-amber-400'
                     : theme === 'dark'
                     ? 'text-slate-400 hover:text-white hover:bg-white/5'
                     : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
                 }`}
               >
                 <div className="flex items-center gap-3">
-                  <Icon className={`w-4 h-4 ${isActive ? 'text-white' : 'text-slate-400'}`} />
+                  <Icon className={`w-4 h-4 ${isActive ? 'text-amber-300' : 'text-slate-400'}`} />
                   <span>{item.label}</span>
                 </div>
 
                 {item.badge && (
                   <span
-                    className={`text-[10px] font-mono font-bold px-1.5 py-0.5 rounded-md ${
+                    className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-md ${
                       isActive
                         ? 'bg-white/20 text-white'
                         : item.badgeColor ||
@@ -131,31 +131,33 @@ export const Sidebar: React.FC<Props> = ({ currentTab, onNavigate, onRequestExit
         </nav>
       </div>
 
-      {/* AI Status Card & Logout */}
+      {/* AI Status Card & Sole Exit Button with PIN Security */}
       <div className="space-y-3 pt-3 border-t border-white/5">
         <div
-          className={`p-3 rounded-2xl border ${
+          className={`p-3.5 rounded-2xl border transition-all ${
             theme === 'dark'
-              ? 'bg-gradient-to-b from-blue-950/30 to-indigo-950/20 border-blue-500/20 text-slate-300'
+              ? 'bg-gradient-to-br from-[#0D1738]/90 via-[#0A1128] to-[#1C1608]/40 border-amber-500/25 shadow-lg shadow-amber-500/5 text-slate-300'
               : 'bg-blue-50/70 border-blue-200/80 text-blue-950'
           }`}
         >
           <div className="flex items-center gap-2 text-xs font-bold mb-1">
             <Sparkles className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
-            <span>AI Murabbiy faol</span>
+            <span className="text-white font-extrabold tracking-tight">Mintera AI Plus</span>
           </div>
           <p className="text-[10px] text-slate-400 leading-tight">
-            Kod va xatolarni tushuntirish uchun doimo yordamga tayyor.
+            Algoritmik murabbiy har bir mashqda yordamga tayyor.
           </p>
         </div>
 
-        <button
-          onClick={onRequestExit}
-          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 transition cursor-pointer"
-        >
-          <LogOut className="w-4 h-4" />
-          <span>Ilovadan chiqish</span>
-        </button>
+        {onRequestExit && (
+          <button
+            onClick={onRequestExit}
+            className="w-full flex items-center justify-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-bold text-rose-400 hover:text-white bg-rose-500/10 hover:bg-rose-600 border border-rose-500/20 transition-all cursor-pointer shadow-sm active:scale-98"
+          >
+            <LogOut className="w-4 h-4" />
+            <span>Ilovadan chiqish</span>
+          </button>
+        )}
       </div>
     </aside>
   );

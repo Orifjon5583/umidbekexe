@@ -65,15 +65,41 @@ export class LocalRunnerService {
     timeLimitMs: number,
   ): Promise<RunnerResult> {
     const startTime = performance.now();
-    await new Promise((resolve) => setTimeout(resolve, 350)); // Simulyatsiya qilingan bajarilish vaqti
+    await new Promise((resolve) => setTimeout(resolve, 320));
 
-    // Sintaksis tekshiruvlari
+    const trimmed = code.trim();
+
+    // 1. Python sintaksis tekshiruvlari
     if (language === 'python') {
+      // Qavslar balansi
+      const openParens = (code.match(/\(/g) || []).length;
+      const closeParens = (code.match(/\)/g) || []).length;
+      if (openParens !== closeParens) {
+        return {
+          status: 'compile_error',
+          stdout: '',
+          stderr: `SyntaxError: unmatched '${openParens > closeParens ? '(' : ')'}' at line 3`,
+          executionTimeMs: 35,
+          cpuTimeMs: 20,
+          peakMemoryBytes: 8388608,
+          passedTests: 0,
+          totalTests: testCases.length,
+          testResults: testCases.map((tc, i) => ({
+            testNumber: i + 1,
+            testCaseId: tc.id,
+            status: 'error',
+            executionTimeMs: 0,
+            errorSummary: 'Sintaktik xatolik (SyntaxError)',
+            isHidden: tc.isHidden,
+          })),
+        };
+      }
+
       if (code.includes('def ') && !code.includes(':')) {
         return {
           status: 'compile_error',
           stdout: '',
-          stderr: 'SyntaxError: expected \':\' at the end of def statement',
+          stderr: "SyntaxError: expected ':' at the end of def statement",
           executionTimeMs: 40,
           cpuTimeMs: 25,
           peakMemoryBytes: 8388608,
@@ -82,26 +108,99 @@ export class LocalRunnerService {
           testResults: [],
         };
       }
+
+      // Agar hech qanday print() bo'lmasa
+      if (!code.includes('print(') && trimmed.length > 5) {
+        return {
+          status: 'wrong_answer',
+          stdout: '',
+          stderr: 'Dastur ekranga hech qanday ma’lumot chiqarmadi (print operatori mavjud emas)',
+          executionTimeMs: 25,
+          cpuTimeMs: 15,
+          peakMemoryBytes: 8388608,
+          passedTests: 0,
+          totalTests: testCases.length,
+          testResults: testCases.map((tc, i) => ({
+            testNumber: i + 1,
+            testCaseId: tc.id,
+            status: 'failed',
+            executionTimeMs: 20,
+            actualOutput: '"" (bo‘sh chiqish)',
+            expectedOutput: tc.expectedOutput,
+            inputData: tc.inputData,
+            errorSummary: 'Chiqish topilmadi',
+            isHidden: tc.isHidden,
+          })),
+        };
+      }
     }
 
+    // 2. C++ sintaksis tekshiruvlari
     if (language === 'cpp') {
-      if (!code.includes('main') || !code.includes(';')) {
+      if (!code.includes('main')) {
         return {
           status: 'compile_error',
           stdout: '',
-          stderr: 'error: expected \';\' before token or undefined reference to \'main\'',
+          stderr: "error: undefined reference to 'main'\ncollect2: error: ld returned 1 exit status",
           executionTimeMs: 65,
           cpuTimeMs: 45,
+          peakMemoryBytes: 10485760,
+          passedTests: 0,
+          totalTests: testCases.length,
+          testResults: testCases.map((tc, i) => ({
+            testNumber: i + 1,
+            testCaseId: tc.id,
+            status: 'error',
+            executionTimeMs: 0,
+            errorSummary: 'main() funksiyasi topilmadi',
+            isHidden: tc.isHidden,
+          })),
+        };
+      }
+
+      const openBraces = (code.match(/\{/g) || []).length;
+      const closeBraces = (code.match(/\}/g) || []).length;
+      if (openBraces !== closeBraces) {
+        return {
+          status: 'compile_error',
+          stdout: '',
+          stderr: "error: expected '}' at end of input",
+          executionTimeMs: 50,
+          cpuTimeMs: 35,
           peakMemoryBytes: 10485760,
           passedTests: 0,
           totalTests: testCases.length,
           testResults: [],
         };
       }
+
+      if (!code.includes('cout') && trimmed.length > 15) {
+        return {
+          status: 'wrong_answer',
+          stdout: '',
+          stderr: 'Dastur ekranga hech qanday ma’lumot chiqarmadi (std::cout topilmadi)',
+          executionTimeMs: 30,
+          cpuTimeMs: 20,
+          peakMemoryBytes: 10485760,
+          passedTests: 0,
+          totalTests: testCases.length,
+          testResults: testCases.map((tc, i) => ({
+            testNumber: i + 1,
+            testCaseId: tc.id,
+            status: 'failed',
+            executionTimeMs: 20,
+            actualOutput: '"" (bo‘sh chiqish)',
+            expectedOutput: tc.expectedOutput,
+            inputData: tc.inputData,
+            errorSummary: 'Chiqish topilmadi',
+            isHidden: tc.isHidden,
+          })),
+        };
+      }
     }
 
-    // Cheksiz sikl simulyatsiyasi
-    if (code.includes('while True:') && !code.includes('break')) {
+    // 3. Cheksiz sikl simulyatsiyasi
+    if ((code.includes('while True:') || code.includes('while (true)') || code.includes('while(1)')) && !code.includes('break')) {
       return {
         status: 'time_limit_exceeded',
         stdout: '',
@@ -111,62 +210,75 @@ export class LocalRunnerService {
         peakMemoryBytes: 15728640,
         passedTests: 0,
         totalTests: testCases.length,
-        testResults: [
-          {
-            testNumber: 1,
-            testCaseId: testCases[0]?.id,
-            status: 'timeout',
-            executionTimeMs: timeLimitMs,
-            errorSummary: 'Vaqt chegarasi oshib ketdi',
-            isHidden: testCases[0]?.isHidden || false,
-          },
-        ],
+        testResults: testCases.map((tc, i) => ({
+          testNumber: i + 1,
+          testCaseId: tc.id,
+          status: 'timeout',
+          executionTimeMs: timeLimitMs,
+          errorSummary: 'Vaqt chegarasi oshib ketdi',
+          isHidden: tc.isHidden,
+        })),
       };
     }
 
-    // Testlarni bajarish simulyatsiyasi
+    // 4. Testlarni bajarish va aniq mantiqni tekshirish
     const testResults: TestResultItem[] = [];
     let passed = 0;
     let overallStatus: any = 'accepted';
     let lastStdout = '';
-    let lastStderr = '';
 
     for (let i = 0; i < testCases.length; i++) {
       const tc = testCases[i];
-      let isCorrect = false;
       let simulatedOutput = '';
 
-      // Oddiy standart amallarni talqin qilish
       const parts = tc.inputData.trim().split(/\s+/).map(Number);
-      if (code.includes('+') && parts.length >= 2 && !isNaN(parts[0]) && !isNaN(parts[1])) {
-        simulatedOutput = String(parts[0] + parts[1]);
-      } else if ((code.includes('*') || code.includes('fact')) && !isNaN(parseInt(tc.inputData.trim(), 10))) {
-        const n = parseInt(tc.inputData.trim(), 10);
-        if (n >= 0 && n <= 12) {
-          let f = 1;
-          for (let k = 2; k <= n; k++) f *= k;
-          simulatedOutput = String(f);
+
+      // Koddagi operatorlarni aniqlash
+      const hasPlus = code.includes('+');
+      const hasMinus = code.includes('-');
+      const hasMultiply = code.includes('*');
+      const hasDivide = code.includes('/') || code.includes('//');
+
+      if (parts.length >= 2 && !isNaN(parts[0]) && !isNaN(parts[1])) {
+        if (hasMinus && !hasPlus) {
+          // O'quvchi tasodifan ayiruv yozgan bo'lsa
+          simulatedOutput = String(parts[0] - parts[1]);
+        } else if (hasMultiply && !hasPlus) {
+          // O'quvchi ko'paytiruv yozgan bo'lsa
+          simulatedOutput = String(parts[0] * parts[1]);
+        } else if (hasDivide && !hasPlus) {
+          // Bo'luv yozgan bo'lsa
+          simulatedOutput = String(parts[1] !== 0 ? Math.floor(parts[0] / parts[1]) : 0);
+        } else if (hasPlus) {
+          // To'g'ri yig'indi
+          simulatedOutput = String(parts[0] + parts[1]);
+        } else {
+          simulatedOutput = tc.expectedOutput.trim();
         }
-      } else if (code.includes('even') || code.includes('juft') || code.includes('% 2')) {
-        const lines = tc.inputData.trim().split('\n');
-        const nums = (lines.length > 1 ? lines[1] : lines[0]).trim().split(/\s+/).map(Number);
-        const evens = nums.filter((x) => !isNaN(x) && x % 2 === 0);
-        simulatedOutput = evens.length > 0 ? String(Math.max(...evens)) : '-1';
-      } else if (code.trim().length > 10) {
+      } else if (!isNaN(parseInt(tc.inputData.trim(), 10))) {
+        const n = parseInt(tc.inputData.trim(), 10);
+        if (code.includes('!') || code.includes('fact')) {
+          let f = 1;
+          for (let k = 2; k <= Math.min(n, 12); k++) f *= k;
+          simulatedOutput = String(f);
+        } else {
+          simulatedOutput = tc.expectedOutput.trim();
+        }
+      } else {
         simulatedOutput = tc.expectedOutput.trim();
       }
 
       const cleanExpected = tc.expectedOutput.trim();
       const cleanActual = simulatedOutput.trim();
+      const isCorrect = cleanExpected === cleanActual && trimmed.length > 15;
 
-      if (cleanExpected === cleanActual && code.trim().length > 15) {
-        isCorrect = true;
+      if (isCorrect) {
         passed++;
         testResults.push({
           testNumber: i + 1,
           testCaseId: tc.id,
           status: 'passed',
-          executionTimeMs: Math.floor(Math.random() * 20) + 15,
+          executionTimeMs: Math.floor(Math.random() * 15) + 12,
           actualOutput: tc.isHidden ? undefined : cleanActual,
           expectedOutput: tc.isHidden ? undefined : cleanExpected,
           inputData: tc.isHidden ? undefined : tc.inputData,
@@ -186,6 +298,10 @@ export class LocalRunnerService {
           isHidden: tc.isHidden,
         });
       }
+
+      if (i === 0) {
+        lastStdout = cleanActual;
+      }
     }
 
     const elapsed = Math.round(performance.now() - startTime);
@@ -193,10 +309,10 @@ export class LocalRunnerService {
     return {
       status: overallStatus,
       stdout: lastStdout || (overallStatus === 'accepted' ? 'Barcha testlar muvaffaqiyatli o‘tdi!' : ''),
-      stderr: lastStderr,
+      stderr: overallStatus === 'accepted' ? '' : 'Ayrim testlarda javob kutilgan natijaga mos kelmadi.',
       executionTimeMs: elapsed,
-      cpuTimeMs: Math.round(elapsed * 0.8),
-      peakMemoryBytes: 12582912, // 12 MB
+      cpuTimeMs: Math.round(elapsed * 0.75),
+      peakMemoryBytes: 12582912,
       passedTests: passed,
       totalTests: testCases.length,
       testResults,

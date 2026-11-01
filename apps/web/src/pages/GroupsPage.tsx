@@ -21,6 +21,10 @@ import {
 } from 'lucide-react';
 
 export const GroupsPage: React.FC = () => {
+  const userJson = localStorage.getItem('cp_user');
+  const user = userJson ? JSON.parse(userJson) : null;
+  const isAdmin = user?.role === 'admin';
+
   const [groups, setGroups] = useState<Group[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedGroup, setSelectedGroup] = useState<GroupWithMembers | null>(null);
@@ -288,25 +292,41 @@ export const GroupsPage: React.FC = () => {
         </div>
       )}
 
+      {/* Teacher View Notice */}
+      {!isAdmin && (
+        <div className="bg-blue-50 border border-blue-200 rounded-2xl p-4 flex items-start sm:items-center gap-3.5 text-blue-900 shadow-xs">
+          <div className="w-9 h-9 rounded-xl bg-blue-100 flex items-center justify-center flex-shrink-0 text-blue-700">
+            <AlertCircle className="w-5 h-5" />
+          </div>
+          <div className="flex-1 text-sm">
+            <span className="font-bold">O‘qituvchi ishchi maydoni:</span> Sizga biriktirilgan guruhlar va ularning o‘quvchilari ro‘yxati. Yangi guruh ochish va yangi o‘quvchilarni guruhga qo‘shish faqat Administrator tomonidan amalga oshiriladi.
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h2 className="text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
             <Users className="w-7 h-7 text-blue-600" />
-            O‘quv guruhlari va o‘quvchilar boshqaruvi
+            {isAdmin ? 'O‘quv guruhlari va o‘quvchilar boshqaruvi' : 'Mening guruhlarim va o‘quvchilarim'}
           </h2>
           <p className="text-sm text-slate-500 mt-1">
-            Guruhlar nomini tahrirlash, o‘quvchi qo‘shish, guruhdan chiqarish va o‘quvchi parollarini o‘zgartirish
+            {isAdmin
+              ? 'Guruhlar ochish, guruh nomini tahrirlash, yangi o‘quvchilarni ro‘yxatdan o‘tkazish va parollarni boshqarish'
+              : 'Sizga biriktirilgan guruhlar va ulardagi o‘quvchilar tarkibini ko‘rish'}
           </p>
         </div>
 
-        <button
-          onClick={handleOpenCreateGroup}
-          className="h-11 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-semibold flex items-center gap-2 shadow-sm transition"
-        >
-          <Plus className="w-4 h-4" />
-          Yangi guruh ochish
-        </button>
+        {isAdmin && (
+          <button
+            onClick={handleOpenCreateGroup}
+            className="h-11 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-semibold flex items-center gap-2 shadow-sm transition"
+          >
+            <Plus className="w-4 h-4" />
+            Yangi guruh ochish
+          </button>
+        )}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -360,20 +380,24 @@ export const GroupsPage: React.FC = () => {
                       </td>
                       <td className="px-6 py-4 text-right">
                         <div className="flex items-center justify-end gap-1.5" onClick={(e) => e.stopPropagation()}>
-                          <button
-                            onClick={(e) => handleOpenEditGroup(g, e)}
-                            title="Guruh nomini tahrirlash"
-                            className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition"
-                          >
-                            <Edit2 className="w-4 h-4" />
-                          </button>
-                          <button
-                            onClick={(e) => handleDeleteGroup(g.id, g.name, e)}
-                            title="Guruhni o‘chirish"
-                            className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
+                          {isAdmin && (
+                            <>
+                              <button
+                                onClick={(e) => handleOpenEditGroup(g, e)}
+                                title="Guruh nomini tahrirlash"
+                                className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition"
+                              >
+                                <Edit2 className="w-4 h-4" />
+                              </button>
+                              <button
+                                onClick={(e) => handleDeleteGroup(g.id, g.name, e)}
+                                title="Guruhni o‘chirish"
+                                className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </>
+                          )}
                           <button
                             onClick={() => handleSelectGroup(g)}
                             className="text-blue-600 hover:text-blue-800 text-xs font-bold inline-flex items-center gap-0.5 ml-1"
@@ -407,26 +431,30 @@ export const GroupsPage: React.FC = () => {
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
                     <h3 className="font-bold text-slate-900 text-base truncate">{selectedGroup.name}</h3>
-                    <button
-                      onClick={() => handleOpenEditGroup(selectedGroup)}
-                      title="Guruh nomini o‘zgartirish"
-                      className="p-1 text-slate-400 hover:text-blue-600 rounded"
-                    >
-                      <Edit2 className="w-3.5 h-3.5" />
-                    </button>
+                    {isAdmin && (
+                      <button
+                        onClick={() => handleOpenEditGroup(selectedGroup)}
+                        title="Guruh nomini o‘zgartirish"
+                        className="p-1 text-slate-400 hover:text-blue-600 rounded"
+                      >
+                        <Edit2 className="w-3.5 h-3.5" />
+                      </button>
+                    )}
                   </div>
                   <p className="text-xs text-slate-500 mt-0.5">
                     Guruhdagi o‘quvchilar soni: <strong>{selectedGroup.members.length} nafar</strong>
                   </p>
                 </div>
 
-                <button
-                  onClick={handleOpenAddStudent}
-                  className="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-xs transition flex-shrink-0"
-                >
-                  <UserPlus className="w-3.5 h-3.5" />
-                  O‘quvchi qo‘shish
-                </button>
+                {isAdmin && (
+                  <button
+                    onClick={handleOpenAddStudent}
+                    className="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-xs transition flex-shrink-0"
+                  >
+                    <UserPlus className="w-3.5 h-3.5" />
+                    O‘quvchi qo‘shish
+                  </button>
+                )}
               </div>
 
               {/* Members List with Password Edit & Remove Actions */}
@@ -459,14 +487,16 @@ export const GroupsPage: React.FC = () => {
                         <span className="hidden sm:inline">Parol</span>
                       </button>
 
-                      {/* Remove Student Button */}
-                      <button
-                        onClick={() => handleRemoveStudent(m.student.id, m.student.fullName)}
-                        title="Guruhdan chiqarish"
-                        className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
-                      >
-                        <UserMinus className="w-4 h-4" />
-                      </button>
+                      {/* Remove Student Button (Admin Only) */}
+                      {isAdmin && (
+                        <button
+                          onClick={() => handleRemoveStudent(m.student.id, m.student.fullName)}
+                          title="Guruhdan chiqarish"
+                          className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
+                        >
+                          <UserMinus className="w-4 h-4" />
+                        </button>
+                      )}
                     </div>
                   </div>
                 ))}
@@ -476,7 +506,9 @@ export const GroupsPage: React.FC = () => {
                     <UserPlus className="w-10 h-10 mb-2 stroke-1 text-slate-300" />
                     <p className="text-sm font-semibold">Guruhda o‘quvchilar yo‘q</p>
                     <p className="text-xs text-slate-400 mt-1 max-w-xs">
-                      Yuqoridagi "O‘quvchi qo‘shish" tugmasini bosib yangi o‘quvchi kiriting.
+                      {isAdmin
+                        ? 'Yuqoridagi "O‘quvchi qo‘shish" tugmasini bosib yangi o‘quvchi kiriting.'
+                        : 'Ushbu guruhga administrator tomonidan o‘quvchilar biriktiriladi.'}
                     </p>
                   </div>
                 )}
@@ -491,8 +523,8 @@ export const GroupsPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Modal: Group Create or Edit Name */}
-      {isGroupModalOpen && (
+      {/* Modal: Group Create or Edit Name (Admin Only) */}
+      {isAdmin && isGroupModalOpen && (
         <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 border border-slate-200">
             <div className="flex items-center justify-between pb-3 mb-4 border-b border-slate-100">
@@ -543,8 +575,8 @@ export const GroupsPage: React.FC = () => {
         </div>
       )}
 
-      {/* Modal: Add Student to Group (Create New Student OR Select Existing) */}
-      {isAddStudentOpen && (
+      {/* Modal: Add Student to Group (Admin Only) */}
+      {isAdmin && isAddStudentOpen && (
         <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-6 border border-slate-200">
             <div className="flex items-center justify-between pb-3 mb-4 border-b border-slate-100">

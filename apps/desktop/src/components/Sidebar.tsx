@@ -65,11 +65,11 @@ export const Sidebar: React.FC<Props> = ({ currentTab, onNavigate, onRequestExit
       <div className="space-y-6">
         {/* Brand Header */}
         <div className="flex items-center gap-3 px-2 pt-1 pb-3 border-b border-white/5">
-          <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-blue-600 to-cyan-500 flex items-center justify-center p-1.5 shadow-md shadow-blue-500/20">
+          <div className="w-9 h-9 rounded-xl bg-slate-900 border border-blue-500/20 flex items-center justify-center p-1 shadow-md shadow-blue-500/15 flex-shrink-0">
             <img
               src="/icon.png"
               alt="Mintera"
-              className="w-full h-full object-contain filter brightness-110"
+              className="w-full h-full object-contain filter drop-shadow"
             />
           </div>
           <div>

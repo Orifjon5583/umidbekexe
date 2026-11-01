@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading;
 using System.Windows.Forms;
 
-namespace CodePractice
+namespace Mintera
 {
     class Program
     {
@@ -187,7 +187,7 @@ namespace CodePractice
 
             string userDataDir = Path.Combine(
                 Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                "CodePracticeStudentApp"
+                "MinteraStudentApp"
             );
 
             // DIQQAT: localhost o'rniga 127.0.0.1 ishlatiladi (Windows 11 IPv6 timeout xatosini oldini olish uchun)

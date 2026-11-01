@@ -244,7 +244,11 @@ namespace CodePracticeInstaller
                 // Tugatish / Ishga tushirish bosqichi
                 if (chkLaunchAfter.Checked)
                 {
-                    string targetExe = Path.Combine(txtInstallPath.Text, "CodePractice.exe");
+                    string targetExe = Path.Combine(txtInstallPath.Text, "Mintera.exe");
+                    if (!File.Exists(targetExe))
+                    {
+                        targetExe = Path.Combine(txtInstallPath.Text, "CodePractice.exe");
+                    }
                     if (File.Exists(targetExe))
                     {
                         Process.Start(new ProcessStartInfo
@@ -316,6 +320,8 @@ namespace CodePracticeInstaller
 
             // 1. Asosiy fayllarni nusxalash
             bw.ReportProgress(25, "Ilova fayllari va konfiguratsiyalar ko‘chirilmoqda...");
+            CopyFileIfExists(Path.Combine(sourceDir, "Mintera.exe"), Path.Combine(targetDir, "Mintera.exe"));
+            CopyFileIfExists(Path.Combine(sourceDir, "Mintera.exe"), Path.Combine(targetDir, "CodePractice.exe"));
             CopyFileIfExists(Path.Combine(sourceDir, "CodePractice.exe"), Path.Combine(targetDir, "CodePractice.exe"));
             CopyFileIfExists(Path.Combine(sourceDir, "Uninstall.exe"), Path.Combine(targetDir, "Uninstall.exe"));
 
@@ -357,7 +363,8 @@ namespace CodePracticeInstaller
 
             // 2. Shortcuts yaratish
             bw.ReportProgress(80, "Windows yorliqlari (Shortcuts) yaratilmoqda...");
-            string targetExe = Path.Combine(targetDir, "CodePractice.exe");
+            string targetExe = Path.Combine(targetDir, "Mintera.exe");
+            if (!File.Exists(targetExe)) targetExe = Path.Combine(targetDir, "CodePractice.exe");
             string iconFile = Path.Combine(targetAssets, "app.ico");
 
             if (chkDesktopShortcut.Checked)

@@ -52,7 +52,7 @@ codepractice/
 ## 💻 Windows 11 Desktop (.exe) Ilovasi
 
 Loyiha o‘quvchilar uchun to‘liq Windows 11 `.exe` formatida tayyorlangan:
-- **Darhol ishga tushirish:** Loyiha papkasidagi **`CodePractice.exe`** faylini ikki marta bosing. U backend server va ilova oynasini avtomatik ko‘taradi.
+- **Darhol ishga tushirish:** Loyiha papkasidagi **`Mintera.exe`** (yoki **`Mintera-Setup.exe`**) faylini ikki marta bosing. U backend server va ilova oynasini avtomatik ko‘taradi.
 - **Tauri 2 orqali .exe va installer yig‘ish:** `build-windows-exe.bat` faylini ishga tushiring yoki [INSTALL-WINDOWS-EXE.md](file:///c:/Users/legio/OneDrive/Ishchi%20stol/umitbekexe/INSTALL-WINDOWS-EXE.md) ga qarang.
 
 ---

@@ -10,21 +10,21 @@ Loyiha papkasida rasmiy **`CodePractice-Setup.exe`** (Mintera) o‘rnatish fayli
 
 ```text
 umitbekexe/
-├── CodePractice-Setup.exe   <--- Dasturni o‘rnatish ustasi (Installer)
-├── CodePractice.exe         <--- Asosiy desktop ilova (Portable launcher)
+├── Mintera-Setup.exe        <--- Dasturni o‘rnatish ustasi (Yangi Mintera Installer)
+├── Mintera.exe              <--- Asosiy desktop ilova (Yangi Mintera Launcher)
 ├── Uninstall.exe            <--- Dasturni to‘liq o‘chirish vositasi
 ├── assets/
 │   ├── logo.png             <--- Rasmiy Mintera logotipi
-│   ├── icon.png             <--- Squircle dastur piktogrammasi
+│   ├── icon.png             <--- Yangi 3D Mintera piktogrammasi
 │   └── app.ico              <--- Windows piktogrammasi
 └── build-windows-exe.bat    <--- Avtomatik qayta yig‘ish skripti
 ```
 
 ### O‘rnatish bosqichlari:
-1. **`CodePractice-Setup.exe`** faylini ikki marta bosing.
+1. **`Mintera-Setup.exe`** faylini ikki marta bosing.
 2. O‘rnatish oynasida (Setup Wizard):
    - Rasmiy **Mintera** logotipi va dastur ta’rifi chiqadi;
-   - O‘rnatish papkasi tanlanadi (standart: `%LOCALAPPDATA%\Programs\CodePractice`);
+   - O‘rnatish papkasi tanlanadi (standart: `%LOCALAPPDATA%\Programs\Mintera`);
    - Quyidagi qulayliklar avtomatik yoqilgan bo‘ladi:
      - [✓] Ishchi stolda (Desktop) **Mintera** yorlig‘ini yaratish;
      - [✓] Bosh menyuda (Start Menu) dasturni ro‘yxatga olish;

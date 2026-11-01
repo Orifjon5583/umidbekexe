@@ -88,7 +88,25 @@ export const apiClient = {
     try {
       return await realClient.getTeacherGroups();
     } catch {
-      return getStored<Group[]>('groups', INITIAL_GROUPS);
+      const allGroups = getStored<Group[]>('groups', INITIAL_GROUPS);
+      const userJson = localStorage.getItem('cp_user');
+      const user = userJson ? JSON.parse(userJson) : null;
+      if (user && user.role === 'teacher') {
+        const teachers = await this.getTeachers();
+        const currentTeacher = teachers.find(
+          (t) => t.username.toLowerCase() === user.username.toLowerCase()
+        );
+        if (currentTeacher && currentTeacher.assignedGroups && currentTeacher.assignedGroups.length > 0) {
+          return allGroups.filter((g) =>
+            currentTeacher.assignedGroups.some((ag) => {
+              const cleanAg = ag.toLowerCase().replace(/[^a-z0-9]/g, '');
+              const cleanG = g.name.toLowerCase().replace(/[^a-z0-9]/g, '');
+              return cleanAg.includes(cleanG) || cleanG.includes(cleanAg);
+            })
+          );
+        }
+      }
+      return allGroups;
     }
   },
 
@@ -391,7 +409,25 @@ export const apiClient = {
 
   // ================= ADMIN EXCLUSIVE SERVICES =================
   async getTeachers(): Promise<TeacherRecord[]> {
-    return getStored<TeacherRecord[]>('teachers', INITIAL_TEACHERS);
+    const teachers = getStored<TeacherRecord[]>('teachers', INITIAL_TEACHERS);
+    // Sanitize old mock storage where teacher1 had both Guruh-101 and Guruh-102
+    let modified = false;
+    const sanitized = teachers.map((t) => {
+      if (t.username === 'teacher1' && t.assignedGroups?.includes('Guruh-102 (C++ Algoritmlar)')) {
+        modified = true;
+        return {
+          ...t,
+          assignedGroups: ['Guruh-101 (Python Asoslari)'],
+          studentCount: 18,
+        };
+      }
+      return t;
+    });
+    if (modified) {
+      setStored('teachers', sanitized);
+      return sanitized;
+    }
+    return teachers;
   },
 
   async createTeacher(dto: {

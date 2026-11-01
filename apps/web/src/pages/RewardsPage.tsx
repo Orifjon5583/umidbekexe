@@ -42,6 +42,7 @@ export interface OrderItem {
   points: number;
   orderedAt: string;
   status: 'pending' | 'delivered';
+  teacherUsername?: string;
 }
 
 const DEFAULT_REWARDS: RewardItem[] = [
@@ -117,38 +118,52 @@ const INITIAL_ORDERS: OrderItem[] = [
   {
     id: 'ord-1',
     studentName: 'Aliyev Jasur',
-    groupName: 'Guruh-101',
+    groupName: 'Guruh-101 (Python Asoslari)',
     rewardName: 'CodePractice futbolkasi',
     points: 250,
     orderedAt: '29.10.2026 14:30',
     status: 'pending',
+    teacherUsername: 'teacher1',
   },
   {
     id: 'ord-2',
     studentName: 'Karimova Malika',
-    groupName: 'Guruh-101',
+    groupName: 'Guruh-101 (Python Asoslari)',
     rewardName: 'IT-stikerlar to‘plami',
     points: 50,
     orderedAt: '28.10.2026 18:15',
     status: 'delivered',
+    teacherUsername: 'teacher1',
   },
   {
     id: 'ord-3',
     studentName: 'Saidov Bobur',
-    groupName: 'Guruh-102',
+    groupName: 'Guruh-102 (C++ Algoritmlar)',
     rewardName: 'Dasturchi krujkasi (Mug)',
     points: 120,
     orderedAt: '29.10.2026 16:45',
     status: 'pending',
+    teacherUsername: 'dilnoza_k',
   },
   {
     id: 'ord-4',
     studentName: 'Rustamova Nodira',
-    groupName: 'Guruh-102',
+    groupName: 'Guruh-102 (C++ Algoritmlar)',
     rewardName: 'Dasturchi bloknoti va ruchka',
     points: 80,
     orderedAt: '27.10.2026 11:20',
     status: 'delivered',
+    teacherUsername: 'dilnoza_k',
+  },
+  {
+    id: 'ord-5',
+    studentName: 'Toshmatov Otabek',
+    groupName: 'Guruh-103 (Olimpiada dasturlash)',
+    rewardName: 'Simsiz sichqoncha (Wireless Mouse)',
+    points: 500,
+    orderedAt: '30.10.2026 10:15',
+    status: 'pending',
+    teacherUsername: 'sardor_r',
   },
 ];
 
@@ -161,6 +176,38 @@ export const RewardsPage: React.FC = () => {
   const userJson = localStorage.getItem('cp_user');
   const user = userJson ? JSON.parse(userJson) : null;
   const isAdmin = user?.role === 'admin';
+  const currentUsername = user?.username || 'teacher1';
+
+  // O‘qituvchiga biriktirilgan guruhlarni aniqlash
+  const [assignedGroups] = useState<string[]>(() => {
+    if (isAdmin) return [];
+    try {
+      const raw = localStorage.getItem('cp_web_teachers');
+      if (raw) {
+        const teachers: any[] = JSON.parse(raw);
+        const match = teachers.find(
+          (t) => t.username?.toLowerCase() === currentUsername.toLowerCase()
+        );
+        if (match && match.assignedGroups && match.assignedGroups.length > 0) {
+          if (
+            currentUsername.toLowerCase() === 'teacher1' &&
+            match.assignedGroups.includes('Guruh-102 (C++ Algoritmlar)')
+          ) {
+            return ['Guruh-101 (Python Asoslari)', 'Guruh-101'];
+          }
+          return match.assignedGroups;
+        }
+      }
+    } catch {}
+
+    if (currentUsername.toLowerCase() === 'teacher1') {
+      return ['Guruh-101 (Python Asoslari)', 'Guruh-101'];
+    }
+    if (currentUsername.toLowerCase() === 'dilnoza_k') {
+      return ['Guruh-102 (C++ Algoritmlar)', 'Guruh-102'];
+    }
+    return ['Guruh-101'];
+  });
 
   const [rewards, setRewards] = useState<RewardItem[]>(() => {
     try {
@@ -184,10 +231,34 @@ export const RewardsPage: React.FC = () => {
   const [orders, setOrders] = useState<OrderItem[]>(() => {
     try {
       const saved = localStorage.getItem('cp_web_orders');
-      return saved ? JSON.parse(saved) : INITIAL_ORDERS;
+      if (saved) {
+        const parsed: OrderItem[] = JSON.parse(saved);
+        if (!parsed.some((o) => o.id === 'ord-5')) {
+          return [...parsed, INITIAL_ORDERS[4]];
+        }
+        return parsed;
+      }
+      return INITIAL_ORDERS;
     } catch {
       return INITIAL_ORDERS;
     }
+  });
+
+  // O'quvchilarni o'qituvchiga biriktirilgan guruhlar bo'yicha filtrlash
+  const visibleOrders = orders.filter((o) => {
+    if (isAdmin) return true;
+    if (o.teacherUsername && user?.username) {
+      if (o.teacherUsername.toLowerCase() === user.username.toLowerCase()) return true;
+    }
+    const orderGroup = (o.groupName || '').toLowerCase().trim();
+    return assignedGroups.some((ag) => {
+      const teacherGroup = ag.toLowerCase().trim();
+      if (orderGroup === teacherGroup) return true;
+      if (teacherGroup.includes(orderGroup) || orderGroup.includes(teacherGroup)) return true;
+      const cleanO = orderGroup.replace(/[^a-z0-9]/g, '');
+      const cleanT = teacherGroup.replace(/[^a-z0-9]/g, '');
+      return cleanT.includes(cleanO) || cleanO.includes(cleanT);
+    });
   });
 
   const [isStoreOpen, setIsStoreOpen] = useState<boolean>(() => {
@@ -424,7 +495,7 @@ export const RewardsPage: React.FC = () => {
             <AlertCircle className="w-5 h-5" />
           </div>
           <div className="flex-1 text-sm">
-            <span className="font-bold">Ko‘rish rejimi (O‘qituvchi):</span> Siz sovg‘alar katalogi, narxlar (ballar), zaxira qoldig‘i va o‘quvchilar buyurtmalarini ko‘rishingiz mumkin. Sovg‘alar qo‘shish, narx/zaxirani o‘zgartirish yoki do‘konni ochish/yopish faqat Administrator tomonidan boshqariladi.
+            <span className="font-bold">Ko‘rish rejimi (O‘qituvchi):</span> Siz sovg‘alar katalogini hamda faqat o‘zingizga biriktirilgan guruhlar (<strong>{assignedGroups.filter(g => !g.includes('(') || g.length > 10)[0] || 'Guruh-101'}</strong>) o‘quvchilarining buyurtmalarini ko‘rishingiz mumkin.
           </div>
         </div>
       )}
@@ -510,9 +581,11 @@ export const RewardsPage: React.FC = () => {
             <Clock className="w-6 h-6" />
           </div>
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">Kutilayotgan so‘rovlar</p>
+            <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+              {isAdmin ? 'Kutilayotgan so‘rovlar' : 'Kutilayotgan (guruhingiz)'}
+            </p>
             <p className="text-2xl font-bold text-slate-900 mt-0.5">
-              {orders.filter((o) => o.status === 'pending').length} ta
+              {visibleOrders.filter((o) => o.status === 'pending').length} ta
             </p>
           </div>
         </div>
@@ -522,9 +595,11 @@ export const RewardsPage: React.FC = () => {
             <CheckCircle className="w-6 h-6" />
           </div>
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">Topshirilgan sovg‘alar</p>
+            <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+              {isAdmin ? 'Topshirilgan sovg‘alar' : 'Topshirilgan (guruhingiz)'}
+            </p>
             <p className="text-2xl font-bold text-slate-900 mt-0.5">
-              {orders.filter((o) => o.status === 'delivered').length} ta
+              {visibleOrders.filter((o) => o.status === 'delivered').length} ta
             </p>
           </div>
         </div>
@@ -759,11 +834,19 @@ export const RewardsPage: React.FC = () => {
       <div className="bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden">
         <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
           <div>
-            <h3 className="font-semibold text-slate-900">O‘quvchilarning sovg‘a so‘rovlari</h3>
-            <p className="text-xs text-slate-500 mt-0.5">Topshiriqlardan yig‘ilgan ballar evaziga beriladigan sovg‘alar</p>
+            <h3 className="font-semibold text-slate-900">
+              {isAdmin
+                ? 'O‘quvchilarning sovg‘a so‘rovlari (Barcha guruhlar)'
+                : 'Guruhingiz o‘quvchilarining sovg‘a so‘rovlari'}
+            </h3>
+            <p className="text-xs text-slate-500 mt-0.5">
+              {isAdmin
+                ? 'Barcha guruh o‘quvchilarining topshiriqlardan to‘plangan ballari evaziga yuborgan sovg‘a so‘rovlari'
+                : 'Sizga biriktirilgan guruh o‘quvchilarining sovg‘a so‘rovlari'}
+            </p>
           </div>
           <span className="text-xs font-medium text-slate-500 bg-slate-100 px-3 py-1 rounded-full">
-            Jami: {orders.length} ta buyurtma
+            {isAdmin ? `Jami: ${orders.length} ta buyurtma` : `Guruhingizdan: ${visibleOrders.length} ta buyurtma`}
           </span>
         </div>
 
@@ -781,40 +864,50 @@ export const RewardsPage: React.FC = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-200">
-              {orders.map((o) => (
-                <tr key={o.id} className="hover:bg-slate-50 transition">
-                  <td className="px-6 py-3.5 font-medium text-slate-900">{o.studentName}</td>
-                  <td className="px-6 py-3.5 text-slate-600">{o.groupName}</td>
-                  <td className="px-6 py-3.5 font-medium text-slate-800">{o.rewardName}</td>
-                  <td className="px-6 py-3.5 text-amber-600 font-bold">{o.points} ball</td>
-                  <td className="px-6 py-3.5 text-slate-500 text-xs">{o.orderedAt}</td>
-                  <td className="px-6 py-3.5">
-                    <span
-                      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${
-                        o.status === 'delivered'
-                          ? 'bg-emerald-100 text-emerald-800'
-                          : 'bg-amber-100 text-amber-800'
-                      }`}
-                    >
-                      {o.status === 'delivered' ? 'Topshirildi' : 'Kutilmoqda'}
-                    </span>
+              {visibleOrders.length === 0 ? (
+                <tr>
+                  <td colSpan={isAdmin ? 7 : 6} className="px-6 py-10 text-center text-slate-400 text-sm">
+                    {isAdmin
+                      ? 'Hozircha sovg‘a so‘rovlari mavjud emas'
+                      : 'Sizga biriktirilgan guruhlar o‘quvchilaridan hozircha sovg‘a so‘rovlari kelib tushmagan.'}
                   </td>
-                  {isAdmin && (
-                    <td className="px-6 py-3.5 text-right">
-                      <button
-                        onClick={() => handleToggleDelivered(o.id)}
-                        className={`px-3 py-1.5 rounded-lg text-xs font-bold transition shadow-xs ${
+                </tr>
+              ) : (
+                visibleOrders.map((o) => (
+                  <tr key={o.id} className="hover:bg-slate-50 transition">
+                    <td className="px-6 py-3.5 font-medium text-slate-900">{o.studentName}</td>
+                    <td className="px-6 py-3.5 text-slate-600">{o.groupName}</td>
+                    <td className="px-6 py-3.5 font-medium text-slate-800">{o.rewardName}</td>
+                    <td className="px-6 py-3.5 text-amber-600 font-bold">{o.points} ball</td>
+                    <td className="px-6 py-3.5 text-slate-500 text-xs">{o.orderedAt}</td>
+                    <td className="px-6 py-3.5">
+                      <span
+                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${
                           o.status === 'delivered'
-                            ? 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                            : 'bg-emerald-600 hover:bg-emerald-700 text-white'
+                            ? 'bg-emerald-100 text-emerald-800'
+                            : 'bg-amber-100 text-amber-800'
                         }`}
                       >
-                        {o.status === 'delivered' ? 'Qaytarish' : 'Topshirildi deb belgilash'}
-                      </button>
+                        {o.status === 'delivered' ? 'Topshirildi' : 'Kutilmoqda'}
+                      </span>
                     </td>
-                  )}
-                </tr>
-              ))}
+                    {isAdmin && (
+                      <td className="px-6 py-3.5 text-right">
+                        <button
+                          onClick={() => handleToggleDelivered(o.id)}
+                          className={`px-3 py-1.5 rounded-lg text-xs font-bold transition shadow-xs ${
+                            o.status === 'delivered'
+                              ? 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                              : 'bg-emerald-600 hover:bg-emerald-700 text-white'
+                          }`}
+                        >
+                          {o.status === 'delivered' ? 'Qaytarish' : 'Topshirildi deb belgilash'}
+                        </button>
+                      </td>
+                    )}
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>

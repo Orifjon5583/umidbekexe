@@ -366,8 +366,17 @@ export interface SystemSettingsData {
   pythonEnabled: boolean;
   cppEnabled: boolean;
   javaEnabled: boolean;
+
+  // AI & AI Plus sozlamalari
   aiMurabbiyEnabled: boolean;
+  aiModelTier: 'standard' | 'plus'; // 'standard' (Flash) vs 'plus' (Gemini Pro / GPT-4o Plus)
+  aiModelName: string;
   aiMaxTokensPerStudent: number;
+  aiDailyRequestsLimit: number;
+  aiAllowedGroups: string[]; // AI ruxsat berilgan guruhlar
+  aiPlusGroups: string[]; // Kuchliroq AI Plus ajratilgan guruhlar
+  aiCustomApiKey?: string;
+
   defaultTimeLimitMs: number;
   defaultMemoryLimitMb: number;
   strictClipboardBlock: boolean;
@@ -383,7 +392,13 @@ export const INITIAL_SYSTEM_SETTINGS: SystemSettingsData = {
   cppEnabled: true,
   javaEnabled: false,
   aiMurabbiyEnabled: true,
-  aiMaxTokensPerStudent: 15000,
+  aiModelTier: 'plus',
+  aiModelName: 'Gemini 1.5 Pro • Next-Gen AI Plus',
+  aiMaxTokensPerStudent: 25000,
+  aiDailyRequestsLimit: 40,
+  aiAllowedGroups: ['Guruh-101 (Python Asoslari)', 'Guruh-102 (C++ Algoritmlar)', 'Guruh-103 (Olimpiada dasturlash)'],
+  aiPlusGroups: ['Guruh-101 (Python Asoslari)', 'Guruh-102 (C++ Algoritmlar)'],
+  aiCustomApiKey: '',
   defaultTimeLimitMs: 2000,
   defaultMemoryLimitMb: 128,
   strictClipboardBlock: true,

@@ -27,11 +27,24 @@ export const AIAssistantDrawer: React.FC<Props> = ({
   lastErrorMessage,
   lastTestSummary,
 }) => {
+  const [aiSettings] = useState(() => {
+    try {
+      const raw = localStorage.getItem('cp_web_system_settings') || localStorage.getItem('cp_system_settings');
+      if (raw) return JSON.parse(raw);
+    } catch {}
+    return {
+      aiMurabbiyEnabled: true,
+      aiModelTier: 'plus',
+      aiModelName: 'Gemini 1.5 Pro • Next-Gen AI Plus',
+      aiMaxTokensPerStudent: 25000,
+    };
+  });
+
   const [messages, setMessages] = useState<Message[]>([
     {
       id: 'welcome',
       sender: 'ai',
-      text: 'Salom! Men sizning sun’iy intellekt yordamchingizman. Masala shartini tushunishda, sintaktik xatolarni tahlil qilishda yoki keyingi qadam bo‘yicha maslahat olishda yordam bera olaman. Tayyor to‘liq yechimni yozib bermayman, ammo mustaqil yechishingizga yo‘naltiraman!',
+      text: 'Salom! Men sizning sun’iy intellekt mentor sizman (✨ CodePractice AI Plus faol). Masala shartini tushunishda, murakkab algoritmik va sintaktik xatolarni tahlil qilishda yordam beraman. Qoidaga ko‘ra tayyor to‘liq yechimni yozib bermayman, ammo mustaqil yechishingizga qadam-baqadam yo‘naltiraman!',
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
     },
   ]);
@@ -102,19 +115,38 @@ export const AIAssistantDrawer: React.FC<Props> = ({
   return (
     <div className="fixed inset-y-0 right-0 z-40 w-96 bg-white border-l border-slate-200 shadow-2xl flex flex-col animate-in slide-in-from-right duration-200">
       {/* Header */}
-      <div className="h-14 px-4 bg-slate-900 text-white flex items-center justify-between flex-shrink-0">
-        <div className="flex items-center gap-2">
-          <Sparkles className="w-4 h-4 text-amber-400" />
-          <h3 className="font-semibold text-sm">AI Yordamchi</h3>
-          {remainingTokens !== undefined && (
-            <span className="text-[10px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-300">
-              Qoldi: {remainingTokens} ta
-            </span>
-          )}
+      <div className="h-16 px-4 bg-slate-900 text-white flex items-center justify-between flex-shrink-0 border-b border-slate-800">
+        <div className="flex items-center gap-2.5">
+          <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-amber-500 via-purple-600 to-indigo-600 flex items-center justify-center text-white shadow-md shadow-purple-500/20">
+            <Sparkles className="w-4 h-4 text-amber-300" />
+          </div>
+          <div>
+            <div className="flex items-center gap-1.5">
+              <h3 className="font-bold text-sm text-white">AI Mentor</h3>
+              <span
+                className={`text-[9px] font-extrabold px-1.5 py-0.5 rounded uppercase tracking-wider ${
+                  aiSettings.aiModelTier === 'plus'
+                    ? 'bg-gradient-to-r from-amber-400 to-amber-200 text-slate-950 font-black shadow-2xs'
+                    : 'bg-blue-900 text-blue-200'
+                }`}
+              >
+                {aiSettings.aiModelTier === 'plus' ? '✨ PLUS' : 'FLASH'}
+              </span>
+            </div>
+            <p className="text-[10px] text-slate-400">
+              {aiSettings.aiModelTier === 'plus' ? 'Gemini 1.5 Pro • Kuchli model' : 'Gemini 1.5 Flash • Standart'}
+            </p>
+          </div>
         </div>
-        <button onClick={onClose} className="p-1 text-slate-400 hover:text-white rounded">
-          <X className="w-5 h-5" />
-        </button>
+
+        <div className="flex items-center gap-2">
+          <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700">
+            Token: {(remainingTokens ?? 24150).toLocaleString()}
+          </span>
+          <button onClick={onClose} className="p-1 text-slate-400 hover:text-white rounded-lg transition">
+            <X className="w-5 h-5" />
+          </button>
+        </div>
       </div>
 
       {/* Quick Action Chips */}

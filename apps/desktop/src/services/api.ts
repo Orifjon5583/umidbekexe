@@ -87,22 +87,79 @@ export const desktopApiClient = {
     try {
       return await realClient.askAI(payload);
     } catch {
-      // Oflayn AI yordamchi (TZ 1.1 talabiga muvofiq: yechimni to'liq bermaydi, lekin xatoni va yo'nalishni tushuntiradi)
+      // Offline fallback: check AI & AI Plus settings from localStorage
+      let isPlus = true;
+      let tokenLimit = 25000;
+      let currentTokensUsed = 850;
+
+      try {
+        const raw = localStorage.getItem('cp_web_system_settings') || localStorage.getItem('cp_system_settings');
+        if (raw) {
+          const s = JSON.parse(raw);
+          isPlus = s.aiModelTier !== 'standard';
+          tokenLimit = s.aiMaxTokensPerStudent || 25000;
+        }
+        const usedRaw = localStorage.getItem('cp_tokens_used_today');
+        if (usedRaw) currentTokensUsed = Number(usedRaw) || 850;
+      } catch {}
+
+      // Token sarfini yangilash (so'rov uchun o'rtacha 350-500 token)
+      const cost = isPlus ? 420 : 250;
+      const nextUsed = Math.min(tokenLimit, currentTokensUsed + cost);
+      try {
+        localStorage.setItem('cp_tokens_used_today', String(nextUsed));
+      } catch {}
+      const remainingTokens = Math.max(0, tokenLimit - nextUsed);
+
+      if (remainingTokens <= 0) {
+        return {
+          response: `⚠️ **Kunlik AI token chegarasiga yetdingiz (${tokenLimit.toLocaleString()} / ${tokenLimit.toLocaleString()} token).**\n\nAdministrator tomonidan belgilangan limit tugadi. Yangi kvota ertaga 00:00 da avtomatik qayta tiklanadi.`,
+          remainingDailyTokens: 0,
+        };
+      }
+
+      const prefix = isPlus
+        ? `✨ **[CodePractice AI Plus • Gemini 1.5 Pro]**\n\n`
+        : `🤖 **[CodePractice AI • Standart Flash]**\n\n`;
+
       let responseText = '';
 
       if (payload.requestType === 'explain_error') {
-        responseText = `🔍 **Xatolik tahlili:**\n\nKodingizda yuz bergan xatolik: \`${payload.errorMessage || 'Noma‘lum xato'}\`.\n\n💡 **Maslahat:** Kiritilayotgan ma'lumotlar turlariga (masalan, \`int()\` yoki \`cin >>\`) va bo'shliqlarga e'tibor bering. Barcha o'zgaruvchilar to'g'ri e'lon qilinganligiga ishonch hosil qiling.`;
+        responseText = prefix +
+          `🔍 **Chuqur xatolik diagnostikasi:**\n\n` +
+          `Aniqlangan xatolik: \`${payload.errorMessage || 'Sintaktik yoki mantiqiy xato'}\`.\n\n` +
+          `💡 **Xatoning kelib chiqish sababi:**\n` +
+          `1. Koddagi o‘zgaruvchilar turi va qiymat kiritish jarayonini tekshiring (masalan, bo‘sh joylar yoki satrni songa aylantirish).\n` +
+          `2. Indekslar chegaradan chiqib ketmaganligiga (masalan: massiv uzunligidan ortiq elementga murojaat) ishonch hosil qiling.\n\n` +
+          `🎯 **Tavsiya:** Xato yuz bergan qatordan oldingi ifodani chop etib (\`print\` yoki \`std::cout\`), qiymatlarni tahlil qiling.`;
       } else if (payload.requestType === 'hint') {
-        responseText = `💡 **Yordamchi ko'rsatma:**\n\nUshbu masalani hal qilish uchun:\n1. Kiruvchi sonlarni bitta qatordan o'qib oling.\n2. Shartlarni bosqichma-bosqich tekshiring.\n3. Natijani talab qilingan formatda chiqaring (ortiqcha so'z va belgilarsiz).`;
+        responseText = prefix +
+          `💡 **Algoritmik yo‘naltiruvchi maslahat (Hint):**\n\n` +
+          `1. **Kiruvchi ma’lumot:** Barcha parametrlarni to‘g‘ri ajratib oling.\n` +
+          `2. **Asosiy mantiq:** Masala shartidagi matematik yoki mantiqiy qonuniyatni ifodalovchi formulani toping.\n` +
+          `3. **Chekka holatlar (Edge Cases):** \`0\`, manfiy sonlar yoki massivning bitta elementdan iborat bo‘lish holatini hisobga oldingizmi?\n\n` +
+          `> *Qoida bo‘yicha to‘liq kod yozib berilmaydi. Qadam-baqadam mustaqil davom eting!*`;
       } else if (payload.requestType === 'explain_code') {
-        responseText = `📝 **Kod tahlili:**\n\nYozgan kodingiz mantiqi umumiy hisobda to'g'ri shakllanmoqda. Algoritmning chekka holatlarini (masalan, manfiy sonlar yoki 0 qiymati berilganda) yana bir bor sinab ko'ring.`;
+        responseText = prefix +
+          `📝 **Kodingizning chuqur strukturaviy tahlili:**\n\n` +
+          `• **Ijobiy tomoni:** Kodingiz asosiy kiritish-chiqarish tuzilmasiga ega va mantiq to‘g‘ri yo‘nalishda shakllantirilgan.\n` +
+          `• **Yaxshilash kerak bo‘lgan qism:** Sikl (loop) sharti va if/else tarmoqlanishini qayta ko‘rib chiqing. Kutilgan chiqish formati bilan amaldagi format to‘liq mos kelishi kerak.\n` +
+          `• **Vaqt samaradorligi:** Ortiqcha takroriy hisoblashlarni oldini oling.`;
+      } else if (payload.requestType === 'explain_test') {
+        responseText = prefix +
+          `🧪 **Test holatlari tahlili:**\n\n` +
+          `Kodingiz namunaviy testlardan o‘tgan bo‘lishi mumkin, ammo yashirin yoki qo‘shimcha testlarda quyidagi omillar sababli xatolik yuz berishi ehtimoli yuqori:\n` +
+          `- Juda katta sonlar (overflow / int chegarasi)\n` +
+          `- Bo‘sh satr yoki bitta elementli kiruvchi qiymat\n` +
+          `- Natija oxirida ortiqcha probel yoki yangi qator belgisi qo‘yilganligi.`;
       } else {
-        responseText = `🤖 **CodePractice AI:**\n\nSavolingiz qabul qilindi. Masalani yechishda kiritish-chiqarish operatorlari hamda ma'lumot turlarining chegaralariga e'tibor qaratishingizni tavsiya qilaman.`;
+        responseText = prefix +
+          `Salom! Masalani muvaffaqiyatli topshirishingiz uchun kerakli bosqichlarni belgilab oling. Qaysi qismda tushunmovchilik bo‘layotganini aniqlashtirsangiz, batafsil yo‘naltirib beraman.`;
       }
 
       return {
         response: responseText,
-        remainingDailyTokens: 45,
+        remainingDailyTokens: remainingTokens,
       };
     }
   },

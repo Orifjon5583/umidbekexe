@@ -18,6 +18,7 @@ import {
   Package,
   Layers,
   ArrowUpDown,
+  Eye,
 } from 'lucide-react';
 
 export interface RewardItem {
@@ -157,6 +158,10 @@ const POPULAR_EMOJIS = [
 ];
 
 export const RewardsPage: React.FC = () => {
+  const userJson = localStorage.getItem('cp_user');
+  const user = userJson ? JSON.parse(userJson) : null;
+  const isAdmin = user?.role === 'admin';
+
   const [rewards, setRewards] = useState<RewardItem[]>(() => {
     try {
       const saved = localStorage.getItem('cp_web_rewards');
@@ -412,38 +417,67 @@ export const RewardsPage: React.FC = () => {
 
   return (
     <div className="space-y-8">
+      {/* Teacher View Notice */}
+      {!isAdmin && (
+        <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 flex items-start sm:items-center gap-3.5 text-amber-900 shadow-xs">
+          <div className="w-9 h-9 rounded-xl bg-amber-100 flex items-center justify-center flex-shrink-0 text-amber-700">
+            <AlertCircle className="w-5 h-5" />
+          </div>
+          <div className="flex-1 text-sm">
+            <span className="font-bold">Ko‘rish rejimi (O‘qituvchi):</span> Siz sovg‘alar katalogi, narxlar (ballar), zaxira qoldig‘i va o‘quvchilar buyurtmalarini ko‘rishingiz mumkin. Sovg‘alar qo‘shish, narx/zaxirani o‘zgartirish yoki do‘konni ochish/yopish faqat Administrator tomonidan boshqariladi.
+          </div>
+        </div>
+      )}
+
       {/* Page Title & Store Controls */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h2 className="text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
             <Gift className="w-7 h-7 text-amber-500" />
-            Sovg‘alar va ballar do‘koni boshqaruvi
+            Sovg‘alar va ballar do‘koni {isAdmin ? 'boshqaruvi' : 'katalogi'}
           </h2>
           <p className="text-sm text-slate-500 mt-1">
-            Sovg‘alar rasmi, zaxirasi (qanchasi bor va qanchasi qoldi), narxi va buyurtmalarni nazorat qilish
+            {isAdmin
+              ? 'Sovg‘alar rasmi, zaxirasi (qanchasi bor va qanchasi qoldi), narxi va buyurtmalarni nazorat qilish'
+              : 'O‘quvchilar yig‘gan ballariga beriladigan sovg‘alar katalogi va buyurtmalar holati'}
           </p>
         </div>
 
         <div className="flex items-center gap-3">
-          <button
-            onClick={toggleStore}
-            className={`px-4 py-2.5 rounded-lg text-sm font-semibold flex items-center gap-2 transition shadow-sm ${
-              isStoreOpen
-                ? 'bg-emerald-600 hover:bg-emerald-700 text-white'
-                : 'bg-rose-600 hover:bg-rose-700 text-white'
-            }`}
-          >
-            <ShoppingBag className="w-4 h-4" />
-            Do‘kon holati: {isStoreOpen ? 'OCHIQ' : 'YOPIQ'}
-          </button>
+          {isAdmin ? (
+            <>
+              <button
+                onClick={toggleStore}
+                className={`px-4 py-2.5 rounded-lg text-sm font-semibold flex items-center gap-2 transition shadow-sm ${
+                  isStoreOpen
+                    ? 'bg-emerald-600 hover:bg-emerald-700 text-white'
+                    : 'bg-rose-600 hover:bg-rose-700 text-white'
+                }`}
+              >
+                <ShoppingBag className="w-4 h-4" />
+                Do‘kon holati: {isStoreOpen ? 'OCHIQ' : 'YOPIQ'}
+              </button>
 
-          <button
-            onClick={handleOpenAddModal}
-            className="h-10 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-semibold flex items-center gap-2 shadow-sm transition"
-          >
-            <Plus className="w-4 h-4" />
-            Yangi sovg‘a qo‘shish
-          </button>
+              <button
+                onClick={handleOpenAddModal}
+                className="h-10 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-semibold flex items-center gap-2 shadow-sm transition"
+              >
+                <Plus className="w-4 h-4" />
+                Yangi sovg‘a qo‘shish
+              </button>
+            </>
+          ) : (
+            <div
+              className={`px-4 py-2.5 rounded-xl text-xs font-bold flex items-center gap-2 border shadow-xs ${
+                isStoreOpen
+                  ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                  : 'bg-rose-50 text-rose-700 border-rose-200'
+              }`}
+            >
+              <ShoppingBag className="w-4 h-4" />
+              Do‘kon holati: {isStoreOpen ? 'OCHIQ (O‘quvchilarga ko‘rinadi)' : 'YOPIQ'}
+            </div>
+          )}
         </div>
       </div>
 
@@ -502,18 +536,27 @@ export const RewardsPage: React.FC = () => {
           <div>
             <h3 className="font-bold text-slate-900 text-lg">Mavjud sovg‘alar va zaxira holati</h3>
             <p className="text-xs text-slate-500 mt-0.5">
-              Har bir kartada rasm, narx, jami keltirilgan va qolgan sonini bevosita o‘zgartirishingiz mumkin
+              {isAdmin
+                ? 'Har bir kartada rasm, narx, jami keltirilgan va qolgan sonini bevosita o‘zgartirishingiz mumkin'
+                : 'O‘quvchilar uchun mavjud sovg‘alar ro‘yxati, ball narxlari va zaxiradagi soni'}
             </p>
           </div>
-          <span className="text-xs font-medium text-slate-500 bg-slate-100 px-3 py-1.5 rounded-lg flex items-center gap-1.5 self-start sm:self-auto">
-            <Edit2 className="w-3.5 h-3.5 text-blue-600" />
-            Qalam yoki [-] [+] orqali tezkor tahrirlash
-          </span>
+          {isAdmin ? (
+            <span className="text-xs font-medium text-slate-500 bg-slate-100 px-3 py-1.5 rounded-lg flex items-center gap-1.5 self-start sm:self-auto">
+              <Edit2 className="w-3.5 h-3.5 text-blue-600" />
+              Qalam yoki [-] [+] orqali tezkor tahrirlash
+            </span>
+          ) : (
+            <span className="text-xs font-medium text-slate-600 bg-slate-100 px-3 py-1.5 rounded-lg flex items-center gap-1.5 self-start sm:self-auto">
+              <Eye className="w-3.5 h-3.5 text-slate-500" />
+              Ko‘rish rejimi (Faqat ma’lumot)
+            </span>
+          )}
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           {rewards.map((r) => {
-            const isEditing = editingId === r.id;
+            const isEditing = isAdmin && editingId === r.id;
             const givenCount = Math.max(0, r.totalStock - r.stockCount);
             const stockPercent = r.totalStock > 0 ? Math.round((r.stockCount / r.totalStock) * 100) : 0;
 
@@ -547,22 +590,24 @@ export const RewardsPage: React.FC = () => {
                         <h4 className="font-bold text-slate-900 text-sm leading-snug line-clamp-2">
                           {r.name}
                         </h4>
-                        <div className="flex items-center gap-1 flex-shrink-0">
-                          <button
-                            onClick={() => handleOpenEditModal(r)}
-                            title="To‘liq tahrirlash (rasm, nom, narx)"
-                            className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition"
-                          >
-                            <Edit2 className="w-3.5 h-3.5" />
-                          </button>
-                          <button
-                            onClick={() => handleDeleteReward(r.id)}
-                            title="O‘chirish"
-                            className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
+                        {isAdmin && (
+                          <div className="flex items-center gap-1 flex-shrink-0">
+                            <button
+                              onClick={() => handleOpenEditModal(r)}
+                              title="To‘liq tahrirlash (rasm, nom, narx)"
+                              className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition"
+                            >
+                              <Edit2 className="w-3.5 h-3.5" />
+                            </button>
+                            <button
+                              onClick={() => handleDeleteReward(r.id)}
+                              title="O‘chirish"
+                              className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        )}
                       </div>
                       <span className="inline-block mt-1 text-[11px] font-medium text-slate-500 bg-slate-100 px-2 py-0.5 rounded">
                         {r.category}
@@ -608,8 +653,8 @@ export const RewardsPage: React.FC = () => {
 
                 {/* Bottom: Price & Quick Stock Adjuster */}
                 <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
-                  {isEditing ? (
-                    /* Inline Edit Mode */
+                  {isAdmin && isEditing ? (
+                    /* Inline Edit Mode (Admin Only) */
                     <div className="w-full space-y-2 bg-blue-50/60 p-2.5 rounded-xl border border-blue-200">
                       <div className="grid grid-cols-3 gap-2 text-xs">
                         <div>
@@ -662,36 +707,45 @@ export const RewardsPage: React.FC = () => {
                         <span className="text-amber-600 font-extrabold text-base flex items-center gap-1">
                           <Sparkles className="w-4 h-4" /> {r.price} ball
                         </span>
-                        <button
-                          onClick={() => handleStartInlineEdit(r)}
-                          title="Narx va qoldiq sonini tahrirlash"
-                          className="p-1 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded"
-                        >
-                          <Edit2 className="w-3.5 h-3.5" />
-                        </button>
+                        {isAdmin && (
+                          <button
+                            onClick={() => handleStartInlineEdit(r)}
+                            title="Narx va qoldiq sonini tahrirlash"
+                            className="p-1 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded"
+                          >
+                            <Edit2 className="w-3.5 h-3.5" />
+                          </button>
+                        )}
                       </div>
 
-                      {/* Quick Adjust Buttons (+ / - stock) */}
-                      <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-lg">
-                        <button
-                          onClick={() => handleQuickAdjustStock(r.id, -1)}
-                          disabled={r.stockCount <= 0}
-                          title="Qoldiqni 1 taga kamaytirish (topshirildi)"
-                          className="w-6 h-6 rounded bg-white hover:bg-slate-200 text-slate-700 flex items-center justify-center font-bold text-xs disabled:opacity-40 shadow-xs"
-                        >
-                          <Minus className="w-3 h-3" />
-                        </button>
-                        <span className="px-1.5 text-xs font-bold text-slate-700 select-none">
-                          {r.stockCount}
-                        </span>
-                        <button
-                          onClick={() => handleQuickAdjustStock(r.id, 1)}
-                          title="Qoldiqni 1 taga oshirish"
-                          className="w-6 h-6 rounded bg-white hover:bg-slate-200 text-slate-700 flex items-center justify-center font-bold text-xs shadow-xs"
-                        >
-                          <Plus className="w-3 h-3" />
-                        </button>
-                      </div>
+                      {isAdmin ? (
+                        /* Quick Adjust Buttons (+ / - stock) for Admin */
+                        <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-lg">
+                          <button
+                            onClick={() => handleQuickAdjustStock(r.id, -1)}
+                            disabled={r.stockCount <= 0}
+                            title="Qoldiqni 1 taga kamaytirish (topshirildi)"
+                            className="w-6 h-6 rounded bg-white hover:bg-slate-200 text-slate-700 flex items-center justify-center font-bold text-xs disabled:opacity-40 shadow-xs"
+                          >
+                            <Minus className="w-3 h-3" />
+                          </button>
+                          <span className="px-1.5 text-xs font-bold text-slate-700 select-none">
+                            {r.stockCount}
+                          </span>
+                          <button
+                            onClick={() => handleQuickAdjustStock(r.id, 1)}
+                            title="Qoldiqni 1 taga oshirish"
+                            className="w-6 h-6 rounded bg-white hover:bg-slate-200 text-slate-700 flex items-center justify-center font-bold text-xs shadow-xs"
+                          >
+                            <Plus className="w-3 h-3" />
+                          </button>
+                        </div>
+                      ) : (
+                        /* Read-only Stock Badge for Teacher */
+                        <div className="text-xs font-medium text-slate-600 bg-slate-100 px-2.5 py-1 rounded-lg border border-slate-200">
+                          Zaxirada: <strong className="text-slate-900 font-bold">{r.stockCount} ta</strong>
+                        </div>
+                      )}
                     </>
                   )}
                 </div>
@@ -723,7 +777,7 @@ export const RewardsPage: React.FC = () => {
                 <th className="px-6 py-3 font-semibold">Yechilgan ball</th>
                 <th className="px-6 py-3 font-semibold">Buyurtma vaqti</th>
                 <th className="px-6 py-3 font-semibold">Holat</th>
-                <th className="px-6 py-3 font-semibold text-right">Amal</th>
+                {isAdmin && <th className="px-6 py-3 font-semibold text-right">Amal</th>}
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-200">
@@ -745,18 +799,20 @@ export const RewardsPage: React.FC = () => {
                       {o.status === 'delivered' ? 'Topshirildi' : 'Kutilmoqda'}
                     </span>
                   </td>
-                  <td className="px-6 py-3.5 text-right">
-                    <button
-                      onClick={() => handleToggleDelivered(o.id)}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-bold transition shadow-xs ${
-                        o.status === 'delivered'
-                          ? 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                          : 'bg-emerald-600 hover:bg-emerald-700 text-white'
-                      }`}
-                    >
-                      {o.status === 'delivered' ? 'Qaytarish' : 'Topshirildi deb belgilash'}
-                    </button>
-                  </td>
+                  {isAdmin && (
+                    <td className="px-6 py-3.5 text-right">
+                      <button
+                        onClick={() => handleToggleDelivered(o.id)}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-bold transition shadow-xs ${
+                          o.status === 'delivered'
+                            ? 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                            : 'bg-emerald-600 hover:bg-emerald-700 text-white'
+                        }`}
+                      >
+                        {o.status === 'delivered' ? 'Qaytarish' : 'Topshirildi deb belgilash'}
+                      </button>
+                    </td>
+                  )}
                 </tr>
               ))}
             </tbody>
@@ -764,8 +820,8 @@ export const RewardsPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Modal: Add or Edit Reward (With Image Upload / Emoji Tabs, Stock Count) */}
-      {showModal && (
+      {/* Modal: Add or Edit Reward (Admin Only) */}
+      {isAdmin && showModal && (
         <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-6 border border-slate-200 my-8">
             <div className="flex items-center justify-between pb-3 mb-4 border-b border-slate-100">

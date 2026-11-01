@@ -311,3 +311,157 @@ export const MOCK_DASHBOARD_STATS: TeacherDashboardStats = {
     },
   ],
 };
+
+export interface TeacherRecord {
+  id: string;
+  fullName: string;
+  username: string;
+  email?: string;
+  subject: string;
+  assignedGroups: string[];
+  studentCount: number;
+  isActive: boolean;
+  createdAt: string;
+}
+
+export const INITIAL_TEACHERS: TeacherRecord[] = [
+  {
+    id: 't-1',
+    fullName: 'Anvar Qodirov',
+    username: 'teacher1',
+    email: 'anvar.qodirov@codepractice.uz',
+    subject: 'Python va Algoritmlar',
+    assignedGroups: ['Guruh-101 (Python Asoslari)', 'Guruh-102 (C++ Algoritmlar)'],
+    studentCount: 34,
+    isActive: true,
+    createdAt: '2026-09-01T08:00:00Z',
+  },
+  {
+    id: 't-2',
+    fullName: 'Dilnoza Karimova',
+    username: 'dilnoza_k',
+    email: 'dilnoza.karimova@codepractice.uz',
+    subject: 'C++ va Olimpiada dasturlash',
+    assignedGroups: ['Guruh-103 (Olimpiada dasturlash)'],
+    studentCount: 14,
+    isActive: true,
+    createdAt: '2026-09-15T08:00:00Z',
+  },
+  {
+    id: 't-3',
+    fullName: 'Sardorbek Rahimov',
+    username: 'sardor_r',
+    email: 'sardor.rahimov@codepractice.uz',
+    subject: 'Web dasturlash va Java asoslari',
+    assignedGroups: [],
+    studentCount: 0,
+    isActive: false,
+    createdAt: '2026-10-01T08:00:00Z',
+  },
+];
+
+export interface SystemSettingsData {
+  appName: string;
+  systemVersion: string;
+  pythonEnabled: boolean;
+  cppEnabled: boolean;
+  javaEnabled: boolean;
+  aiMurabbiyEnabled: boolean;
+  aiMaxTokensPerStudent: number;
+  defaultTimeLimitMs: number;
+  defaultMemoryLimitMb: number;
+  strictClipboardBlock: boolean;
+  requireFullscreenMode: boolean;
+  serverRegion: string;
+  backupStatus: string;
+}
+
+export const INITIAL_SYSTEM_SETTINGS: SystemSettingsData = {
+  appName: 'CodePractice Enterprise',
+  systemVersion: 'v2.4 (Windows 11 + Web Panel)',
+  pythonEnabled: true,
+  cppEnabled: true,
+  javaEnabled: false,
+  aiMurabbiyEnabled: true,
+  aiMaxTokensPerStudent: 15000,
+  defaultTimeLimitMs: 2000,
+  defaultMemoryLimitMb: 128,
+  strictClipboardBlock: true,
+  requireFullscreenMode: true,
+  serverRegion: 'AWS eu-central-1 (Frankfurt)',
+  backupStatus: 'Har kuni 04:00 da avtomatik zaxira olinadi',
+};
+
+export interface SecurityLogItem {
+  id: string;
+  timestamp: string;
+  user: string;
+  role: 'student' | 'teacher' | 'admin' | 'guest';
+  eventType: 'clipboard_violation' | 'login_success' | 'failed_login' | 'assignment_create' | 'settings_change';
+  severity: 'danger' | 'warning' | 'info' | 'success';
+  details: string;
+  ip: string;
+}
+
+export const INITIAL_SECURITY_LOGS: SecurityLogItem[] = [
+  {
+    id: 'log-1',
+    timestamp: '01.11.2026 14:52',
+    user: 'student1 (Jasur Aliyev)',
+    role: 'student',
+    eventType: 'clipboard_violation',
+    severity: 'warning',
+    details: 'Monaco kod muharririga tashqi matnni paste (Ctrl+V) qilishga urinish to‘xtatildi.',
+    ip: '192.168.1.104',
+  },
+  {
+    id: 'log-2',
+    timestamp: '01.11.2026 14:30',
+    user: 'teacher1 (Anvar Qodirov)',
+    role: 'teacher',
+    eventType: 'assignment_create',
+    severity: 'info',
+    details: 'Guruh-101 uchun yangi "2-Mavzu: Shartli operatorlar" topshirig‘i e’lon qilindi.',
+    ip: '192.168.1.45',
+  },
+  {
+    id: 'log-3',
+    timestamp: '01.11.2026 14:15',
+    user: 'admin (Tizim Administratori)',
+    role: 'admin',
+    eventType: 'login_success',
+    severity: 'info',
+    details: 'Administrator boshqaruv tizimiga muvaffaqiyatli kirdi.',
+    ip: '127.0.0.1',
+  },
+  {
+    id: 'log-4',
+    timestamp: '01.11.2026 12:40',
+    user: 'teacher1 (Anvar Qodirov)',
+    role: 'teacher',
+    eventType: 'clipboard_violation',
+    severity: 'warning',
+    details: 'student1 (Jasur Aliyev) paroli o‘qituvchi tomonidan yangilandi.',
+    ip: '192.168.1.45',
+  },
+  {
+    id: 'log-5',
+    timestamp: '01.11.2026 11:20',
+    user: 'noma‘lum_mehmon',
+    role: 'guest',
+    eventType: 'failed_login',
+    severity: 'danger',
+    details: 'O‘qituvchi paneliga noto‘g‘ri parol orqali 3 marta kirishga urinish qayd etildi.',
+    ip: '192.168.1.210',
+  },
+  {
+    id: 'log-6',
+    timestamp: '01.11.2026 09:05',
+    user: 'admin (Tizim Administratori)',
+    role: 'admin',
+    eventType: 'settings_change',
+    severity: 'success',
+    details: 'AI murabbiy kvotasi va test vaqt chegaralari tekshirildi va saqlandi.',
+    ip: '127.0.0.1',
+  },
+];

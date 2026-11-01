@@ -15,6 +15,12 @@ import {
   INITIAL_PROBLEMS,
   INITIAL_ASSIGNMENTS,
   MOCK_DASHBOARD_STATS,
+  INITIAL_TEACHERS,
+  TeacherRecord,
+  INITIAL_SYSTEM_SETTINGS,
+  SystemSettingsData,
+  INITIAL_SECURITY_LOGS,
+  SecurityLogItem,
 } from './mockData';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000/api/v1';
@@ -381,5 +387,80 @@ export const apiClient = {
 
       return csv;
     }
+  },
+
+  // ================= ADMIN EXCLUSIVE SERVICES =================
+  async getTeachers(): Promise<TeacherRecord[]> {
+    return getStored<TeacherRecord[]>('teachers', INITIAL_TEACHERS);
+  },
+
+  async createTeacher(dto: {
+    fullName: string;
+    username: string;
+    password?: string;
+    subject: string;
+    assignedGroups: string[];
+    email?: string;
+  }): Promise<TeacherRecord> {
+    const teachers = getStored<TeacherRecord[]>('teachers', INITIAL_TEACHERS);
+    const newTeacher: TeacherRecord = {
+      id: `t-${Date.now()}`,
+      fullName: dto.fullName.trim(),
+      username: dto.username.trim().toLowerCase().replace(/\s+/g, '_'),
+      email: dto.email || `${dto.username.toLowerCase()}@codepractice.uz`,
+      subject: dto.subject || 'Dasturlash asoslari',
+      assignedGroups: dto.assignedGroups || [],
+      studentCount: (dto.assignedGroups || []).length * 15,
+      isActive: true,
+      createdAt: new Date().toISOString(),
+    };
+
+    const updated = [newTeacher, ...teachers];
+    setStored('teachers', updated);
+
+    if (dto.password) {
+      const passwords = getStored<Record<string, string>>('teacher_passwords', {});
+      passwords[newTeacher.username] = dto.password;
+      setStored('teacher_passwords', passwords);
+    }
+
+    return newTeacher;
+  },
+
+  async updateTeacher(id: string, dto: Partial<TeacherRecord>): Promise<TeacherRecord> {
+    const teachers = getStored<TeacherRecord[]>('teachers', INITIAL_TEACHERS);
+    const updated = teachers.map((t) => (t.id === id ? { ...t, ...dto } : t));
+    setStored('teachers', updated);
+    return updated.find((t) => t.id === id)!;
+  },
+
+  async toggleTeacherStatus(id: string): Promise<boolean> {
+    const teachers = getStored<TeacherRecord[]>('teachers', INITIAL_TEACHERS);
+    const updated = teachers.map((t) => (t.id === id ? { ...t, isActive: !t.isActive } : t));
+    setStored('teachers', updated);
+    const target = updated.find((t) => t.id === id);
+    return target ? target.isActive : true;
+  },
+
+  async deleteTeacher(id: string): Promise<boolean> {
+    const teachers = getStored<TeacherRecord[]>('teachers', INITIAL_TEACHERS);
+    const updated = teachers.filter((t) => t.id !== id);
+    setStored('teachers', updated);
+    return true;
+  },
+
+  async getSystemSettings(): Promise<SystemSettingsData> {
+    return getStored<SystemSettingsData>('system_settings', INITIAL_SYSTEM_SETTINGS);
+  },
+
+  async updateSystemSettings(dto: Partial<SystemSettingsData>): Promise<SystemSettingsData> {
+    const current = getStored<SystemSettingsData>('system_settings', INITIAL_SYSTEM_SETTINGS);
+    const updated = { ...current, ...dto };
+    setStored('system_settings', updated);
+    return updated;
+  },
+
+  async getSecurityLogs(): Promise<SecurityLogItem[]> {
+    return getStored<SecurityLogItem[]>('security_logs', INITIAL_SECURITY_LOGS);
   },
 };

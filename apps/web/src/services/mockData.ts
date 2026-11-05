@@ -39,9 +39,9 @@ export const MOCK_STUDENTS: User[] = [
 ];
 
 export const INITIAL_GROUPS: Group[] = [
-  { id: 'g-1', name: 'Guruh-101 (Python Asoslari)', studentCount: 18, activeAssignmentsCount: 2, createdAt: '2026-09-01T08:00:00Z', updatedAt: '2026-10-29T10:00:00Z' },
-  { id: 'g-2', name: 'Guruh-102 (C++ Algoritmlar)', studentCount: 16, activeAssignmentsCount: 1, createdAt: '2026-09-10T08:00:00Z', updatedAt: '2026-10-29T10:00:00Z' },
-  { id: 'g-3', name: 'Guruh-103 (Olimpiada dasturlash)', studentCount: 14, activeAssignmentsCount: 1, createdAt: '2026-09-15T08:00:00Z', updatedAt: '2026-10-29T10:00:00Z' },
+  { id: 'g-1', name: 'Guruh-101 (Python Asoslari)', studentCount: 18, activeAssignmentsCount: 2, telegramChatId: '-100192837482', createdAt: '2026-09-01T08:00:00Z', updatedAt: '2026-10-29T10:00:00Z' },
+  { id: 'g-2', name: 'Guruh-102 (C++ Algoritmlar)', studentCount: 16, activeAssignmentsCount: 1, telegramChatId: '-100183749201', createdAt: '2026-09-10T08:00:00Z', updatedAt: '2026-10-29T10:00:00Z' },
+  { id: 'g-3', name: 'Guruh-103 (Olimpiada dasturlash)', studentCount: 14, activeAssignmentsCount: 1, telegramChatId: '-100174829103', createdAt: '2026-09-15T08:00:00Z', updatedAt: '2026-10-29T10:00:00Z' },
 ];
 
 export const INITIAL_PROBLEMS: Problem[] = [

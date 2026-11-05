@@ -1,9 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { apiClient } from '../services/api';
 import { Assignment, Group, Problem } from '@codepractice/shared-types';
-import { Plus, CheckSquare, Calendar, Users, X, Clock, AlertCircle } from 'lucide-react';
+import { Plus, CheckSquare, Calendar, Users, X, Clock, AlertCircle, Send } from 'lucide-react';
 
-export const AssignmentsPage: React.FC = () => {
+interface AssignmentsPageProps {
+  onNavigateToReports?: (groupId?: string) => void;
+}
+
+export const AssignmentsPage: React.FC<AssignmentsPageProps> = ({ onNavigateToReports }) => {
   const [assignments, setAssignments] = useState<Assignment[]>([]);
   const [groups, setGroups] = useState<Group[]>([]);
   const [problems, setProblems] = useState<Problem[]>([]);
@@ -126,15 +130,28 @@ export const AssignmentsPage: React.FC = () => {
               <p className="text-xs text-slate-500 line-clamp-2 mb-4">{a.description || 'Izoh berilmagan'}</p>
             </div>
 
-            <div className="pt-4 border-t border-slate-100 text-xs text-slate-500 space-y-1.5">
-              <div className="flex items-center gap-1.5">
-                <Calendar className="w-3.5 h-3.5 text-slate-400" />
-                <span>Boshlanadi: {new Date(a.startsAt).toLocaleDateString('uz-UZ')}</span>
+            <div className="pt-4 border-t border-slate-100 flex items-end justify-between gap-2 text-xs text-slate-500">
+              <div className="space-y-1.5">
+                <div className="flex items-center gap-1.5">
+                  <Calendar className="w-3.5 h-3.5 text-slate-400" />
+                  <span>Boshlanadi: {new Date(a.startsAt).toLocaleDateString('uz-UZ')}</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <Clock className="w-3.5 h-3.5 text-slate-400" />
+                  <span>Muddati: {new Date(a.dueAt).toLocaleDateString('uz-UZ')}</span>
+                </div>
               </div>
-              <div className="flex items-center gap-1.5">
-                <Clock className="w-3.5 h-3.5 text-slate-400" />
-                <span>Muddati: {new Date(a.dueAt).toLocaleDateString('uz-UZ')}</span>
-              </div>
+              {onNavigateToReports && (
+                <button
+                  type="button"
+                  onClick={() => onNavigateToReports(a.groupId)}
+                  className="px-2.5 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 font-medium rounded-lg text-xs flex items-center gap-1.5 transition border border-blue-200 shadow-xs flex-shrink-0"
+                  title="Guruh bo‘yicha topshiriq hisoboti va Telegramga yuborish"
+                >
+                  <Send className="w-3.5 h-3.5 text-blue-600" />
+                  <span>Telegram hisobot</span>
+                </button>
+              )}
             </div>
           </div>
         ))}

@@ -36,6 +36,7 @@ export interface Group {
   name: string;
   studentCount?: number;
   activeAssignmentsCount?: number;
+  telegramChatId?: string;
   createdAt: string;
   updatedAt: string;
 }

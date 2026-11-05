@@ -91,7 +91,7 @@ export const App: React.FC = () => {
           {currentTab === 'dashboard' && <DashboardPage />}
           {currentTab === 'groups' && <GroupsPage />}
           {currentTab === 'problems' && <ProblemsPage />}
-          {currentTab === 'assignments' && <AssignmentsPage />}
+          {currentTab === 'assignments' && <AssignmentsPage onNavigateToReports={() => setCurrentTab('reports')} />}
           {currentTab === 'reports' && <ReportsPage />}
           {currentTab === 'rewards' && <RewardsPage />}
 

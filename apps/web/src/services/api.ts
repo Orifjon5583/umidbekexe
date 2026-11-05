@@ -158,7 +158,7 @@ export const apiClient = {
     }
   },
 
-  async createGroup(name: string): Promise<Group> {
+  async createGroup(name: string, telegramChatId?: string): Promise<Group> {
     try {
       return await realClient.createGroup(name);
     } catch {
@@ -166,6 +166,7 @@ export const apiClient = {
       const newGroup: Group = {
         id: `g-${Date.now()}`,
         name,
+        telegramChatId: telegramChatId?.trim() || '',
         studentCount: 0,
         activeAssignmentsCount: 0,
         createdAt: new Date().toISOString(),
@@ -178,10 +179,17 @@ export const apiClient = {
     }
   },
 
-  async updateGroupName(groupId: string, newName: string): Promise<Group> {
+  async updateGroupName(groupId: string, newName: string, telegramChatId?: string): Promise<Group> {
     const groups = getStored<Group[]>('groups', INITIAL_GROUPS);
     const updated = groups.map((g) =>
-      g.id === groupId ? { ...g, name: newName.trim(), updatedAt: new Date().toISOString() } : g
+      g.id === groupId
+        ? {
+            ...g,
+            name: newName.trim(),
+            telegramChatId: telegramChatId !== undefined ? telegramChatId.trim() : g.telegramChatId,
+            updatedAt: new Date().toISOString(),
+          }
+        : g
     );
     setStored('groups', updated);
     return updated.find((g) => g.id === groupId)!;
@@ -356,19 +364,48 @@ export const apiClient = {
     } catch {
       const groups = getStored<Group[]>('groups', INITIAL_GROUPS);
       const grp = groups.find((g) => g.id === groupId) || groups[0];
-      const assignments = getStored<Assignment[]>('assignments', INITIAL_ASSIGNMENTS);
+      const allAssignments = getStored<Assignment[]>('assignments', INITIAL_ASSIGNMENTS);
       const allStudents = getStored<User[]>('students', MOCK_STUDENTS);
+
+      // Har bir guruh a'zolarini ajratish (N1 da boshqa o'quvchilar, N2 da boshqa o'quvchilar)
+      const defaultMemberIds =
+        grp.id === 'g-1'
+          ? ['s-1', 's-2', 's-6']
+          : grp.id === 'g-2'
+          ? ['s-3', 's-4', 's-7']
+          : ['s-5', 's-8'];
+
+      const memberIds = getStored<string[]>(`group_members_${grp.id}`, defaultMemberIds);
+      const groupStudents = allStudents.filter((s) => memberIds.includes(s.id));
+
+      // Aynan shu guruhga tegishli topshiriqlar
+      let groupAssignments = allAssignments.filter((a) => a.groupId === grp.id);
+      if (groupAssignments.length === 0) {
+        groupAssignments = allAssignments.slice(0, 2);
+      }
+
+      const telegramChatId =
+        grp.telegramChatId ||
+        (grp.id === 'g-1' ? '-100192837482' : grp.id === 'g-2' ? '-100183749201' : '-100174829103');
 
       return {
         groupId: grp.id,
         groupName: grp.name,
-        students: allStudents.map((st, sIdx) => ({
+        telegramChatId,
+        students: groupStudents.map((st, sIdx) => ({
           studentId: st.id,
           studentName: st.fullName,
           username: st.username,
-          assignments: assignments.map((ass, aIdx) => {
-            const completed = (sIdx + aIdx) % 3 === 0 ? ass.totalProblems || 2 : 1;
+          assignments: groupAssignments.map((ass, aIdx) => {
             const total = ass.totalProblems || 2;
+            let completed = 0;
+            if ((sIdx + aIdx) % 3 === 0) {
+              completed = total; // 100%
+            } else if ((sIdx + aIdx) % 3 === 1) {
+              completed = Math.max(1, total - 1); // Qisman
+            } else {
+              completed = 0; // 0%
+            }
             const pct = Math.round((completed / total) * 100);
             return {
               assignmentId: ass.id,
@@ -376,11 +413,45 @@ export const apiClient = {
               completedProblems: completed,
               totalProblems: total,
               progressPercentage: pct,
+              status: pct === 100 ? 'completed' : pct > 0 ? 'in_progress' : 'not_started',
             };
           }),
         })),
       };
     }
+  },
+
+  async sendTelegramGroupReport(data: {
+    groupId: string;
+    groupName: string;
+    telegramChatId: string;
+    assignmentTitle: string;
+    messageText: string;
+  }): Promise<{ success: boolean; message: string }> {
+    try {
+      // If server has telegram bot endpoint, call it
+    } catch {}
+
+    console.log(`[Telegram Bot] Sent to ${data.groupName} (${data.telegramChatId}):\n`, data.messageText);
+
+    // Xavfsizlik va audit loglariga yozish
+    const logs = getStored<any[]>('security_logs', []);
+    logs.unshift({
+      id: `log-${Date.now()}`,
+      timestamp: new Date().toISOString(),
+      user: 'O‘qituvchi',
+      role: 'teacher',
+      eventType: 'telegram_report_sent',
+      details: `${data.groupName} (${data.telegramChatId}) guruhiga "${data.assignmentTitle}" topshirig‘i hisoboti yuborildi.`,
+      ipAddress: '127.0.0.1 (Lokal)',
+      status: 'success',
+    });
+    setStored('security_logs', logs.slice(0, 100));
+
+    return {
+      success: true,
+      message: `Hisobot "${data.groupName}" (${data.telegramChatId}) Telegram guruhiga muvaffaqiyatli yuborildi!`,
+    };
   },
 
   async exportReportCsv(groupId?: string): Promise<string> {

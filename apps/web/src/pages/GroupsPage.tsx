@@ -18,6 +18,7 @@ import {
   ShieldCheck,
   AlertCircle,
   FolderEdit,
+  Send,
 } from 'lucide-react';
 
 export const GroupsPage: React.FC = () => {
@@ -37,6 +38,7 @@ export const GroupsPage: React.FC = () => {
   const [groupModalMode, setGroupModalMode] = useState<'create' | 'edit'>('create');
   const [editingGroupId, setEditingGroupId] = useState<string | null>(null);
   const [groupNameInput, setGroupNameInput] = useState('');
+  const [groupTelegramInput, setGroupTelegramInput] = useState('');
 
   // Add Student Modal (New vs Existing)
   const [isAddStudentOpen, setIsAddStudentOpen] = useState(false);
@@ -102,6 +104,7 @@ export const GroupsPage: React.FC = () => {
     setGroupModalMode('create');
     setEditingGroupId(null);
     setGroupNameInput('');
+    setGroupTelegramInput('');
     setIsGroupModalOpen(true);
   };
 
@@ -111,6 +114,7 @@ export const GroupsPage: React.FC = () => {
     setGroupModalMode('edit');
     setEditingGroupId(g.id);
     setGroupNameInput(g.name);
+    setGroupTelegramInput(g.telegramChatId || '');
     setIsGroupModalOpen(true);
   };
 
@@ -121,23 +125,25 @@ export const GroupsPage: React.FC = () => {
 
     try {
       if (groupModalMode === 'create') {
-        const created = await apiClient.createGroup(groupNameInput.trim());
+        const created = await apiClient.createGroup(groupNameInput.trim(), groupTelegramInput.trim());
         setIsGroupModalOpen(false);
         setGroupNameInput('');
+        setGroupTelegramInput('');
         await fetchGroups();
         const details = await apiClient.getGroupDetails(created.id);
         setSelectedGroup(details);
         showToast(`"${created.name}" guruhi muvaffaqiyatli yaratildi!`);
       } else if (groupModalMode === 'edit' && editingGroupId) {
-        const updated = await apiClient.updateGroupName(editingGroupId, groupNameInput.trim());
+        const updated = await apiClient.updateGroupName(editingGroupId, groupNameInput.trim(), groupTelegramInput.trim());
         setIsGroupModalOpen(false);
         setGroupNameInput('');
+        setGroupTelegramInput('');
         await fetchGroups();
         if (selectedGroup?.id === editingGroupId) {
           const details = await apiClient.getGroupDetails(editingGroupId);
           setSelectedGroup(details);
         }
-        showToast(`Guruh nomi "${updated.name}" ga o‘zgartirildi!`);
+        showToast(`Guruh ma’lumotlari muvaffaqiyatli saqlandi!`);
       }
     } catch (err: any) {
       setError(err.message);
@@ -441,9 +447,16 @@ export const GroupsPage: React.FC = () => {
                       </button>
                     )}
                   </div>
-                  <p className="text-xs text-slate-500 mt-0.5">
-                    Guruhdagi o‘quvchilar soni: <strong>{selectedGroup.members.length} nafar</strong>
-                  </p>
+                  <div className="flex flex-wrap items-center gap-2 mt-1">
+                    <p className="text-xs text-slate-500">
+                      O‘quvchilar soni: <strong>{selectedGroup.members.length} nafar</strong>
+                    </p>
+                    <span className="text-slate-300">•</span>
+                    <span className="inline-flex items-center gap-1 text-[11px] font-mono text-cyan-700 bg-cyan-50 px-2 py-0.5 rounded border border-cyan-200">
+                      <Send className="w-3 h-3 text-cyan-600" />
+                      <span>{selectedGroup.telegramChatId ? `Telegram: ${selectedGroup.telegramChatId}` : 'Telegram: Biriktirilmagan'}</span>
+                    </span>
+                  </div>
                 </div>
 
                 {isAdmin && (
@@ -552,6 +565,26 @@ export const GroupsPage: React.FC = () => {
                 />
                 <p className="text-[11px] text-slate-400 mt-1">
                   Tushunarli va guruh yo‘nalishini aks ettiruvchi nom kiriting.
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1.5 flex items-center justify-between">
+                  <span>Telegram Guruh Chat ID / Havolasi</span>
+                  <span className="text-[10px] text-cyan-600 font-normal">Bot xabarlari uchun</span>
+                </label>
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={groupTelegramInput}
+                    onChange={(e) => setGroupTelegramInput(e.target.value)}
+                    placeholder="Masalan: -100192837482 yoki @mintera_guruh_101"
+                    className="w-full h-11 pl-9 pr-3 border border-slate-300 rounded-xl text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  <Send className="w-4 h-4 text-cyan-600 absolute left-3 top-3.5" />
+                </div>
+                <p className="text-[11px] text-slate-400 mt-1">
+                  Ushbu guruhning test natijalari aynan shu Telegram guruhiga alohida yuboriladi.
                 </p>
               </div>
 

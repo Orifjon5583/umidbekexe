@@ -25,7 +25,12 @@ const MIME_TYPES = {
   '.woff2': 'font/woff2',
   '.woff': 'font/woff',
   '.ttf': 'font/ttf',
+  '.exe': 'application/vnd.microsoft.portable-executable',
+  '.zip': 'application/zip',
 };
+
+const ROOT_DIR = path.resolve(__dirname, '..');
+const PUBLIC_DIR = path.resolve(ROOT_DIR, 'apps', 'web', 'public');
 
 const server = http.createServer((req, res) => {
   const urlPath = req.url.split('?')[0];
@@ -35,7 +40,20 @@ const server = http.createServer((req, res) => {
     if (err || !stats.isFile()) {
       const ext = path.extname(urlPath).toLowerCase();
 
-      if (ext === '.css') {
+      // Check if it's an exe installer file in public or root
+      if (ext === '.exe') {
+        const publicExe = path.join(PUBLIC_DIR, path.basename(urlPath));
+        const rootExe = path.join(ROOT_DIR, path.basename(urlPath));
+        if (fs.existsSync(publicExe)) {
+          filePath = publicExe;
+        } else if (fs.existsSync(rootExe)) {
+          filePath = rootExe;
+        } else {
+          res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' });
+          res.end('Fayl topilmadi');
+          return;
+        }
+      } else if (ext === '.css') {
         const assetsDir = path.join(DIST_DIR, 'assets');
         if (fs.existsSync(assetsDir)) {
           const cssFiles = fs.readdirSync(assetsDir).filter((f) => f.endsWith('.css'));
@@ -84,13 +102,17 @@ const server = http.createServer((req, res) => {
         return;
       }
 
-      res.writeHead(200, {
+      const headers = {
         'Content-Type': contentType,
         'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0',
         'Pragma': 'no-cache',
         'Expires': '0',
         'Access-Control-Allow-Origin': '*',
-      });
+      };
+      if (ext === '.exe') {
+        headers['Content-Disposition'] = `attachment; filename="${path.basename(filePath)}"`;
+      }
+      res.writeHead(200, headers);
       res.end(data);
     });
   });

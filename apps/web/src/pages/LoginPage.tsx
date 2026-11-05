@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { apiClient } from '../services/api';
-import { Eye, EyeOff, AlertCircle, ShieldCheck, UserCheck, Sparkles } from 'lucide-react';
+import { Eye, EyeOff, AlertCircle, ShieldCheck, UserCheck, Sparkles, ArrowLeft } from 'lucide-react';
 
 interface Props {
   onLoginSuccess: (user: any) => void;
+  onBackToHome?: () => void;
 }
 
-export const LoginPage: React.FC<Props> = ({ onLoginSuccess }) => {
+export const LoginPage: React.FC<Props> = ({ onLoginSuccess, onBackToHome }) => {
   const [username, setUsername] = useState('teacher1');
   const [password, setPassword] = useState('Teacher123!');
   const [showPassword, setShowPassword] = useState(false);
@@ -58,7 +59,19 @@ export const LoginPage: React.FC<Props> = ({ onLoginSuccess }) => {
   };
 
   return (
-    <div className="min-h-screen bg-[#070D1E] flex items-center justify-center p-4 sm:p-6 font-sans">
+    <div className="min-h-screen bg-[#070D1E] flex flex-col items-center justify-center p-4 sm:p-6 font-sans relative">
+      {onBackToHome && (
+        <div className="w-full max-w-4xl mb-4 flex items-center justify-between">
+          <button
+            onClick={onBackToHome}
+            className="inline-flex items-center gap-2 text-slate-300 hover:text-white bg-white/10 hover:bg-white/15 px-3.5 py-2 rounded-xl text-xs font-semibold transition backdrop-blur-md cursor-pointer"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            <span>Asosiy saytga qaytish</span>
+          </button>
+          <span className="text-xs text-slate-400 font-mono">Mintera Platform</span>
+        </div>
+      )}
       <div className="w-full max-w-4xl flex flex-col md:flex-row items-center justify-between gap-8 md:gap-12 py-4">
         {/* Left: Brand with squircle icon and O'qituvchi paneli */}
         <div className="flex-1 flex flex-col items-center md:items-start text-center md:text-left">

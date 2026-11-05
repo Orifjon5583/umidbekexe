@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { LandingPage } from './pages/LandingPage';
 import { LoginPage } from './pages/LoginPage';
 import { DashboardLayout } from './layouts/DashboardLayout';
 import { DashboardPage } from './pages/DashboardPage';
@@ -14,6 +15,7 @@ import { SecurityLogsPage } from './pages/SecurityLogsPage';
 export const App: React.FC = () => {
   const [currentUser, setCurrentUser] = useState<any | null>(null);
   const [currentTab, setCurrentTab] = useState<string>('dashboard');
+  const [currentView, setCurrentView] = useState<'landing' | 'login' | 'dashboard'>('landing');
 
   useEffect(() => {
     const userJson = localStorage.getItem('cp_user');
@@ -22,18 +24,65 @@ export const App: React.FC = () => {
       try {
         const user = JSON.parse(userJson);
         setCurrentUser(user);
+        if (window.location.hash === '#dashboard' || window.location.search.includes('panel')) {
+          setCurrentView('dashboard');
+        }
       } catch {}
+    } else {
+      if (window.location.hash === '#login' || window.location.pathname === '/login') {
+        setCurrentView('login');
+      }
     }
   }, []);
 
-  if (!currentUser) {
-    return <LoginPage onLoginSuccess={(user) => setCurrentUser(user)} />;
+  const handleLoginSuccess = (user: any) => {
+    setCurrentUser(user);
+    setCurrentView('dashboard');
+    window.location.hash = 'dashboard';
+  };
+
+  const handleGoToLogin = () => {
+    setCurrentView('login');
+    window.location.hash = 'login';
+  };
+
+  const handleGoToLanding = () => {
+    setCurrentView('landing');
+    window.location.hash = '';
+  };
+
+  const handleGoToDashboard = () => {
+    setCurrentView('dashboard');
+    window.location.hash = 'dashboard';
+  };
+
+  if (currentView === 'landing') {
+    return (
+      <LandingPage
+        onGoToLogin={handleGoToLogin}
+        currentUser={currentUser}
+        onGoToDashboard={handleGoToDashboard}
+      />
+    );
+  }
+
+  if (currentView === 'login' || !currentUser) {
+    return (
+      <LoginPage
+        onLoginSuccess={handleLoginSuccess}
+        onBackToHome={handleGoToLanding}
+      />
+    );
   }
 
   const isAdmin = currentUser.role === 'admin';
 
   return (
-    <DashboardLayout currentTab={currentTab} onTabChange={setCurrentTab}>
+    <DashboardLayout
+      currentTab={currentTab}
+      onTabChange={setCurrentTab}
+      onGoToLanding={handleGoToLanding}
+    >
       {currentTab === 'dashboard' && <DashboardPage />}
       {currentTab === 'groups' && <GroupsPage />}
       {currentTab === 'problems' && <ProblemsPage />}

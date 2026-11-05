@@ -64,7 +64,7 @@ export const App: React.FC = () => {
     <>
       {/* Sahifa yangilanganda / ochilganda chiquvchi zamonaviy Zagruzka (Preloader) */}
       {isAppLoading && (
-        <Preloader onFinish={() => setIsAppLoading(false)} minDurationMs={900} />
+        <Preloader onFinish={() => setIsAppLoading(false)} minDurationMs={2400} />
       )}
 
       {currentView === 'landing' ? (

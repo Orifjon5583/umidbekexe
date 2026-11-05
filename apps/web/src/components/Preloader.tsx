@@ -6,28 +6,28 @@ interface PreloaderProps {
   minDurationMs?: number;
 }
 
-export const Preloader: React.FC<PreloaderProps> = ({ onFinish, minDurationMs = 900 }) => {
-  const [progress, setProgress] = useState(15);
+export const Preloader: React.FC<PreloaderProps> = ({ onFinish, minDurationMs = 2400 }) => {
+  const [progress, setProgress] = useState(0);
   const [isFadingOut, setIsFadingOut] = useState(false);
   const [statusText, setStatusText] = useState('Mintera tizimi ishga tushirilmoqda...');
 
   useEffect(() => {
     const startTime = Date.now();
 
-    // Dinamik status xabarlari
+    // Dinamik status xabarlari (sekinroq va ketma-ketlikda)
     const statusTimeout1 = setTimeout(() => {
-      setStatusText('Kodni tekshirish muhiti yuklanmoqda...');
-    }, 280);
+      setStatusText('Kodni tekshirish va tahlil qilish muhiti yuklanmoqda...');
+    }, 650);
 
     const statusTimeout2 = setTimeout(() => {
-      setStatusText('Xavfsizlik va Anti-Cheat modullari faollashtirilmoqda...');
-    }, 600);
+      setStatusText('Anti-Cheat va Sandbox xavfsizlik modullari faollashtirilmoqda...');
+    }, 1350);
 
     const statusTimeout3 = setTimeout(() => {
-      setStatusText('Tayyor! Xush kelibsiz.');
-    }, 850);
+      setStatusText('Barcha modullar tayyor! Tizim ochilmoqda...');
+    }, 2050);
 
-    // Progress foizini oshirish
+    // Progress foizini sokin va bir maromda oshirish
     const interval = setInterval(() => {
       setProgress((prev) => {
         if (prev >= 100) {
@@ -39,16 +39,27 @@ export const Preloader: React.FC<PreloaderProps> = ({ onFinish, minDurationMs = 
             setIsFadingOut(true);
             setTimeout(() => {
               onFinish?.();
-            }, 450); // silliq yo'qolish (fade-out)
-          }, remaining);
+            }, 600); // silliq yo'qolish (fade-out)
+          }, remaining + 250);
 
           return 100;
         }
 
-        const step = Math.floor(Math.random() * 20) + 15;
+        // Bosqichma-bosqich sekin va ravon to'lish
+        let step = 3;
+        if (prev < 30) {
+          step = Math.floor(Math.random() * 4) + 4; // 4 - 7%
+        } else if (prev < 70) {
+          step = Math.floor(Math.random() * 3) + 3; // 3 - 5%
+        } else if (prev < 90) {
+          step = Math.floor(Math.random() * 3) + 2; // 2 - 4%
+        } else {
+          step = 2; // 2%
+        }
+
         return Math.min(prev + step, 100);
       });
-    }, 110);
+    }, 85);
 
     return () => {
       clearInterval(interval);
@@ -60,7 +71,7 @@ export const Preloader: React.FC<PreloaderProps> = ({ onFinish, minDurationMs = 
 
   return (
     <div
-      className={`fixed inset-0 z-[99999] flex flex-col items-center justify-center bg-[#070D1E] text-white select-none transition-all duration-500 ease-out ${
+      className={`fixed inset-0 z-[99999] flex flex-col items-center justify-center bg-[#070D1E] text-white select-none transition-all duration-700 ease-out ${
         isFadingOut ? 'opacity-0 scale-105 pointer-events-none' : 'opacity-100 scale-100'
       }`}
     >

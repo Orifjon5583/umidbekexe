@@ -20,6 +20,11 @@ import {
   Layers,
   Users,
   AlertCircle,
+  Send,
+  Eye,
+  EyeOff,
+  ExternalLink,
+  HelpCircle,
 } from 'lucide-react';
 
 export const SystemSettingsPage: React.FC = () => {
@@ -27,6 +32,9 @@ export const SystemSettingsPage: React.FC = () => {
   const [groups, setGroups] = useState<Group[]>([]);
   const [loading, setLoading] = useState(true);
   const [savedMsg, setSavedMsg] = useState(false);
+  const [showBotToken, setShowBotToken] = useState(false);
+  const [testingBot, setTestingBot] = useState(false);
+  const [botTestResult, setBotTestResult] = useState<{ success: boolean; message: string } | null>(null);
 
   useEffect(() => {
     Promise.all([
@@ -60,6 +68,26 @@ export const SystemSettingsPage: React.FC = () => {
     await apiClient.updateSystemSettings(settings);
     setSavedMsg(true);
     setTimeout(() => setSavedMsg(false), 3500);
+  };
+
+  const handleTestBot = async () => {
+    if (!settings.telegramBotToken?.trim()) {
+      setBotTestResult({ success: false, message: 'Iltimos, avval Telegram Bot Tokenni kiriting!' });
+      return;
+    }
+    setTestingBot(true);
+    setBotTestResult(null);
+    try {
+      const res = await apiClient.testTelegramBotConnection(settings.telegramBotToken);
+      setBotTestResult(res);
+      if (res.username && !settings.telegramBotUsername) {
+        setSettings({ ...settings, telegramBotUsername: res.username });
+      }
+    } catch (err: any) {
+      setBotTestResult({ success: false, message: err.message || 'Xatolik yuz berdi' });
+    } finally {
+      setTestingBot(false);
+    }
   };
 
   return (
@@ -375,7 +403,136 @@ export const SystemSettingsPage: React.FC = () => {
           </div>
         </div>
 
-        {/* 3. Lokal Ijro va Cheklovlar */}
+        {/* 3. Telegram Bot Integratsiyasi */}
+        <div className="bg-white rounded-2xl border border-blue-200 p-6 shadow-xs space-y-5 bg-gradient-to-b from-blue-50/20 to-white">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-blue-100">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center shadow-sm shadow-blue-500/20">
+                <Send className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="font-bold text-slate-900 text-base flex items-center gap-2">
+                  <span>Telegram Bot Integratsiyasi</span>
+                  <span className="text-[10px] uppercase font-extrabold tracking-wider px-2 py-0.5 rounded-full bg-blue-100 text-blue-700">
+                    Guruhlarga Hisobot
+                  </span>
+                </h3>
+                <p className="text-xs text-slate-500">
+                  O‘quvchilar natijalari va topshiriq hisobotlarini avtomatik Telegram guruhlarga yuborish
+                </p>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={handleTestBot}
+              disabled={testingBot}
+              className="px-4 py-2 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-xl text-xs font-bold border border-blue-200 flex items-center gap-1.5 transition cursor-pointer self-start sm:self-auto disabled:opacity-50"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 ${testingBot ? 'animate-spin' : ''}`} />
+              <span>{testingBot ? 'Tekshirilmoqda...' : 'Bot ulanishini tekshirish (Ping)'}</span>
+            </button>
+          </div>
+
+          {/* Test Result Toast/Banner */}
+          {botTestResult && (
+            <div
+              className={`p-3.5 rounded-xl border text-xs font-semibold flex items-center gap-2.5 transition animate-fade-in ${
+                botTestResult.success
+                  ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
+                  : 'bg-red-50 border-red-200 text-red-800'
+              }`}
+            >
+              {botTestResult.success ? (
+                <Check className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+              ) : (
+                <AlertCircle className="w-4 h-4 text-red-600 flex-shrink-0" />
+              )}
+              <span className="flex-1">{botTestResult.message}</span>
+            </div>
+          )}
+
+          {/* Bot Key Inputs */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div>
+              <label className="block text-xs font-bold text-slate-700 mb-1 flex items-center justify-between">
+                <span className="flex items-center gap-1.5">
+                  <Key className="w-3.5 h-3.5 text-blue-600" />
+                  Telegram Bot API Token (Key):
+                </span>
+                <span className="text-[11px] text-slate-400 font-normal">@BotFather bergan kalit</span>
+              </label>
+              <div className="relative">
+                <input
+                  type={showBotToken ? 'text' : 'password'}
+                  value={settings.telegramBotToken || ''}
+                  onChange={(e) => setSettings({ ...settings, telegramBotToken: e.target.value })}
+                  placeholder="Masalan: 7123456789:AAHk_abcdef123456789..."
+                  className="w-full h-10 px-3 pr-10 border border-slate-300 rounded-xl text-xs font-mono bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowBotToken(!showBotToken)}
+                  className="absolute right-3 top-2.5 text-slate-400 hover:text-slate-600 cursor-pointer"
+                  title={showBotToken ? "Yashirish" : "Ko‘rsatish"}
+                >
+                  {showBotToken ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+              <p className="text-[11px] text-slate-500 mt-1">
+                * Ushbu token orqali bot guruhlarga xabarlar, test natijalari va jadvallarni yuboradi.
+              </p>
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-slate-700 mb-1 flex items-center justify-between">
+                <span className="flex items-center gap-1.5">
+                  <Bot className="w-3.5 h-3.5 text-blue-600" />
+                  Bot Username:
+                </span>
+                <span className="text-[11px] text-slate-400 font-normal">Havola va o‘quvchilar uchun</span>
+              </label>
+              <input
+                type="text"
+                value={settings.telegramBotUsername || ''}
+                onChange={(e) => setSettings({ ...settings, telegramBotUsername: e.target.value })}
+                placeholder="@mintera_robot yoki @sizning_botingiz"
+                className="w-full h-10 px-3 border border-slate-300 rounded-xl text-xs font-mono bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              <p className="text-[11px] text-slate-500 mt-1">
+                * Sayt bosh sahifasida va o‘quvchilar panelida ko‘rinuvchi rasmiy bot manzili.
+              </p>
+            </div>
+          </div>
+
+          {/* Step by step mini-guide */}
+          <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-2 text-xs">
+            <div className="font-bold text-slate-800 flex items-center gap-1.5 text-xs">
+              <HelpCircle className="w-4 h-4 text-blue-600" />
+              <span>Telegram Bot kalitini qanday olish va ulash mumkin? (Yo‘riqnoma)</span>
+            </div>
+            <ol className="list-decimal list-inside space-y-1.5 text-slate-600 pl-1 leading-relaxed">
+              <li>
+                Telegramda rasmiy <strong className="text-blue-600 font-semibold">@BotFather</strong> botiga kiring va <code className="bg-white px-1.5 py-0.5 rounded border border-slate-200 font-mono text-[11px]">/newbot</code> deb yozing.
+              </li>
+              <li>
+                Botingizga ixtiyoriy nom va oxiri <code className="bg-white px-1.5 py-0.5 rounded border border-slate-200 font-mono text-[11px]">bot</code> bilan tugovchi username tanlang (masalan: <em>mintera_edu_bot</em>).
+              </li>
+              <li>
+                BotFather bergan uzun <strong className="text-slate-800">HTTP API Token</strong>ni nusxalab, yuqoridagi <strong>«Telegram Bot API Token (Key)»</strong> maydoniga joylang.
+              </li>
+              <li>
+                Botingizni o‘quvchilar Telegram guruhiga qo‘shing va unga <strong className="text-slate-900">Administrator (Admin)</strong> huquqini bering, aks holda bot guruhga xabar yubora olmaydi.
+              </li>
+            </ol>
+            <div className="pt-2 border-t border-slate-200 flex flex-wrap items-center gap-2 text-[11px] text-slate-500">
+              <span className="font-medium">Muqobil usul:</span>
+              <span>Serverda <code className="bg-white px-1 py-0.5 rounded border border-slate-200 font-mono">.env</code> fayliga <code className="text-purple-700 font-mono font-bold">TELEGRAM_BOT_TOKEN=kalitingiz</code> qilib yozib qo‘yishingiz ham mumkin.</span>
+            </div>
+          </div>
+        </div>
+
+        {/* 4. Lokal Ijro va Cheklovlar */}
         <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs space-y-4">
           <div className="flex items-center gap-3 pb-3 border-b border-slate-100">
             <Cpu className="w-5 h-5 text-purple-600" />

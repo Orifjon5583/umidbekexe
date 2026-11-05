@@ -383,6 +383,10 @@ export interface SystemSettingsData {
   requireFullscreenMode: boolean;
   serverRegion: string;
   backupStatus: string;
+
+  // Telegram Bot Integratsiyasi
+  telegramBotToken?: string;
+  telegramBotUsername?: string;
 }
 
 export const INITIAL_SYSTEM_SETTINGS: SystemSettingsData = {
@@ -399,6 +403,8 @@ export const INITIAL_SYSTEM_SETTINGS: SystemSettingsData = {
   aiAllowedGroups: ['Guruh-101 (Python Asoslari)', 'Guruh-102 (C++ Algoritmlar)', 'Guruh-103 (Olimpiada dasturlash)'],
   aiPlusGroups: ['Guruh-101 (Python Asoslari)', 'Guruh-102 (C++ Algoritmlar)'],
   aiCustomApiKey: '',
+  telegramBotToken: '',
+  telegramBotUsername: '@mintera_edu_bot',
   defaultTimeLimitMs: 2000,
   defaultMemoryLimitMb: 128,
   strictClipboardBlock: true,

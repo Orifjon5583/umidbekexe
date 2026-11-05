@@ -421,16 +421,70 @@ export const apiClient = {
     }
   },
 
+  async testTelegramBotConnection(token: string): Promise<{ success: boolean; botName?: string; username?: string; message: string }> {
+    if (!token || !token.trim()) {
+      return { success: false, message: 'Iltimos, Bot Tokenni kiriting!' };
+    }
+    try {
+      const res = await fetch(`https://api.telegram.org/bot${token.trim()}/getMe`);
+      const data = await res.json();
+      if (data.ok) {
+        return {
+          success: true,
+          botName: data.result.first_name,
+          username: `@${data.result.username}`,
+          message: `Ulanish muvaffaqiyatli! Bot nomi: "${data.result.first_name}" (@${data.result.username})`,
+        };
+      } else {
+        return {
+          success: false,
+          message: `Telegram xatoligi: ${data.description || 'Token noto‘g‘ri yoki yaroqsiz'}`,
+        };
+      }
+    } catch (err: any) {
+      return {
+        success: false,
+        message: `Internet yoki tarmoq xatosi: ${err.message || 'Telegram serveriga ulanib bo‘lmadi'}`,
+      };
+    }
+  },
+
   async sendTelegramGroupReport(data: {
     groupId: string;
     groupName: string;
     telegramChatId: string;
     assignmentTitle: string;
     messageText: string;
-  }): Promise<{ success: boolean; message: string }> {
-    try {
-      // If server has telegram bot endpoint, call it
-    } catch {}
+  }): Promise<{ success: boolean; message: string; isRealTelegramSent?: boolean }> {
+    const settings = getStored<SystemSettingsData>('system_settings', INITIAL_SYSTEM_SETTINGS);
+    const token = settings.telegramBotToken?.trim();
+
+    let realSent = false;
+    let deliveryNote = '';
+
+    if (token) {
+      try {
+        const response = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            chat_id: data.telegramChatId,
+            text: data.messageText,
+          }),
+        });
+        const resJson = await response.json();
+        if (resJson.ok) {
+          realSent = true;
+          deliveryNote = ` (Telegram xabari yetkazildi, Msg ID: ${resJson.result.message_id})`;
+        } else {
+          deliveryNote = ` (Telegram API xabarnomasi: ${resJson.description}. Botni ushbu guruhga Admin qilib qo‘shganingizga ishonch hosil qiling!)`;
+        }
+      } catch (err: any) {
+        deliveryNote = ` (Tarmoq xatosi: ${err.message})`;
+      }
+    } else {
+      deliveryNote = ` (Bot Token kiritilmagan. "Tizim sozlamalari"da Bot Tokenni kiriting).`;
+    }
 
     console.log(`[Telegram Bot] Sent to ${data.groupName} (${data.telegramChatId}):\n`, data.messageText);
 
@@ -442,15 +496,18 @@ export const apiClient = {
       user: 'O‘qituvchi',
       role: 'teacher',
       eventType: 'telegram_report_sent',
-      details: `${data.groupName} (${data.telegramChatId}) guruhiga "${data.assignmentTitle}" topshirig‘i hisoboti yuborildi.`,
+      details: `${data.groupName} (${data.telegramChatId}) guruhiga "${data.assignmentTitle}" topshirig‘i hisoboti yuborildi.${deliveryNote}`,
       ipAddress: '127.0.0.1 (Lokal)',
-      status: 'success',
+      status: realSent ? 'success' : 'info',
     });
     setStored('security_logs', logs.slice(0, 100));
 
     return {
       success: true,
-      message: `Hisobot "${data.groupName}" (${data.telegramChatId}) Telegram guruhiga muvaffaqiyatli yuborildi!`,
+      isRealTelegramSent: realSent,
+      message: realSent
+        ? `Hisobot "${data.groupName}" (${data.telegramChatId}) Telegram guruhiga jonli yuborildi! 🚀`
+        : `Hisobot audit jurnaliga saqlandi.${deliveryNote}`,
     };
   },
 

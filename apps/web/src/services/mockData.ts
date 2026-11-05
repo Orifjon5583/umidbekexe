@@ -404,7 +404,7 @@ export const INITIAL_SYSTEM_SETTINGS: SystemSettingsData = {
   aiPlusGroups: ['Guruh-101 (Python Asoslari)', 'Guruh-102 (C++ Algoritmlar)'],
   aiCustomApiKey: '',
   telegramBotToken: '',
-  telegramBotUsername: '@mintera_edu_bot',
+  telegramBotUsername: '',
   defaultTimeLimitMs: 2000,
   defaultMemoryLimitMb: 128,
   strictClipboardBlock: true,

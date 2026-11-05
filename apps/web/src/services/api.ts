@@ -457,30 +457,50 @@ export const apiClient = {
     messageText: string;
   }): Promise<{ success: boolean; message: string; isRealTelegramSent?: boolean }> {
     const settings = getStored<SystemSettingsData>('system_settings', INITIAL_SYSTEM_SETTINGS);
-    const token = settings.telegramBotToken?.trim();
+    const token = settings.telegramBotToken?.trim() || '';
 
     let realSent = false;
     let deliveryNote = '';
 
     if (token) {
+      // 1. Try local bot daemon on port 4005 first
       try {
-        const response = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+        const localResp = await fetch('http://127.0.0.1:4005/api/send-message', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            chat_id: data.telegramChatId,
+            chatId: data.telegramChatId,
             text: data.messageText,
           }),
         });
-        const resJson = await response.json();
-        if (resJson.ok) {
+        const localJson = await localResp.json();
+        if (localJson.ok) {
           realSent = true;
-          deliveryNote = ` (Telegram xabari yetkazildi, Msg ID: ${resJson.result.message_id})`;
-        } else {
-          deliveryNote = ` (Telegram API xabarnomasi: ${resJson.description}. Botni ushbu guruhga Admin qilib qo‘shganingizga ishonch hosil qiling!)`;
+          deliveryNote = ` (Telegram xabari yetkazildi, Msg ID: ${localJson.result?.message_id || 'OK'})`;
         }
-      } catch (err: any) {
-        deliveryNote = ` (Tarmoq xatosi: ${err.message})`;
+      } catch {}
+
+      // 2. Fallback direct to Telegram API if local server didn't send
+      if (!realSent) {
+        try {
+          const response = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              chat_id: data.telegramChatId,
+              text: data.messageText,
+            }),
+          });
+          const resJson = await response.json();
+          if (resJson.ok) {
+            realSent = true;
+            deliveryNote = ` (Telegram xabari yetkazildi, Msg ID: ${resJson.result.message_id})`;
+          } else {
+            deliveryNote = ` (Telegram API: ${resJson.description}. Bot guruhga qo‘shilganini tekshiring!)`;
+          }
+        } catch (err: any) {
+          deliveryNote = ` (Tarmoq xatosi: ${err.message})`;
+        }
       }
     } else {
       deliveryNote = ` (Bot Token kiritilmagan. "Tizim sozlamalari"da Bot Tokenni kiriting).`;

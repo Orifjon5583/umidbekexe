@@ -63,7 +63,7 @@ const translations: Record<Language, any> = {
       aboutApp: 'Ilova haqida',
       news: 'Yangiliklar',
       aboutUs: 'Biz haqimizda',
-      download: 'Yuklab olish (.zip)',
+      download: 'Yuklab olish',
       login: 'Kirish',
       dashboard: 'Boshqaruv paneli',
       themeLight: 'Kunduzgi',
@@ -153,7 +153,7 @@ const translations: Record<Language, any> = {
       aboutApp: 'О приложении',
       news: 'Новости',
       aboutUs: 'О нас',
-      download: 'Скачать (.zip)',
+      download: 'Скачать',
       login: 'Войти',
       dashboard: 'Панель управления',
       themeLight: 'Светлая',
@@ -243,7 +243,7 @@ const translations: Record<Language, any> = {
       aboutApp: 'Илова ҳақида',
       news: 'Янгиликлар',
       aboutUs: 'Биз ҳақимизда',
-      download: 'Юклаб олиш (.zip)',
+      download: 'Юклаб олиш',
       login: 'Кириш',
       dashboard: 'Бошқарув панели',
       themeLight: 'Кундузги',
@@ -473,11 +473,46 @@ export const LandingPage: React.FC<Props> = ({ onGoToLogin, currentUser, onGoToD
     setDownloadSuccessModal(true);
   };
 
-  const scrollTo = (id: string) => {
+  const [activeNav, setActiveNav] = useState<'home' | 'about-app' | 'news' | 'about-us'>('home');
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollPosition = window.scrollY + 140;
+
+      const aboutAppEl = document.getElementById('about-app');
+      const newsEl = document.getElementById('news');
+      const aboutUsEl = document.getElementById('about-us');
+
+      if (aboutUsEl && scrollPosition >= aboutUsEl.offsetTop) {
+        setActiveNav('about-us');
+      } else if (newsEl && scrollPosition >= newsEl.offsetTop) {
+        setActiveNav('news');
+      } else if (aboutAppEl && scrollPosition >= aboutAppEl.offsetTop) {
+        setActiveNav('about-app');
+      } else {
+        setActiveNav('home');
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll();
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const scrollTo = (id: 'home' | 'about-app' | 'news' | 'about-us' | 'download-section') => {
     setMobileMenuOpen(false);
+    if (id !== 'download-section') {
+      setActiveNav(id);
+    }
+    if (id === 'home') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
     const element = document.getElementById(id);
     if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
+      const yOffset = -85;
+      const y = element.getBoundingClientRect().top + window.pageYOffset + yOffset;
+      window.scrollTo({ top: y, behavior: 'smooth' });
     }
   };
 
@@ -518,37 +553,59 @@ export const LandingPage: React.FC<Props> = ({ onGoToLogin, currentUser, onGoToD
             </div>
           </div>
 
-          {/* Desktop Navigation Links */}
+          {/* Desktop Navigation Links (Pill bar with active slide) */}
           <nav
-            className={`hidden lg:flex items-center gap-1 p-1 rounded-xl border ${
+            className={`hidden md:flex items-center gap-1 p-1 rounded-2xl border transition-colors duration-200 flex-shrink-0 ${
               theme === 'dark'
-                ? 'bg-slate-900/80 border-slate-800 text-slate-300'
-                : 'bg-slate-100/80 border-slate-200/60 text-slate-600'
+                ? 'bg-[#0B132B]/80 border-slate-800 text-slate-300'
+                : 'bg-slate-100/90 border-slate-200/80 text-slate-600'
             }`}
           >
             <button
-              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-              className={`px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition ${
-                theme === 'dark' ? 'text-white bg-slate-800 shadow-xs' : 'text-blue-700 bg-white shadow-xs'
+              onClick={() => scrollTo('home')}
+              className={`px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap transition-all duration-150 cursor-pointer ${
+                activeNav === 'home'
+                  ? theme === 'dark'
+                    ? 'bg-blue-600 text-white shadow-xs'
+                    : 'bg-white text-blue-600 shadow-xs'
+                  : 'hover:text-blue-500 hover:bg-slate-200/50 dark:hover:bg-slate-800/50'
               }`}
             >
               {t.nav.home}
             </button>
             <button
               onClick={() => scrollTo('about-app')}
-              className="px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-medium hover:text-blue-500 transition"
+              className={`px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap transition-all duration-150 cursor-pointer ${
+                activeNav === 'about-app'
+                  ? theme === 'dark'
+                    ? 'bg-blue-600 text-white shadow-xs'
+                    : 'bg-white text-blue-600 shadow-xs'
+                  : 'hover:text-blue-500 hover:bg-slate-200/50 dark:hover:bg-slate-800/50'
+              }`}
             >
               {t.nav.aboutApp}
             </button>
             <button
               onClick={() => scrollTo('news')}
-              className="px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-medium hover:text-blue-500 transition"
+              className={`px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap transition-all duration-150 cursor-pointer ${
+                activeNav === 'news'
+                  ? theme === 'dark'
+                    ? 'bg-blue-600 text-white shadow-xs'
+                    : 'bg-white text-blue-600 shadow-xs'
+                  : 'hover:text-blue-500 hover:bg-slate-200/50 dark:hover:bg-slate-800/50'
+              }`}
             >
               {t.nav.news}
             </button>
             <button
               onClick={() => scrollTo('about-us')}
-              className="px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-medium hover:text-blue-500 transition"
+              className={`px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap transition-all duration-150 cursor-pointer ${
+                activeNav === 'about-us'
+                  ? theme === 'dark'
+                    ? 'bg-blue-600 text-white shadow-xs'
+                    : 'bg-white text-blue-600 shadow-xs'
+                  : 'hover:text-blue-500 hover:bg-slate-200/50 dark:hover:bg-slate-800/50'
+              }`}
             >
               {t.nav.aboutUs}
             </button>
@@ -646,22 +703,19 @@ export const LandingPage: React.FC<Props> = ({ onGoToLogin, currentUser, onGoToD
               )}
             </button>
 
-            {/* Discreet Portal / Login Button (Without showing full name) */}
+            {/* Discreet Portal / Login Button */}
             {currentUser ? (
               <button
                 onClick={onGoToDashboard}
-                className="p-2 sm:px-3 sm:py-2 rounded-xl bg-slate-900 hover:bg-slate-800 dark:bg-blue-600 dark:hover:bg-blue-500 text-white font-semibold text-xs transition cursor-pointer flex items-center gap-1.5 shadow-xs"
+                className="p-2 sm:px-2.5 sm:py-2 rounded-xl bg-slate-900 hover:bg-slate-800 dark:bg-blue-600 dark:hover:bg-blue-500 text-white font-semibold text-xs transition cursor-pointer flex items-center justify-center shadow-xs flex-shrink-0"
                 title={t.nav.dashboard}
               >
-                <div className="w-5 h-5 rounded-full bg-blue-500 dark:bg-white/20 text-white flex items-center justify-center text-[10px] font-bold">
-                  {currentUser.fullName ? currentUser.fullName[0].toUpperCase() : 'U'}
-                </div>
-                <span className="hidden xl:inline">{t.nav.dashboard}</span>
+                <User className="w-4 h-4" />
               </button>
             ) : (
               <button
                 onClick={onGoToLogin}
-                className={`p-2 sm:px-3 sm:py-2 rounded-xl border font-semibold text-xs transition cursor-pointer flex items-center gap-1.5 ${
+                className={`p-2 sm:px-2.5 sm:py-2 rounded-xl border font-semibold text-xs transition cursor-pointer flex items-center justify-center flex-shrink-0 ${
                   theme === 'dark'
                     ? 'bg-slate-800/80 hover:bg-slate-700 text-slate-200 border-slate-700'
                     : 'bg-slate-100 hover:bg-slate-200 text-slate-700 border-slate-200'
@@ -669,14 +723,13 @@ export const LandingPage: React.FC<Props> = ({ onGoToLogin, currentUser, onGoToD
                 title={t.nav.login}
               >
                 <LogIn className="w-4 h-4 text-blue-500" />
-                <span className="hidden sm:inline">{t.nav.login}</span>
               </button>
             )}
 
             {/* Mobile Menu Toggle Button */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className={`lg:hidden p-2 rounded-xl transition ${
+              className={`md:hidden p-2 rounded-xl transition ${
                 theme === 'dark' ? 'text-slate-200 hover:bg-slate-800' : 'text-slate-700 hover:bg-slate-100'
               }`}
               title="Menyu"
@@ -689,17 +742,16 @@ export const LandingPage: React.FC<Props> = ({ onGoToLogin, currentUser, onGoToD
         {/* Mobile Dropdown Menu */}
         {mobileMenuOpen && (
           <div
-            className={`lg:hidden border-b px-6 py-4 space-y-2.5 shadow-xl animate-fade-in ${
+            className={`md:hidden border-b px-6 py-4 space-y-2.5 shadow-xl animate-fade-in ${
               theme === 'dark' ? 'bg-[#0B1120] border-slate-800 text-slate-200' : 'bg-white border-slate-200'
             }`}
           >
             <button
-              onClick={() => {
-                setMobileMenuOpen(false);
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-              }}
-              className={`w-full text-left px-3.5 py-2.5 rounded-xl text-sm font-semibold flex items-center justify-between ${
-                theme === 'dark' ? 'bg-slate-800 text-blue-400' : 'bg-blue-50 text-blue-700'
+              onClick={() => scrollTo('home')}
+              className={`w-full text-left px-3.5 py-2.5 rounded-xl text-sm font-semibold flex items-center justify-between transition ${
+                activeNav === 'home'
+                  ? theme === 'dark' ? 'bg-blue-600 text-white' : 'bg-blue-50 text-blue-700 font-bold'
+                  : 'hover:bg-slate-500/10'
               }`}
             >
               <span>{t.nav.home}</span>
@@ -707,21 +759,33 @@ export const LandingPage: React.FC<Props> = ({ onGoToLogin, currentUser, onGoToD
             </button>
             <button
               onClick={() => scrollTo('about-app')}
-              className="w-full text-left px-3.5 py-2.5 rounded-xl text-sm font-medium hover:bg-slate-500/10 flex items-center justify-between"
+              className={`w-full text-left px-3.5 py-2.5 rounded-xl text-sm font-semibold flex items-center justify-between transition ${
+                activeNav === 'about-app'
+                  ? theme === 'dark' ? 'bg-blue-600 text-white' : 'bg-blue-50 text-blue-700 font-bold'
+                  : 'hover:bg-slate-500/10'
+              }`}
             >
               <span>{t.nav.aboutApp}</span>
               <ChevronRight className="w-4 h-4" />
             </button>
             <button
               onClick={() => scrollTo('news')}
-              className="w-full text-left px-3.5 py-2.5 rounded-xl text-sm font-medium hover:bg-slate-500/10 flex items-center justify-between"
+              className={`w-full text-left px-3.5 py-2.5 rounded-xl text-sm font-semibold flex items-center justify-between transition ${
+                activeNav === 'news'
+                  ? theme === 'dark' ? 'bg-blue-600 text-white' : 'bg-blue-50 text-blue-700 font-bold'
+                  : 'hover:bg-slate-500/10'
+              }`}
             >
               <span>{t.nav.news}</span>
               <ChevronRight className="w-4 h-4" />
             </button>
             <button
               onClick={() => scrollTo('about-us')}
-              className="w-full text-left px-3.5 py-2.5 rounded-xl text-sm font-medium hover:bg-slate-500/10 flex items-center justify-between"
+              className={`w-full text-left px-3.5 py-2.5 rounded-xl text-sm font-semibold flex items-center justify-between transition ${
+                activeNav === 'about-us'
+                  ? theme === 'dark' ? 'bg-blue-600 text-white' : 'bg-blue-50 text-blue-700 font-bold'
+                  : 'hover:bg-slate-500/10'
+              }`}
             >
               <span>{t.nav.aboutUs}</span>
               <ChevronRight className="w-4 h-4" />
@@ -983,7 +1047,7 @@ export const LandingPage: React.FC<Props> = ({ onGoToLogin, currentUser, onGoToD
 
         {/* 3. ABOUT THE APPLICATION (ILOVA HAQIDA) */}
         <section
-          className={`w-full py-16 sm:py-24 border-y transition-colors duration-200 ${
+          className={`w-full py-16 sm:py-24 border-y transition-colors duration-200 scroll-mt-24 ${
             theme === 'dark' ? 'bg-[#0B1120] border-slate-800' : 'bg-slate-100/70 border-slate-200/60'
           }`}
           id="about-app"
@@ -1152,7 +1216,7 @@ export const LandingPage: React.FC<Props> = ({ onGoToLogin, currentUser, onGoToD
 
             {/* ACTION CTA: DOWNLOAD SECTION */}
             <div
-              className={`flex flex-col items-center gap-4 text-center max-w-2xl p-8 sm:p-12 rounded-3xl border shadow-xl transition-colors duration-200 ${
+              className={`flex flex-col items-center gap-4 text-center max-w-2xl p-8 sm:p-12 rounded-3xl border shadow-xl transition-colors duration-200 scroll-mt-24 ${
                 theme === 'dark' ? 'bg-[#0E1528] border-slate-800 text-white' : 'bg-white border-slate-200/90 text-slate-900'
               }`}
               id="download-section"
@@ -1222,7 +1286,7 @@ export const LandingPage: React.FC<Props> = ({ onGoToLogin, currentUser, onGoToD
         </section>
 
         {/* 4. PROGRAMMING NEWS (SO‘NGGI YANGILIKLAR) */}
-        <section className={`w-full py-16 sm:py-24 transition-colors duration-200 ${theme === 'dark' ? 'bg-[#070D1E]' : 'bg-white'}`} id="news">
+        <section className={`w-full py-16 sm:py-24 transition-colors duration-200 scroll-mt-24 ${theme === 'dark' ? 'bg-[#070D1E]' : 'bg-white'}`} id="news">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 flex flex-col items-center">
             {/* Section Header */}
             <div className="flex flex-col items-center text-center max-w-2xl mb-12 sm:mb-16">
@@ -1285,7 +1349,7 @@ export const LandingPage: React.FC<Props> = ({ onGoToLogin, currentUser, onGoToD
 
         {/* 5. ABOUT US (BIZ HAQIMIZDA) */}
         <section
-          className={`w-full py-16 sm:py-24 border-t transition-colors duration-200 ${
+          className={`w-full py-16 sm:py-24 border-t transition-colors duration-200 scroll-mt-24 ${
             theme === 'dark' ? 'bg-[#0B1120] border-slate-800' : 'bg-slate-50 border-slate-200/70'
           }`}
           id="about-us"

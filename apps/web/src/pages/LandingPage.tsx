@@ -51,6 +51,7 @@ export const LandingPage: React.FC<Props> = ({ onGoToLogin, currentUser, onGoToD
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [selectedNews, setSelectedNews] = useState<NewsItem | null>(null);
   const [downloadSuccessModal, setDownloadSuccessModal] = useState(false);
+  const [downloadedFileName, setDownloadedFileName] = useState('Mintera-Setup.zip');
 
   const newsList: NewsItem[] = [
     {
@@ -91,7 +92,8 @@ export const LandingPage: React.FC<Props> = ({ onGoToLogin, currentUser, onGoToD
     },
   ];
 
-  const handleDownload = (fileName = 'Mintera-Setup.exe') => {
+  const handleDownload = (fileName = 'Mintera-Setup.zip') => {
+    setDownloadedFileName(fileName);
     // Trigger download
     const link = document.createElement('a');
     link.href = `/${fileName}`;
@@ -100,7 +102,7 @@ export const LandingPage: React.FC<Props> = ({ onGoToLogin, currentUser, onGoToD
     link.click();
     document.body.removeChild(link);
 
-    // Show nice confirmation modal
+    // Show confirmation modal
     setDownloadSuccessModal(true);
   };
 
@@ -167,11 +169,11 @@ export const LandingPage: React.FC<Props> = ({ onGoToLogin, currentUser, onGoToD
           <div className="flex items-center gap-2 sm:gap-3">
             {/* Download CTA Button */}
             <button
-              onClick={() => handleDownload('Mintera-Setup.exe')}
+              onClick={() => handleDownload('Mintera-Setup.zip')}
               className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs sm:text-sm px-4 sm:px-5 py-2.5 rounded-xl shadow-md shadow-blue-600/20 hover:shadow-lg hover:shadow-blue-600/30 transition transform active:scale-95 cursor-pointer"
             >
               <Download className="w-4 h-4 flex-shrink-0 animate-bounce" />
-              <span className="hidden xs:inline">Ilovani yuklab olish</span>
+              <span className="hidden xs:inline">Yuklab olish (.zip)</span>
               <span className="xs:hidden">Yuklab olish</span>
             </button>
 
@@ -245,11 +247,11 @@ export const LandingPage: React.FC<Props> = ({ onGoToLogin, currentUser, onGoToD
             </button>
             <div className="pt-2 border-t border-slate-100 flex flex-col gap-2">
               <button
-                onClick={() => handleDownload('Mintera-Setup.exe')}
+                onClick={() => handleDownload('Mintera-Setup.zip')}
                 className="w-full flex items-center justify-center gap-2 py-3 bg-blue-600 text-white rounded-xl text-sm font-bold shadow-md shadow-blue-600/20"
               >
                 <Download className="w-4 h-4" />
-                <span>O‘rnatuvchini yuklab olish (Setup.exe)</span>
+                <span>Mintera to‘plamini yuklab olish (.zip)</span>
               </button>
               <button
                 onClick={() => {
@@ -302,11 +304,11 @@ export const LandingPage: React.FC<Props> = ({ onGoToLogin, currentUser, onGoToD
                 {/* Action Buttons */}
                 <div className="flex flex-wrap items-center gap-3 sm:gap-4 pt-2 w-full sm:w-auto">
                   <button
-                    onClick={() => handleDownload('Mintera-Setup.exe')}
+                    onClick={() => handleDownload('Mintera-Setup.zip')}
                     className="inline-flex items-center justify-center gap-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm sm:text-base px-6 py-3.5 rounded-xl shadow-lg shadow-blue-600/25 hover:shadow-xl hover:shadow-blue-600/35 transition-all transform hover:-translate-y-0.5 active:translate-y-0 cursor-pointer w-full sm:w-auto"
                   >
                     <Download className="w-5 h-5" />
-                    <span>Ilovani yuklab olish</span>
+                    <span>Ilovani yuklab olish (.zip)</span>
                   </button>
                   <button
                     onClick={() => scrollTo('about-app')}
@@ -570,17 +572,24 @@ export const LandingPage: React.FC<Props> = ({ onGoToLogin, currentUser, onGoToD
               {/* Direct Download Options */}
               <div className="flex flex-wrap items-center justify-center gap-3 pt-2 w-full">
                 <button
-                  onClick={() => handleDownload('Mintera-Setup.exe')}
+                  onClick={() => handleDownload('Mintera-Setup.zip')}
                   className="inline-flex items-center gap-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm sm:text-base px-6 sm:px-8 py-3.5 rounded-xl shadow-lg shadow-blue-600/25 transition cursor-pointer"
                 >
                   <Download className="w-5 h-5" />
-                  <span>Mintera Setup (v2.4.0) — O‘rnatish</span>
+                  <span>ZIP to‘plamni yuklab olish (.zip) — Tavsiya etiladi</span>
+                </button>
+                <button
+                  onClick={() => handleDownload('Mintera-Setup.exe')}
+                  className="inline-flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-800 font-semibold text-sm px-5 py-3.5 rounded-xl border border-slate-200 transition cursor-pointer"
+                >
+                  <FolderArchive className="w-4 h-4 text-slate-600" />
+                  <span>To‘g‘ridan-to‘g‘ri Setup (.exe)</span>
                 </button>
                 <button
                   onClick={() => handleDownload('Mintera.exe')}
                   className="inline-flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-800 font-semibold text-sm px-5 py-3.5 rounded-xl border border-slate-200 transition cursor-pointer"
                 >
-                  <FolderArchive className="w-4 h-4 text-slate-600" />
+                  <FileCode2 className="w-4 h-4 text-slate-600" />
                   <span>Portable (.exe)</span>
                 </button>
               </div>
@@ -791,10 +800,10 @@ export const LandingPage: React.FC<Props> = ({ onGoToLogin, currentUser, onGoToD
               <span>v2.4.0 Desktop Release</span>
               <span>•</span>
               <button
-                onClick={() => handleDownload('Mintera-Setup.exe')}
+                onClick={() => handleDownload('Mintera-Setup.zip')}
                 className="text-blue-400 hover:underline"
               >
-                Mintera-Setup.exe yuklab olish
+                Mintera-Setup.zip yuklab olish
               </button>
             </div>
           </div>
@@ -848,16 +857,16 @@ export const LandingPage: React.FC<Props> = ({ onGoToLogin, currentUser, onGoToD
             <h3 className="text-xl font-extrabold text-slate-900 mb-2">
               Yuklab olish boshlandi!
             </h3>
-            <p className="text-xs sm:text-sm text-slate-600 mb-6 leading-relaxed">
-              <strong>Mintera-Setup.exe</strong> fayli brauzeringiz orqali yuklab olinmoqda.
-              <br /><br />
-              <span className="text-slate-800 font-semibold">O‘rnatish tartibi:</span>
+            <p className="text-xs sm:text-sm text-slate-600 mb-6 leading-relaxed text-left bg-slate-50 p-4 rounded-2xl border border-slate-100">
+              <span className="font-bold text-blue-700 block mb-1">
+                📦 {downloadedFileName} yuklab olinmoqda.
+              </span>
+              <span className="text-slate-800 font-bold block mt-2 mb-1">O‘rnatish tartibi:</span>
+              1. Yuklab olingan ZIP arxivni oching (Extract / Hammasini chiqarish)
               <br />
-              1. Yuklab olingan faylni oching
+              2. Ichidagi <strong>Mintera-Setup.exe</strong> faylini ishga tushiring
               <br />
-              2. "O‘rnatish" tugmasini bosing
-              <br />
-              3. Mintera ish stoli ilovasi avtomatik ishga tushadi
+              3. "O‘rnatish" tugmasini bosing — ilova ish stolingizda paydo bo‘ladi!
             </p>
 
             <div className="flex flex-col gap-2">
@@ -867,12 +876,21 @@ export const LandingPage: React.FC<Props> = ({ onGoToLogin, currentUser, onGoToD
               >
                 Tushunarli, rahmat!
               </button>
-              <button
-                onClick={() => handleDownload('Mintera.exe')}
-                className="text-xs text-slate-500 hover:text-slate-800 py-1 transition"
-              >
-                Agar o‘rnatmasdan ishlatmoqchi bo‘lsangiz: Portable versiyani yuklab olish (.exe)
-              </button>
+              <div className="flex items-center justify-center gap-2 pt-2 text-xs">
+                <button
+                  onClick={() => handleDownload('Mintera-Setup.exe')}
+                  className="text-slate-500 hover:text-blue-600 underline"
+                >
+                  To‘g‘ridan-to‘g‘ri .exe
+                </button>
+                <span className="text-slate-300">•</span>
+                <button
+                  onClick={() => handleDownload('Mintera.exe')}
+                  className="text-slate-500 hover:text-blue-600 underline"
+                >
+                  Portable versiya (.exe)
+                </button>
+              </div>
             </div>
           </div>
         </div>

@@ -40,14 +40,14 @@ const server = http.createServer((req, res) => {
     if (err || !stats.isFile()) {
       const ext = path.extname(urlPath).toLowerCase();
 
-      // Check if it's an exe installer file in public or root
-      if (ext === '.exe') {
-        const publicExe = path.join(PUBLIC_DIR, path.basename(urlPath));
-        const rootExe = path.join(ROOT_DIR, path.basename(urlPath));
-        if (fs.existsSync(publicExe)) {
-          filePath = publicExe;
-        } else if (fs.existsSync(rootExe)) {
-          filePath = rootExe;
+      // Check if it's an installer file (.exe or .zip) in public or root
+      if (ext === '.exe' || ext === '.zip') {
+        const publicFile = path.join(PUBLIC_DIR, path.basename(urlPath));
+        const rootFile = path.join(ROOT_DIR, path.basename(urlPath));
+        if (fs.existsSync(publicFile)) {
+          filePath = publicFile;
+        } else if (fs.existsSync(rootFile)) {
+          filePath = rootFile;
         } else {
           res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' });
           res.end('Fayl topilmadi');
@@ -109,7 +109,7 @@ const server = http.createServer((req, res) => {
         'Expires': '0',
         'Access-Control-Allow-Origin': '*',
       };
-      if (ext === '.exe') {
+      if (ext === '.exe' || ext === '.zip') {
         headers['Content-Disposition'] = `attachment; filename="${path.basename(filePath)}"`;
       }
       res.writeHead(200, headers);

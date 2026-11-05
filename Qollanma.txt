@@ -1,0 +1,26 @@
+======================================================
+       MINTERA — DASTURLASH AMALIYOT PLATFORMASI
+======================================================
+Versiya: 2.4.0 (Windows x64)
+Chiqarilgan sana: 2026-yil
+
+Ushbu arxiv tarkibi:
+1. Mintera-Setup.exe  — Avtomatik o‘rnatuvchi dastur (Tavsiya etiladi).
+                        Ishga tushiring va "O‘rnatish" tugmasini bosing.
+2. Mintera.exe        — Portativ versiya (O‘rnatmasdan to‘g‘ridan-to‘g‘ri ishga tushadi).
+
+O‘RNATISH VA ISHGA TUSHIRISH:
+1. Ushbu ZIP arxivni kompyuteringizdagi ixtiyoriy papkaga chiqaring 
+   (Sichqonchaning o‘ng tugmasi -> "Extract all..." / "Hammasini chiqarish").
+2. "Mintera-Setup.exe" faylini ishga tushiring.
+3. Dastur kompyuterga o‘rnatiladi va ish stolida Mintera nishoni paydo bo‘ladi.
+4. O‘qituvchi yoki administrator bergan login va parol bilan tizimga kiring.
+
+TIZIM TALABLARI:
+- Operatsion tizim: Windows 10 yoki Windows 11 (64-bit)
+- Internet: Test topshirish va natijalarni yuborish uchun (offline ishlash ham mumkin)
+
+YORDAM VA ALOQA:
+Telegram: @mintera_uz
+Rasmiy sayt: http://localhost:3000
+======================================================

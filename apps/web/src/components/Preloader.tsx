@@ -6,28 +6,35 @@ interface PreloaderProps {
   minDurationMs?: number;
 }
 
-export const Preloader: React.FC<PreloaderProps> = ({ onFinish, minDurationMs = 2400 }) => {
+export const Preloader: React.FC<PreloaderProps> = ({ onFinish, minDurationMs = 3800 }) => {
   const [progress, setProgress] = useState(0);
   const [isFadingOut, setIsFadingOut] = useState(false);
   const [statusText, setStatusText] = useState('Mintera tizimi ishga tushirilmoqda...');
 
+  const handleSkip = () => {
+    setIsFadingOut(true);
+    setTimeout(() => {
+      onFinish?.();
+    }, 400);
+  };
+
   useEffect(() => {
     const startTime = Date.now();
 
-    // Dinamik status xabarlari (sekinroq va ketma-ketlikda)
+    // Dinamik status xabarlari (3-5 soniya oralig'ida maromida almashadi)
     const statusTimeout1 = setTimeout(() => {
       setStatusText('Kodni tekshirish va tahlil qilish muhiti yuklanmoqda...');
-    }, 650);
+    }, 1000);
 
     const statusTimeout2 = setTimeout(() => {
       setStatusText('Anti-Cheat va Sandbox xavfsizlik modullari faollashtirilmoqda...');
-    }, 1350);
+    }, 2000);
 
     const statusTimeout3 = setTimeout(() => {
       setStatusText('Barcha modullar tayyor! Tizim ochilmoqda...');
-    }, 2050);
+    }, 3100);
 
-    // Progress foizini sokin va bir maromda oshirish
+    // Progress foizini sokin va bir maromda oshirish (~3.8 soniya)
     const interval = setInterval(() => {
       setProgress((prev) => {
         if (prev >= 100) {
@@ -45,21 +52,21 @@ export const Preloader: React.FC<PreloaderProps> = ({ onFinish, minDurationMs = 
           return 100;
         }
 
-        // Bosqichma-bosqich sekin va ravon to'lish
-        let step = 3;
+        // 3-5 soniya uchun maromli, mayin qadamlar
+        let step = 2;
         if (prev < 30) {
-          step = Math.floor(Math.random() * 4) + 4; // 4 - 7%
-        } else if (prev < 70) {
-          step = Math.floor(Math.random() * 3) + 3; // 3 - 5%
-        } else if (prev < 90) {
+          step = Math.floor(Math.random() * 2) + 2; // 2 - 3%
+        } else if (prev < 65) {
           step = Math.floor(Math.random() * 3) + 2; // 2 - 4%
+        } else if (prev < 90) {
+          step = Math.floor(Math.random() * 2) + 2; // 2 - 3%
         } else {
-          step = 2; // 2%
+          step = 1; // 1%
         }
 
         return Math.min(prev + step, 100);
       });
-    }, 85);
+    }, 75);
 
     return () => {
       clearInterval(interval);
@@ -75,6 +82,15 @@ export const Preloader: React.FC<PreloaderProps> = ({ onFinish, minDurationMs = 
         isFadingOut ? 'opacity-0 scale-105 pointer-events-none' : 'opacity-100 scale-100'
       }`}
     >
+      {/* O'tkazib yuborish tugmasi */}
+      <button
+        onClick={handleSkip}
+        className="absolute top-6 right-6 z-20 text-xs font-semibold text-slate-400 hover:text-white px-3 py-1.5 rounded-lg bg-slate-800/40 hover:bg-slate-800/80 border border-slate-700/50 transition cursor-pointer backdrop-blur-xs flex items-center gap-1.5 shadow-sm"
+        title="Yuklanishni darhol o‘tkazib yuborish"
+      >
+        <span>O‘tkazib yuborish</span>
+        <span className="text-blue-400">→</span>
+      </button>
       {/* Orqa fon atmosferik nuri */}
       <div className="absolute w-[500px] h-[500px] rounded-full bg-gradient-to-tr from-blue-600/20 via-indigo-600/15 to-amber-500/10 blur-3xl pointer-events-none animate-pulse" />
       <div className="absolute top-1/4 left-1/3 w-64 h-64 rounded-full bg-blue-500/10 blur-3xl pointer-events-none" />

@@ -9,8 +9,30 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   </head>
-  <body class="bg-slate-50 text-slate-800 antialiased font-sans">
-    <div id="root"></div>
+  <body class="bg-[#070D1E] text-slate-100 antialiased font-sans">
+    <div id="root">
+      <div style="position:fixed;inset:0;background-color:#070D1E;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;font-family:Inter,system-ui,sans-serif;z-index:99999;">
+        <div style="width:76px;height:76px;border-radius:20px;background:#091128;border:1px solid rgba(59,130,246,0.35);display:flex;align-items:center;justify-content:center;box-shadow:0 12px 30px -5px rgba(37,99,235,0.4);margin-bottom:18px;">
+          <img src="/icon.png" alt="Mintera" style="width:52px;height:52px;object-fit:contain;" />
+        </div>
+        <div style="font-size:26px;font-weight:800;letter-spacing:-0.02em;margin-bottom:6px;">
+          Min<span style="color:#3B82F6;">tera</span>
+        </div>
+        <div style="font-size:11px;color:#60A5FA;letter-spacing:0.1em;text-transform:uppercase;font-weight:700;margin-bottom:20px;padding:3px 10px;border-radius:9999px;background:rgba(30,58,138,0.4);border:1px solid rgba(30,58,138,0.6);">
+          CodePractice Platform
+        </div>
+        <div style="width:220px;height:4px;border-radius:9999px;background:#1E293B;overflow:hidden;position:relative;">
+          <div style="position:absolute;top:0;bottom:0;left:0;width:40%;background:linear-gradient(90deg, #3B82F6, #F59E0B);border-radius:9999px;animation:mintera-init-bar 1.2s infinite ease-in-out;"></div>
+        </div>
+      </div>
+      <style>
+        @keyframes mintera-init-bar {
+          0% { left: -40%; width: 30%; }
+          50% { left: 40%; width: 50%; }
+          100% { left: 100%; width: 30%; }
+        }
+      </style>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Preloader } from './components/Preloader';
 import { LandingPage } from './pages/LandingPage';
 import { LoginPage } from './pages/LoginPage';
 import { DashboardLayout } from './layouts/DashboardLayout';
@@ -16,6 +17,7 @@ export const App: React.FC = () => {
   const [currentUser, setCurrentUser] = useState<any | null>(null);
   const [currentTab, setCurrentTab] = useState<string>('dashboard');
   const [currentView, setCurrentView] = useState<'landing' | 'login' | 'dashboard'>('landing');
+  const [isAppLoading, setIsAppLoading] = useState<boolean>(true);
 
   useEffect(() => {
     const userJson = localStorage.getItem('cp_user');
@@ -56,44 +58,45 @@ export const App: React.FC = () => {
     window.location.hash = 'dashboard';
   };
 
-  if (currentView === 'landing') {
-    return (
-      <LandingPage
-        onGoToLogin={handleGoToLogin}
-        currentUser={currentUser}
-        onGoToDashboard={handleGoToDashboard}
-      />
-    );
-  }
-
-  if (currentView === 'login' || !currentUser) {
-    return (
-      <LoginPage
-        onLoginSuccess={handleLoginSuccess}
-        onBackToHome={handleGoToLanding}
-      />
-    );
-  }
-
-  const isAdmin = currentUser.role === 'admin';
+  const isAdmin = currentUser?.role === 'admin';
 
   return (
-    <DashboardLayout
-      currentTab={currentTab}
-      onTabChange={setCurrentTab}
-      onGoToLanding={handleGoToLanding}
-    >
-      {currentTab === 'dashboard' && <DashboardPage />}
-      {currentTab === 'groups' && <GroupsPage />}
-      {currentTab === 'problems' && <ProblemsPage />}
-      {currentTab === 'assignments' && <AssignmentsPage />}
-      {currentTab === 'reports' && <ReportsPage />}
-      {currentTab === 'rewards' && <RewardsPage />}
+    <>
+      {/* Sahifa yangilanganda / ochilganda chiquvchi zamonaviy Zagruzka (Preloader) */}
+      {isAppLoading && (
+        <Preloader onFinish={() => setIsAppLoading(false)} minDurationMs={900} />
+      )}
 
-      {/* Admin Exclusive Tabs */}
-      {isAdmin && currentTab === 'teachers' && <TeachersPage />}
-      {isAdmin && currentTab === 'settings' && <SystemSettingsPage />}
-      {isAdmin && currentTab === 'logs' && <SecurityLogsPage />}
-    </DashboardLayout>
+      {currentView === 'landing' ? (
+        <LandingPage
+          onGoToLogin={handleGoToLogin}
+          currentUser={currentUser}
+          onGoToDashboard={handleGoToDashboard}
+        />
+      ) : currentView === 'login' || !currentUser ? (
+        <LoginPage
+          onLoginSuccess={handleLoginSuccess}
+          onBackToHome={handleGoToLanding}
+        />
+      ) : (
+        <DashboardLayout
+          currentTab={currentTab}
+          onTabChange={setCurrentTab}
+          onGoToLanding={handleGoToLanding}
+        >
+          {currentTab === 'dashboard' && <DashboardPage />}
+          {currentTab === 'groups' && <GroupsPage />}
+          {currentTab === 'problems' && <ProblemsPage />}
+          {currentTab === 'assignments' && <AssignmentsPage />}
+          {currentTab === 'reports' && <ReportsPage />}
+          {currentTab === 'rewards' && <RewardsPage />}
+
+          {/* Admin Exclusive Tabs */}
+          {isAdmin && currentTab === 'teachers' && <TeachersPage />}
+          {isAdmin && currentTab === 'settings' && <SystemSettingsPage />}
+          {isAdmin && currentTab === 'logs' && <SecurityLogsPage />}
+        </DashboardLayout>
+      )}
+    </>
   );
 };

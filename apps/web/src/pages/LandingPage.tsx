@@ -36,10 +36,13 @@ import {
   User,
   Play,
   RotateCcw,
+  Smartphone,
+  UserCheck,
+  ShieldCheck,
 } from 'lucide-react';
 
 interface Props {
-  onGoToLogin: () => void;
+  onGoToLogin: (role?: 'teacher' | 'admin') => void;
   currentUser?: any | null;
   onGoToDashboard?: () => void;
 }
@@ -145,6 +148,30 @@ const translations: Record<Language, any> = {
       rights: '© 2026 Mintera. Barcha huquqlar himoyalangan.',
       adminPanel: 'O‘qituvchi / Admin Paneli →',
     },
+    pwa: {
+      pill: 'PWA Web Ilova',
+      title: 'Mobil & Desktop Ilova (PWA)',
+      desc: 'Mintera platformasini brauzer orqali telefoningiz yoki kompyuter bosh ekraniga qulay ilova ko‘rinishida o‘rnating.',
+      installBtn: 'Ilovani o‘rnatish (PWA)',
+      installedBtn: 'Ilova o‘rnatilgan ✓',
+      guideTitle: 'PWA ilovani o‘rnatish qo‘llanmasi',
+      guideDesc: 'Mintera ilovasini qurilmangiz ekraniga ilova sifatida qo‘shish:',
+      androidTip: 'Android (Chrome): Brauzer menyusidagi uch nuqtani bosing va "Bosh ekranga qo‘shish" (Install app) ni tanlang.',
+      iosTip: 'iOS (Safari): Pastdagi "Ulashish" (Share) belgisini bosing va "Bosh ekranga qo‘shish" (Add to Home Screen) ni bosing.',
+      desktopTip: 'Kompyuter (Chrome/Edge): Qidiruv satridagi "O‘rnatish" (Install) belgisini bosing.',
+      close: 'Tushunarli',
+    },
+    footerCards: {
+      portalPill: 'O‘qituvchi & Admin',
+      portalTitle: 'Boshqaruv Tizimiga Kirish',
+      portalDesc: 'Guruhlar tuzish, o‘quvchilarga topshiriq berish, test natijalarini monitoring qilish va masalalar banki.',
+      teacherBtn: 'O‘qituvchi sifatida kirish',
+      adminBtn: 'Administrator kabineti',
+      botPill: 'Telegram Bot',
+      botTitle: 'Mintera Telegram Boti',
+      botDesc: 'O‘quvchilar test yechganda natijalarni, yangi topshiriqlar va eslatmalarni bevosita Telegram orqali qabul qiling.',
+      botBtn: 'Botga ulanish (@minterabot)',
+    },
     modal: {
       title: 'Yuklab olish boshlandi!',
       downloading: 'yuklab olinmoqda.',
@@ -240,6 +267,30 @@ const translations: Record<Language, any> = {
       contact: 'Контакты и Вход',
       rights: '© 2026 Mintera. Все права защищены.',
       adminPanel: 'Панель преподавателя / Админа →',
+    },
+    pwa: {
+      pill: 'PWA Веб-приложение',
+      title: 'Мобильное и ПК приложение (PWA)',
+      desc: 'Установите веб-платформу Mintera прямо из браузера на главный экран смартфона или рабочий стол ПК.',
+      installBtn: 'Установить приложение (PWA)',
+      installedBtn: 'Приложение установлено ✓',
+      guideTitle: 'Инструкция по установке PWA',
+      guideDesc: 'Как добавить Mintera на экран вашего устройства:',
+      androidTip: 'Android (Chrome): Нажмите меню с тремя точками и выберите «Установить приложение» (Install app).',
+      iosTip: 'iOS (Safari): Нажмите кнопку «Поделиться» (Share) снизу и выберите «На экран Домой» (Add to Home Screen).',
+      desktopTip: 'ПК (Chrome/Edge): Нажмите значок «Установить» в правой части адресной строки.',
+      close: 'Понятно',
+    },
+    footerCards: {
+      portalPill: 'Преподаватель и Админ',
+      portalTitle: 'Вход в панель управления',
+      portalDesc: 'Управление группами, выдача заданий, мониторинг решений и банк задач.',
+      teacherBtn: 'Войти как преподаватель',
+      adminBtn: 'Кабинет администратора',
+      botPill: 'Telegram-бот',
+      botTitle: 'Telegram-бот Mintera',
+      botDesc: 'Получайте результаты тестов, новые задания и системные уведомления прямо в Telegram.',
+      botBtn: 'Подключить бота (@minterabot)',
     },
     modal: {
       title: 'Загрузка началась!',
@@ -337,6 +388,30 @@ const translations: Record<Language, any> = {
       rights: '© 2026 Mintera. Барча ҳуқуқлар ҳимояланган.',
       adminPanel: 'Ўқитувчи / Админ Панели →',
     },
+    pwa: {
+      pill: 'PWA Веб Илова',
+      title: 'Мобил & Desktop Илова (PWA)',
+      desc: 'Mintera платформасини браузер орқали телефонингиз ёки компьютерингиз бош экранига қулай илова сифатида ўрнатинг.',
+      installBtn: 'Иловани ўрнатиш (PWA)',
+      installedBtn: 'Илова ўрнатилган ✓',
+      guideTitle: 'PWA иловани ўрнатиш қўлланмаси',
+      guideDesc: 'Mintera иловасини қурилмангиз экранига илова сифатида қўшиш:',
+      androidTip: 'Android (Chrome): Браузер менюсидаги уч нуқтани босиб, "Бош экранга қўшиш" (Install app) ни танланг.',
+      iosTip: 'iOS (Safari): Пастдаги "Улашиш" (Share) белгисини босиб, "Бош экранга қўшиш" (Add to Home Screen) ни танланг.',
+      desktopTip: 'Компьютер (Chrome/Edge): Қидирув сатридаги "Ўрнатиш" (Install) белгисини босинг.',
+      close: 'Тушунарли',
+    },
+    footerCards: {
+      portalPill: 'Ўқитувчи & Админ',
+      portalTitle: 'Бошқарув Тизимига Кириш',
+      portalDesc: 'Гуруҳлар тузиш, ўқувчиларга топшириқ бериш, тест натижаларини мониторинг қилиш ва масалалар банки.',
+      teacherBtn: 'Ўқитувчи сифатида кириш',
+      adminBtn: 'Администратор кабинети',
+      botPill: 'Telegram Бот',
+      botTitle: 'Mintera Telegram Боти',
+      botDesc: 'Ўқувчилар тест топширганда натижаларни, янги топшириқлар ва эслатмаларни бевосита Telegram орқали қабул қилинг.',
+      botBtn: 'Ботга уланиш (@minterabot)',
+    },
     modal: {
       title: 'Юклаб олиш бошланди!',
       downloading: 'юклаб олинмоқда.',
@@ -382,6 +457,50 @@ export const LandingPage: React.FC<Props> = ({ onGoToLogin, currentUser, onGoToD
       setSimTestCount(12);
       setSimStatus('success');
     }, 1200);
+  };
+
+  // PWA (Progressive Web App) Install State & Logic
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const [isPwaInstalled, setIsPwaInstalled] = useState<boolean>(false);
+  const [pwaModalOpen, setPwaModalOpen] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone) {
+      setIsPwaInstalled(true);
+    }
+
+    const handleBeforeInstallPrompt = (e: any) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+
+    window.addEventListener('appinstalled', () => {
+      setIsPwaInstalled(true);
+      setDeferredPrompt(null);
+    });
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    };
+  }, []);
+
+  const handleInstallPwa = async () => {
+    if (deferredPrompt) {
+      try {
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        if (outcome === 'accepted') {
+          setIsPwaInstalled(true);
+        }
+        setDeferredPrompt(null);
+      } catch {
+        setPwaModalOpen(true);
+      }
+    } else {
+      setPwaModalOpen(true);
+    }
   };
 
   // Til va Rejim boshqaruvi
@@ -752,26 +871,14 @@ export const LandingPage: React.FC<Props> = ({ onGoToLogin, currentUser, onGoToD
               )}
             </button>
 
-            {/* Discreet Portal / Login Button */}
-            {currentUser ? (
+            {/* User Profile / Dashboard Button (Only if already logged in) */}
+            {currentUser && (
               <button
                 onClick={onGoToDashboard}
                 className="p-2 sm:px-2.5 sm:py-2 rounded-xl bg-slate-900 hover:bg-slate-800 dark:bg-blue-600 dark:hover:bg-blue-500 text-white font-semibold text-xs transition cursor-pointer flex items-center justify-center shadow-xs flex-shrink-0"
                 title={t.nav.dashboard}
               >
                 <User className="w-4 h-4" />
-              </button>
-            ) : (
-              <button
-                onClick={onGoToLogin}
-                className={`p-2 sm:px-2.5 sm:py-2 rounded-xl border font-semibold text-xs transition cursor-pointer flex items-center justify-center flex-shrink-0 ${
-                  theme === 'dark'
-                    ? 'bg-slate-800/80 hover:bg-slate-700 text-slate-200 border-slate-700'
-                    : 'bg-slate-100 hover:bg-slate-200 text-slate-700 border-slate-200'
-                }`}
-                title={t.nav.login}
-              >
-                <LogIn className="w-4 h-4 text-blue-500" />
               </button>
             )}
 
@@ -873,28 +980,29 @@ export const LandingPage: React.FC<Props> = ({ onGoToLogin, currentUser, onGoToD
 
             <div className="pt-2 flex flex-col gap-2">
               <button
-                onClick={() => handleDownload('Mintera-Setup.zip')}
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  scrollTo('download-section');
+                }}
                 className="w-full flex items-center justify-center gap-2 py-3 bg-blue-600 text-white rounded-xl text-sm font-bold shadow-md shadow-blue-600/20"
               >
                 <Download className="w-4 h-4" />
                 <span>{t.nav.download}</span>
               </button>
-              <button
-                onClick={() => {
-                  setMobileMenuOpen(false);
-                  if (currentUser) {
+              {currentUser && (
+                <button
+                  onClick={() => {
+                    setMobileMenuOpen(false);
                     onGoToDashboard?.();
-                  } else {
-                    onGoToLogin();
-                  }
-                }}
-                className={`w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold ${
-                  theme === 'dark' ? 'bg-slate-800 text-slate-200' : 'bg-slate-100 text-slate-800'
-                }`}
-              >
-                <LogIn className="w-4 h-4 text-blue-500" />
-                <span>{currentUser ? t.nav.dashboard : t.nav.login}</span>
-              </button>
+                  }}
+                  className={`w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold ${
+                    theme === 'dark' ? 'bg-slate-800 text-slate-200' : 'bg-slate-100 text-slate-800'
+                  }`}
+                >
+                  <User className="w-4 h-4 text-blue-500" />
+                  <span>{t.nav.dashboard}</span>
+                </button>
+              )}
             </div>
           </div>
         )}
@@ -1616,6 +1724,110 @@ export const LandingPage: React.FC<Props> = ({ onGoToLogin, currentUser, onGoToD
       {/* 6. FOOTER */}
       <footer className="w-full bg-[#030611] text-white border-t border-slate-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 py-12 sm:py-16">
+          {/* Top Command Cards: Teacher & Admin Login, PWA Mobile/Desktop, Telegram Bot */}
+          <div className="pb-12 mb-12 border-b border-slate-800/80">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+              {/* CARD 1: O'qituvchi va Administrator Tizimiga Kirish */}
+              <div className="rounded-2xl bg-gradient-to-br from-[#0B1530] via-[#0D1B3E] to-[#081026] border border-blue-500/30 p-5 sm:p-6 flex flex-col justify-between gap-4 shadow-xl hover:border-blue-500/50 transition">
+                <div>
+                  <div className="flex items-center justify-between mb-2.5">
+                    <span className="w-9 h-9 rounded-xl bg-blue-600/20 text-blue-400 border border-blue-500/30 flex items-center justify-center">
+                      <UserCheck className="w-5 h-5" />
+                    </span>
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-blue-400 bg-blue-950/80 px-2.5 py-0.5 rounded-full border border-blue-800/70">
+                      {t.footerCards.portalPill}
+                    </span>
+                  </div>
+                  <h4 className="text-base sm:text-lg font-bold text-white mb-1.5">
+                    {t.footerCards.portalTitle}
+                  </h4>
+                  <p className="text-xs text-slate-400 leading-relaxed">
+                    {t.footerCards.portalDesc}
+                  </p>
+                </div>
+
+                <div className="flex flex-col sm:flex-row gap-2 pt-1">
+                  <button
+                    onClick={() => onGoToLogin('teacher')}
+                    className="flex-1 inline-flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs transition shadow-md shadow-blue-600/30 active:scale-95 cursor-pointer"
+                  >
+                    <UserCheck className="w-4 h-4" />
+                    <span>{t.footerCards.teacherBtn}</span>
+                  </button>
+                  <button
+                    onClick={() => onGoToLogin('admin')}
+                    className="flex-1 inline-flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-slate-200 border border-slate-700 font-bold text-xs transition active:scale-95 cursor-pointer"
+                  >
+                    <ShieldCheck className="w-4 h-4 text-purple-400" />
+                    <span>{t.footerCards.adminBtn}</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* CARD 2: PWA Web Ilovasi */}
+              <div className="rounded-2xl bg-gradient-to-br from-[#0B1530] via-[#0D1B3E] to-[#081026] border border-emerald-500/30 p-5 sm:p-6 flex flex-col justify-between gap-4 shadow-xl hover:border-emerald-500/50 transition">
+                <div>
+                  <div className="flex items-center justify-between mb-2.5">
+                    <span className="w-9 h-9 rounded-xl bg-emerald-600/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center">
+                      <Smartphone className="w-5 h-5" />
+                    </span>
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-400 bg-emerald-950/80 px-2.5 py-0.5 rounded-full border border-emerald-800/70">
+                      {t.pwa.pill}
+                    </span>
+                  </div>
+                  <h4 className="text-base sm:text-lg font-bold text-white mb-1.5">
+                    {t.pwa.title}
+                  </h4>
+                  <p className="text-xs text-slate-400 leading-relaxed">
+                    {t.pwa.desc}
+                  </p>
+                </div>
+
+                <div className="pt-1">
+                  <button
+                    onClick={handleInstallPwa}
+                    className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition shadow-md shadow-emerald-600/30 active:scale-95 cursor-pointer"
+                  >
+                    <Download className="w-4 h-4" />
+                    <span>{isPwaInstalled ? t.pwa.installedBtn : t.pwa.installBtn}</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* CARD 3: Telegram Bot */}
+              <div className="rounded-2xl bg-gradient-to-br from-[#0B1530] via-[#0D1B3E] to-[#081026] border border-cyan-500/30 p-5 sm:p-6 flex flex-col justify-between gap-4 shadow-xl hover:border-cyan-500/50 transition">
+                <div>
+                  <div className="flex items-center justify-between mb-2.5">
+                    <span className="w-9 h-9 rounded-xl bg-cyan-600/20 text-cyan-400 border border-cyan-500/30 flex items-center justify-center">
+                      <Send className="w-5 h-5" />
+                    </span>
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-cyan-400 bg-cyan-950/80 px-2.5 py-0.5 rounded-full border border-cyan-800/70">
+                      {t.footerCards.botPill}
+                    </span>
+                  </div>
+                  <h4 className="text-base sm:text-lg font-bold text-white mb-1.5">
+                    {t.footerCards.botTitle}
+                  </h4>
+                  <p className="text-xs text-slate-400 leading-relaxed">
+                    {t.footerCards.botDesc}
+                  </p>
+                </div>
+
+                <div className="pt-1">
+                  <a
+                    href="https://t.me/minterabot"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#229ED9] hover:bg-[#1E8BC0] text-white font-bold text-xs transition shadow-md shadow-cyan-600/20 active:scale-95"
+                  >
+                    <Send className="w-4 h-4" />
+                    <span>{t.footerCards.botBtn}</span>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-start pb-12 border-b border-slate-800">
             {/* Brand column */}
             <div className="md:col-span-5 flex flex-col gap-3">
@@ -1640,31 +1852,40 @@ export const LandingPage: React.FC<Props> = ({ onGoToLogin, currentUser, onGoToD
               <nav className="flex flex-col gap-2 text-xs sm:text-sm text-slate-400">
                 <button
                   onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-                  className="text-left hover:text-white transition"
+                  className="text-left hover:text-white transition cursor-pointer"
                 >
                   {t.nav.home}
                 </button>
-                <button onClick={() => scrollTo('about-app')} className="text-left hover:text-white transition">
+                <button onClick={() => scrollTo('about-app')} className="text-left hover:text-white transition cursor-pointer">
                   {t.nav.aboutApp}
                 </button>
-                <button onClick={() => scrollTo('download-section')} className="text-left hover:text-white transition">
+                <button onClick={() => scrollTo('download-section')} className="text-left hover:text-white transition cursor-pointer">
                   {t.nav.download}
                 </button>
-                <button onClick={() => scrollTo('news')} className="text-left hover:text-white transition">
+                <button onClick={() => scrollTo('news')} className="text-left hover:text-white transition cursor-pointer">
                   {t.nav.news}
                 </button>
-                <button onClick={() => scrollTo('about-us')} className="text-left hover:text-white transition">
+                <button onClick={() => scrollTo('about-us')} className="text-left hover:text-white transition cursor-pointer">
                   {t.nav.aboutUs}
                 </button>
               </nav>
             </div>
 
-            {/* Social & Admin Portal */}
+            {/* Social & Direct Bot Link */}
             <div className="md:col-span-3 flex flex-col gap-2">
               <span className="text-xs font-bold text-slate-300 uppercase tracking-wider mb-1">
                 {t.footer.contact}
               </span>
               <div className="flex flex-col gap-2.5 text-xs sm:text-sm text-slate-400">
+                <a
+                  href="https://t.me/minterabot"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 text-cyan-400 hover:text-cyan-300 transition"
+                >
+                  <Send className="w-4 h-4" />
+                  <span>Telegram Bot: @minterabot</span>
+                </a>
                 <a
                   href="https://t.me/mintera_uz"
                   target="_blank"
@@ -1683,13 +1904,6 @@ export const LandingPage: React.FC<Props> = ({ onGoToLogin, currentUser, onGoToD
                   <FileCode2 className="w-4 h-4" />
                   <span>GitHub Repository</span>
                 </a>
-                <button
-                  onClick={onGoToLogin}
-                  className="inline-flex items-center gap-2 text-blue-400 hover:text-blue-300 font-semibold pt-1 transition text-left cursor-pointer"
-                >
-                  <LogIn className="w-4 h-4" />
-                  <span>{t.footer.adminPanel}</span>
-                </button>
               </div>
             </div>
           </div>
@@ -1710,6 +1924,55 @@ export const LandingPage: React.FC<Props> = ({ onGoToLogin, currentUser, onGoToD
           </div>
         </div>
       </footer>
+
+      {/* PWA INSTALLATION GUIDE MODAL */}
+      {pwaModalOpen && (
+        <div className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-xs flex items-center justify-center p-4 animate-fade-in">
+          <div
+            className={`rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl border animate-fade-in relative ${
+              theme === 'dark' ? 'bg-[#0E1528] border-slate-700 text-white' : 'bg-white border-slate-200 text-slate-900'
+            }`}
+          >
+            <button
+              onClick={() => setPwaModalOpen(false)}
+              className="absolute top-5 right-5 p-2 rounded-xl text-slate-400 hover:text-slate-100 hover:bg-slate-800 transition cursor-pointer"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div className="w-14 h-14 rounded-2xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center justify-center mb-4">
+              <Smartphone className="w-7 h-7" />
+            </div>
+
+            <h3 className="text-xl font-extrabold mb-2">{t.pwa.guideTitle}</h3>
+            <p className="text-xs sm:text-sm text-slate-400 mb-5 leading-relaxed">
+              {t.pwa.guideDesc}
+            </p>
+
+            <div className="space-y-3 mb-6 text-xs sm:text-sm leading-relaxed">
+              <div className="p-3 rounded-xl bg-slate-900/60 border border-slate-800 text-slate-300 flex items-start gap-2.5">
+                <span className="text-base">🤖</span>
+                <span>{t.pwa.androidTip}</span>
+              </div>
+              <div className="p-3 rounded-xl bg-slate-900/60 border border-slate-800 text-slate-300 flex items-start gap-2.5">
+                <span className="text-base">🍏</span>
+                <span>{t.pwa.iosTip}</span>
+              </div>
+              <div className="p-3 rounded-xl bg-slate-900/60 border border-slate-800 text-slate-300 flex items-start gap-2.5">
+                <span className="text-base">💻</span>
+                <span>{t.pwa.desktopTip}</span>
+              </div>
+            </div>
+
+            <button
+              onClick={() => setPwaModalOpen(false)}
+              className="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold text-sm shadow-md shadow-emerald-600/25 transition cursor-pointer"
+            >
+              {t.pwa.close}
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* NEWS DETAILS MODAL */}
       {selectedNews && (

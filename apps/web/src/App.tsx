@@ -43,7 +43,10 @@ export const App: React.FC = () => {
     window.location.hash = 'dashboard';
   };
 
-  const handleGoToLogin = () => {
+  const [loginInitialRole, setLoginInitialRole] = useState<'teacher' | 'admin'>('teacher');
+
+  const handleGoToLogin = (role: 'teacher' | 'admin' = 'teacher') => {
+    setLoginInitialRole(role);
     setCurrentView('login');
     window.location.hash = 'login';
   };
@@ -77,6 +80,7 @@ export const App: React.FC = () => {
         <LoginPage
           onLoginSuccess={handleLoginSuccess}
           onBackToHome={handleGoToLanding}
+          initialRole={loginInitialRole}
         />
       ) : (
         <DashboardLayout

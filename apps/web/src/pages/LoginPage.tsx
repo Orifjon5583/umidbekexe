@@ -5,17 +5,28 @@ import { Eye, EyeOff, AlertCircle, ShieldCheck, UserCheck, Sparkles, ArrowLeft }
 interface Props {
   onLoginSuccess: (user: any) => void;
   onBackToHome?: () => void;
+  initialRole?: 'teacher' | 'admin';
 }
 
-export const LoginPage: React.FC<Props> = ({ onLoginSuccess, onBackToHome }) => {
-  const [username, setUsername] = useState('teacher1');
-  const [password, setPassword] = useState('Teacher123!');
+export const LoginPage: React.FC<Props> = ({ onLoginSuccess, onBackToHome, initialRole = 'teacher' }) => {
+  const [username, setUsername] = useState(initialRole === 'admin' ? 'admin' : 'teacher1');
+  const [password, setPassword] = useState(initialRole === 'admin' ? 'Admin123!' : 'Teacher123!');
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [failedAttempts, setFailedAttempts] = useState(0);
   const [lockoutTimer, setLockoutTimer] = useState(0);
+
+  React.useEffect(() => {
+    if (initialRole === 'admin') {
+      setUsername('admin');
+      setPassword('Admin123!');
+    } else {
+      setUsername('teacher1');
+      setPassword('Teacher123!');
+    }
+  }, [initialRole]);
 
   React.useEffect(() => {
     if (lockoutTimer > 0) {

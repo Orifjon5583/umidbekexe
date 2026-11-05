@@ -34,6 +34,8 @@ import {
   Moon,
   Languages,
   User,
+  Play,
+  RotateCcw,
 } from 'lucide-react';
 
 interface Props {
@@ -87,7 +89,13 @@ const translations: Record<Language, any> = {
       autoCheck: 'Avtomatlashtirilgan tekshirish',
       coverage: '100% Sinov qamrovi',
       statusPassed: 'Qabul qilindi',
-      specs: 'Xotira: 14.2 MB • Vaqt: 28 ms',
+      specs: 'Xotira: 14.2 MB • Vaqt: 24 ms',
+      runBtn: 'Sinash (Run)',
+      runningBtn: 'Tekshirilmoqda...',
+      rerunBtn: 'Qayta sinash',
+      antiCheatBadge: 'Anti-Cheat: 100% Himoya',
+      runnerBadge: '⚡ 0.02s Native Runner',
+      testsLabel: 'Testlar',
     },
     aboutApp: {
       pill: 'Desktop dastur',
@@ -177,7 +185,13 @@ const translations: Record<Language, any> = {
       autoCheck: 'Автоматическое тестирование',
       coverage: '100% Покрытие тестами',
       statusPassed: 'Пройдено',
-      specs: 'Память: 14.2 МБ • Время: 28 мс',
+      specs: 'Память: 14.2 МБ • Время: 24 мс',
+      runBtn: 'Запустить (Run)',
+      runningBtn: 'Проверка тестов...',
+      rerunBtn: 'Запустить снова',
+      antiCheatBadge: 'Anti-Cheat: 100% Защита',
+      runnerBadge: '⚡ 0.02с Native Runner',
+      testsLabel: 'Тесты',
     },
     aboutApp: {
       pill: 'Десктопное приложение',
@@ -267,7 +281,13 @@ const translations: Record<Language, any> = {
       autoCheck: 'Автоматлаштирилган текшириш',
       coverage: '100% Синов қамрови',
       statusPassed: 'Қабул қилинди',
-      specs: 'Хотира: 14.2 МБ • Вақт: 28 мс',
+      specs: 'Хотира: 14.2 МБ • Вақт: 24 мс',
+      runBtn: 'Синаш (Run)',
+      runningBtn: 'Текширилмоқда...',
+      rerunBtn: 'Қайта синаш',
+      antiCheatBadge: 'Anti-Cheat: 100% Ҳимоя',
+      runnerBadge: '⚡ 0.02с Native Runner',
+      testsLabel: 'Тестлар',
     },
     aboutApp: {
       pill: 'Desktop дастур',
@@ -334,6 +354,35 @@ export const LandingPage: React.FC<Props> = ({ onGoToLogin, currentUser, onGoToD
   const [selectedNews, setSelectedNews] = useState<NewsItem | null>(null);
   const [downloadSuccessModal, setDownloadSuccessModal] = useState(false);
   const [downloadedFileName, setDownloadedFileName] = useState('Mintera-Setup.zip');
+
+  // Hero Code Simulator & Interactive Animation state
+  const [simLang, setSimLang] = useState<'python' | 'cpp'>('python');
+  const [simStatus, setSimStatus] = useState<'idle' | 'running' | 'success'>('idle');
+  const [simTestCount, setSimTestCount] = useState<number>(12);
+  const [simProgress, setSimProgress] = useState<number>(100);
+
+  const handleRunSimulator = () => {
+    if (simStatus === 'running') return;
+    setSimStatus('running');
+    setSimProgress(15);
+    setSimTestCount(2);
+
+    setTimeout(() => {
+      setSimProgress(50);
+      setSimTestCount(6);
+    }, 350);
+
+    setTimeout(() => {
+      setSimProgress(85);
+      setSimTestCount(10);
+    }, 750);
+
+    setTimeout(() => {
+      setSimProgress(100);
+      setSimTestCount(12);
+      setSimStatus('success');
+    }, 1200);
+  };
 
   // Til va Rejim boshqaruvi
   const [lang, setLang] = useState<Language>(() => {
@@ -855,17 +904,22 @@ export const LandingPage: React.FC<Props> = ({ onGoToLogin, currentUser, onGoToD
       <main className="w-full pt-20">
         {/* 2. HERO SECTION */}
         <section className="relative w-full overflow-hidden pt-10 sm:pt-14 pb-16 sm:pb-24">
-          {/* Ambient Glows */}
+          {/* Ambient Glows with slow breathing animation */}
           <div
-            className={`absolute -top-32 left-1/2 -translate-x-1/2 w-[850px] h-[400px] blur-3xl pointer-events-none -z-10 ${
+            className={`absolute -top-32 left-1/2 -translate-x-1/2 w-[850px] h-[400px] blur-3xl pointer-events-none -z-10 animate-glow-pulse ${
               theme === 'dark'
                 ? 'bg-gradient-to-b from-blue-900/40 via-indigo-900/20 to-transparent'
                 : 'bg-gradient-to-b from-blue-200/50 via-indigo-100/30 to-transparent'
             }`}
           />
           <div
-            className={`absolute top-40 right-10 w-72 h-72 rounded-full blur-3xl pointer-events-none -z-10 ${
+            className={`absolute top-40 right-10 w-72 h-72 rounded-full blur-3xl pointer-events-none -z-10 animate-float-slow ${
               theme === 'dark' ? 'bg-amber-600/15' : 'bg-amber-200/30'
+            }`}
+          />
+          <div
+            className={`absolute bottom-10 left-10 w-64 h-64 rounded-full blur-3xl pointer-events-none -z-10 animate-float-reverse ${
+              theme === 'dark' ? 'bg-blue-600/15' : 'bg-blue-200/25'
             }`}
           />
 
@@ -965,8 +1019,24 @@ export const LandingPage: React.FC<Props> = ({ onGoToLogin, currentUser, onGoToD
                 </div>
               </div>
 
-              {/* Right Column: Hero Visual Graphic & Editor Card */}
+              {/* Right Column: Hero Visual Graphic & Interactive Animated Simulator Card */}
               <div className="lg:col-span-5 relative">
+                {/* Floating Holographic Badge 1: Top-Left */}
+                <div className="hidden sm:flex absolute -top-4 -left-4 z-30 items-center gap-2 px-3.5 py-1.5 rounded-xl bg-slate-900/95 border border-cyan-500/40 shadow-xl shadow-cyan-500/10 backdrop-blur-md animate-float-slow text-xs font-semibold text-cyan-300 pointer-events-none">
+                  <Zap className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
+                  <span>{t.simulator.runnerBadge}</span>
+                </div>
+
+                {/* Floating Holographic Badge 2: Bottom-Right */}
+                <div className="hidden sm:flex absolute -bottom-4 -right-4 z-30 items-center gap-2 px-3.5 py-1.5 rounded-xl bg-slate-900/95 border border-emerald-500/40 shadow-xl shadow-emerald-500/10 backdrop-blur-md animate-float-reverse text-xs font-semibold text-emerald-300 pointer-events-none">
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                  </span>
+                  <Shield className="w-3.5 h-3.5 text-emerald-400" />
+                  <span>{t.simulator.antiCheatBadge}</span>
+                </div>
+
                 <div
                   className={`relative rounded-2xl shadow-2xl border overflow-hidden p-4 sm:p-5 transition-colors duration-200 ${
                     theme === 'dark'
@@ -982,61 +1052,215 @@ export const LandingPage: React.FC<Props> = ({ onGoToLogin, currentUser, onGoToD
                       <span className="w-3 h-3 rounded-full bg-emerald-500" />
                       <span className="text-xs text-slate-300 font-mono ml-2">{t.simulator.activeTest}</span>
                     </div>
-                    <span className="text-[11px] text-amber-300 bg-slate-800 px-2 py-0.5 rounded font-mono font-bold">
-                      00:45:12
-                    </span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] uppercase font-bold text-emerald-400 bg-emerald-950/60 border border-emerald-800 px-2 py-0.5 rounded">
+                        Online / Sandbox
+                      </span>
+                      <span className="text-[11px] text-amber-300 bg-slate-800 px-2 py-0.5 rounded font-mono font-bold">
+                        00:45:12
+                      </span>
+                    </div>
                   </div>
 
                   {/* Visual Image Banner with 100% test coverage overlay */}
-                  <div className="relative rounded-xl overflow-hidden mb-4 aspect-[16/9] bg-slate-950">
+                  <div className="relative rounded-xl overflow-hidden mb-3 aspect-[16/8] bg-slate-950">
                     <img
                       src="https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=800&q=80"
                       alt="Mintera Test Architecture"
                       className="w-full h-full object-cover opacity-80"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent flex items-end p-4">
-                      <div className="text-white">
-                        <div className="text-[11px] uppercase tracking-wider font-bold text-amber-400">
-                          {t.simulator.autoCheck}
+                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent flex items-end p-3.5">
+                      <div className="text-white w-full flex items-end justify-between">
+                        <div>
+                          <div className="text-[11px] uppercase tracking-wider font-bold text-amber-400">
+                            {t.simulator.autoCheck}
+                          </div>
+                          <div className="text-base sm:text-lg font-extrabold flex items-center gap-2">
+                            <span>{t.simulator.coverage}</span>
+                            <span className="text-xs bg-emerald-500/80 text-white px-2 py-0.5 rounded-full">
+                              {t.simulator.statusPassed}
+                            </span>
+                          </div>
                         </div>
-                        <div className="text-lg font-extrabold flex items-center gap-2">
-                          <span>{t.simulator.coverage}</span>
-                          <span className="text-xs bg-emerald-500/80 text-white px-2 py-0.5 rounded-full">
-                            {t.simulator.statusPassed}
-                          </span>
-                        </div>
+                        <span className="text-xs px-2.5 py-1 rounded-lg bg-blue-600/80 backdrop-blur-xs font-mono font-bold border border-blue-400/40">
+                          v2.4.0
+                        </span>
                       </div>
                     </div>
                   </div>
 
-                  {/* Interactive Code Snippet Box */}
-                  <div className="bg-slate-950 rounded-xl p-4 font-mono text-[12px] sm:text-[13px] leading-relaxed text-slate-200 border border-slate-800 shadow-inner">
-                    <div className="flex justify-between text-slate-400 text-[11px] mb-2 font-sans font-semibold uppercase tracking-wider border-b border-slate-800 pb-1.5">
+                  {/* Interactive Code Simulator Box with Animated Laser Scanner */}
+                  <div className="relative bg-slate-950 rounded-xl p-4 font-mono text-[12px] sm:text-[13px] leading-relaxed text-slate-200 border border-slate-800 shadow-inner overflow-hidden">
+                    {/* Laser Scan Animation Line when running */}
+                    {simStatus === 'running' && (
+                      <div className="absolute inset-x-0 h-1 bg-gradient-to-r from-transparent via-cyan-400 to-transparent shadow-[0_0_16px_#22d3ee] pointer-events-none animate-laser z-20" />
+                    )}
+
+                    {/* Simulator Header: Language Switcher Tabs & Interactive Run Button */}
+                    <div className="flex flex-wrap items-center justify-between gap-2 mb-3 pb-2.5 border-b border-slate-800">
+                      {/* Language Selection Tabs */}
+                      <div className="flex items-center gap-1 bg-slate-900/90 p-1 rounded-lg border border-slate-800">
+                        <button
+                          onClick={() => setSimLang('python')}
+                          className={`px-2.5 py-1 text-[11px] font-mono font-bold rounded-md transition cursor-pointer ${
+                            simLang === 'python'
+                              ? 'bg-blue-600 text-white shadow-xs'
+                              : 'text-slate-400 hover:text-slate-200'
+                          }`}
+                        >
+                          Python 3.12
+                        </button>
+                        <button
+                          onClick={() => setSimLang('cpp')}
+                          className={`px-2.5 py-1 text-[11px] font-mono font-bold rounded-md transition cursor-pointer ${
+                            simLang === 'cpp'
+                              ? 'bg-blue-600 text-white shadow-xs'
+                              : 'text-slate-400 hover:text-slate-200'
+                          }`}
+                        >
+                          C++20 (GCC)
+                        </button>
+                      </div>
+
+                      {/* Interactive Run Test Button */}
+                      <button
+                        onClick={handleRunSimulator}
+                        disabled={simStatus === 'running'}
+                        className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold transition shadow-md cursor-pointer ${
+                          simStatus === 'running'
+                            ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40 cursor-wait'
+                            : simStatus === 'success'
+                            ? 'bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/40'
+                            : 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-emerald-600/30 active:scale-95'
+                        }`}
+                        title="Kodni sinash va testlarni ishga tushirish"
+                      >
+                        {simStatus === 'running' ? (
+                          <>
+                            <span className="w-2.5 h-2.5 rounded-full border-2 border-amber-300 border-t-transparent animate-spin" />
+                            <span>{t.simulator.runningBtn}</span>
+                          </>
+                        ) : simStatus === 'success' ? (
+                          <>
+                            <RotateCcw className="w-3.5 h-3.5 text-emerald-400" />
+                            <span>{t.simulator.rerunBtn}</span>
+                          </>
+                        ) : (
+                          <>
+                            <Play className="w-3.5 h-3.5 fill-current" />
+                            <span>{t.simulator.runBtn}</span>
+                          </>
+                        )}
+                      </button>
+                    </div>
+
+                    {/* Task Title & Passed Counter */}
+                    <div className="flex justify-between text-slate-400 text-[11px] mb-2 font-sans font-semibold uppercase tracking-wider">
                       <span className="text-blue-400">{t.simulator.taskTitle}</span>
                       <span className="text-emerald-400 font-bold flex items-center gap-1">
-                        <Check className="w-3.5 h-3.5" /> {t.simulator.passed}
+                        <Check className="w-3.5 h-3.5 text-emerald-400" />
+                        {simTestCount}/12 {t.simulator.testsLabel}
                       </span>
                     </div>
-                    <p className="text-amber-400">
-                      <span className="text-purple-400 font-bold">def</span> binary_search(arr, target):
-                    </p>
-                    <p className="pl-4 text-slate-300">left, right = 0, len(arr) - 1</p>
-                    <p className="pl-4 text-purple-400 font-bold">
-                      while <span className="text-slate-300 font-normal">left &lt;= right:</span>
-                    </p>
-                    <p className="pl-8 text-slate-300">mid = (left + right) // 2</p>
-                    <p className="pl-8 text-purple-400 font-bold">
-                      if <span className="text-slate-300 font-normal">arr[mid] == target:</span>{' '}
-                      <span className="text-rose-400 font-bold">return</span> mid
-                    </p>
-                    <div className="mt-3 pt-2.5 border-t border-slate-800 flex items-center justify-between font-sans">
-                      <span className="inline-flex items-center gap-1 text-[11px] sm:text-[12px] text-emerald-400 font-medium">
-                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-                        {t.simulator.specs}
-                      </span>
-                      <span className="text-[11px] bg-blue-950 text-blue-300 border border-blue-800 px-2 py-0.5 rounded font-mono font-bold">
-                        Python 3.12
-                      </span>
+
+                    {/* Dynamic Code Content based on simLang */}
+                    {simLang === 'python' ? (
+                      <div className="space-y-0.5 min-h-[145px]">
+                        <p className="text-slate-500 text-[11px] italic"># Mintera Offline Python Sandbox (v3.12)</p>
+                        <p className="text-amber-300 font-semibold">
+                          <span className="text-purple-400 font-bold">def</span> binary_search<span className="text-slate-300">(arr, target):</span>
+                        </p>
+                        <p className="pl-4 text-slate-300">
+                          left, right = <span className="text-amber-400">0</span>, <span className="text-purple-400">len</span>(arr) - <span className="text-amber-400">1</span>
+                        </p>
+                        <p className="pl-4 text-purple-400 font-bold">
+                          while <span className="text-slate-300 font-normal">left &lt;= right:</span>
+                        </p>
+                        <p className="pl-8 text-slate-300">
+                          mid = (left + right) // <span className="text-amber-400">2</span>
+                        </p>
+                        <p className="pl-8 text-purple-400 font-bold">
+                          if <span className="text-slate-300 font-normal">arr[mid] == target:</span>{' '}
+                          <span className="text-rose-400 font-bold">return</span> mid
+                        </p>
+                        <p className="pl-8 text-purple-400 font-bold">
+                          elif <span className="text-slate-300 font-normal">arr[mid] &lt; target:</span>{' '}
+                          <span className="text-slate-300 font-normal">left = mid + <span className="text-amber-400">1</span></span>
+                        </p>
+                        <p className="pl-8 text-purple-400 font-bold">
+                          else<span className="text-slate-300 font-normal">: right = mid - <span className="text-amber-400">1</span></span>
+                        </p>
+                        <p className="pl-4 text-rose-400 font-bold">
+                          return <span className="text-amber-400">-1</span>
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="space-y-0.5 min-h-[145px]">
+                        <p className="text-slate-500 text-[11px] italic">// Mintera Offline GCC C++20 Sandbox</p>
+                        <p className="text-cyan-400">
+                          <span className="text-purple-400 font-bold">#include</span> &lt;vector&gt;
+                        </p>
+                        <p className="text-amber-300 font-semibold">
+                          <span className="text-blue-400 font-bold">int</span> binary_search<span className="text-slate-300">(</span><span className="text-purple-400">const</span> std::vector&lt;<span className="text-blue-400">int</span>&gt;&amp; arr, <span className="text-blue-400">int</span> target<span className="text-slate-300">) &#123;</span>
+                        </p>
+                        <p className="pl-4 text-slate-300">
+                          <span className="text-blue-400 font-bold">int</span> left = <span className="text-amber-400">0</span>, right = arr.<span className="text-cyan-400">size</span>() - <span className="text-amber-400">1</span>;
+                        </p>
+                        <p className="pl-4 text-purple-400 font-bold">
+                          while <span className="text-slate-300 font-normal">(left &lt;= right) &#123;</span>
+                        </p>
+                        <p className="pl-8 text-slate-300">
+                          <span className="text-blue-400 font-bold">int</span> mid = left + (right - left) / <span className="text-amber-400">2</span>;
+                        </p>
+                        <p className="pl-8 text-purple-400 font-bold">
+                          if <span className="text-slate-300 font-normal">(arr[mid] == target) </span><span className="text-rose-400">return</span> mid;
+                        </p>
+                        <p className="pl-8 text-purple-400 font-bold">
+                          if <span className="text-slate-300 font-normal">(arr[mid] &lt; target) left = mid + </span><span className="text-amber-400">1</span>;
+                        </p>
+                        <p className="pl-8 text-purple-400 font-bold">
+                          else <span className="text-slate-300 font-normal">right = mid - </span><span className="text-amber-400">1</span>;
+                        </p>
+                        <p className="pl-4 text-slate-300">&#125;</p>
+                        <p className="pl-4 text-rose-400 font-bold">
+                          return <span className="text-amber-400">-1</span>;
+                        </p>
+                        <p className="text-slate-300">&#125;</p>
+                      </div>
+                    )}
+
+                    {/* Progress & Realtime Test Feedback */}
+                    <div className="mt-3 pt-2.5 border-t border-slate-800">
+                      <div className="flex items-center justify-between text-[11px] mb-1.5 font-sans">
+                        <div className="flex items-center gap-1.5">
+                          <span
+                            className={`w-2 h-2 rounded-full ${
+                              simStatus === 'running'
+                                ? 'bg-amber-400 animate-ping'
+                                : 'bg-emerald-400'
+                            }`}
+                          />
+                          <span className="text-slate-300 font-medium">
+                            {simStatus === 'running'
+                              ? `${t.simulator.runningBtn} (${simTestCount}/12)`
+                              : `${simTestCount}/12 ${t.simulator.passed}`}
+                          </span>
+                        </div>
+                        <span className="text-emerald-400 font-mono font-bold">
+                          {simStatus === 'running' ? `${simProgress}%` : t.simulator.specs}
+                        </span>
+                      </div>
+                      {/* Live Progress Bar */}
+                      <div className="w-full bg-slate-800/80 rounded-full h-1.5 overflow-hidden">
+                        <div
+                          className={`h-full transition-all duration-300 rounded-full ${
+                            simStatus === 'running'
+                              ? 'bg-gradient-to-r from-blue-500 via-amber-400 to-emerald-400'
+                              : 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]'
+                          }`}
+                          style={{ width: `${simProgress}%` }}
+                        />
+                      </div>
                     </div>
                   </div>
                 </div>

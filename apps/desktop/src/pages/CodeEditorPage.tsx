@@ -37,6 +37,8 @@ import {
   Cpu,
   Layers,
   Flame,
+  ShieldAlert,
+  ShieldCheck,
 } from 'lucide-react';
 
 interface Props {
@@ -68,7 +70,25 @@ export const CodeEditorPage: React.FC<Props> = ({
   onRequestExit,
   onFinishAssignment,
 }) => {
-  useClipboardRestrictions(true);
+  const [securityWarning, setSecurityWarning] = useState<string | null>(null);
+  const [violationCount, setViolationCount] = useState<number>(0);
+
+  // Anti-Cheat va xavfsizlik cheklovlari
+  useClipboardRestrictions(true, (violation) => {
+    setViolationCount((prev) => prev + 1);
+    setSecurityWarning(violation.detail);
+  });
+
+  // Ogohlantirishni 6 soniyadan so'ng avtomatik yopish
+  useEffect(() => {
+    if (securityWarning) {
+      const timer = setTimeout(() => {
+        setSecurityWarning(null);
+      }, 6000);
+      return () => clearTimeout(timer);
+    }
+  }, [securityWarning]);
+
   const { theme } = useTheme();
 
   // Programming language selection
@@ -522,6 +542,34 @@ int main() {
     >
       <TitleBar onExitRequest={onRequestExit} />
 
+      {/* Floating Anti-Cheat / Security Warning Banner */}
+      {securityWarning && (
+        <div className="fixed top-12 left-1/2 -translate-x-1/2 z-50 max-w-lg w-[92%] sm:w-auto bg-slate-900/95 text-white border border-rose-500/50 shadow-2xl rounded-2xl p-4 flex items-start gap-3 backdrop-blur-xl animate-in fade-in slide-in-from-top-4 duration-300">
+          <div className="w-8 h-8 rounded-xl bg-rose-500/20 text-rose-400 flex items-center justify-center flex-shrink-0 mt-0.5">
+            <ShieldAlert className="w-5 h-5" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center justify-between gap-4">
+              <h4 className="text-xs font-bold text-rose-400 tracking-wide uppercase">
+                Xavfsizlik Ogohlantirishi #{violationCount}
+              </h4>
+              <button
+                onClick={() => setSecurityWarning(null)}
+                className="text-slate-400 hover:text-white"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <p className="text-xs text-slate-200 mt-1 leading-relaxed">
+              {securityWarning}
+            </p>
+            <p className="text-[10px] text-slate-400 mt-1.5 font-mono">
+              Diqqat: Sinov vaqtida dasturdan chiqish yoki tashqi matn kiritish taqiqlangan. Ushbu hodisa o‘qituvchi audit jurnalida qayd etildi.
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Main Split Layout: Left Problem Pane, Right Editor Pane */}
       <div className="flex-1 flex min-h-0 overflow-hidden relative">
         {/* ===================== LEFT PANE (Problem Statement) ===================== */}
@@ -958,6 +1006,28 @@ int main() {
 
             {/* Right Controls: Auto-save, AI Murabbiy, RUN, Topshirish */}
             <div className="flex items-center gap-2.5">
+              {/* Anti-Cheat Shield Badge */}
+              <div
+                className={`hidden md:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-semibold border ${
+                  violationCount > 0
+                    ? 'bg-amber-500/10 text-amber-500 border-amber-500/20'
+                    : 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'
+                }`}
+                title="Monaco muharriri va sinov tizimi to‘liq Anti-Cheat himoyasi ostida"
+              >
+                {violationCount > 0 ? (
+                  <ShieldAlert className="w-3.5 h-3.5" />
+                ) : (
+                  <ShieldCheck className="w-3.5 h-3.5" />
+                )}
+                <span>Anti-Cheat</span>
+                {violationCount > 0 && (
+                  <span className="px-1.5 py-0.2 rounded bg-amber-500 text-slate-900 font-bold text-[10px]">
+                    {violationCount}
+                  </span>
+                )}
+              </div>
+
               <span className="text-[11px] font-mono text-slate-500 hidden md:inline">
                 {saveStatus}
               </span>

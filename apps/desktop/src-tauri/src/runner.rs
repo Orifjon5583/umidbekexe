@@ -44,6 +44,46 @@ pub struct RunnerResult {
 pub struct CodeRunner;
 
 impl CodeRunner {
+    pub fn check_security(language: &str, source_code: &str) -> Option<String> {
+        let code_lower = source_code.to_lowercase();
+        if language == "python" {
+            let forbidden = [
+                ("import os", "os tizim moduli"),
+                ("from os", "os tizim moduli"),
+                ("import subprocess", "subprocess jarayon boshqaruvi"),
+                ("from subprocess", "subprocess jarayon boshqaruvi"),
+                ("import shutil", "shutil fayl tizimi"),
+                ("import socket", "socket tarmoq ulanishi"),
+                ("import requests", "requests tarmoq so'rovi"),
+                ("import urllib", "urllib tarmoq so'rovi"),
+                ("eval(", "eval dinamik kod"),
+                ("exec(", "exec dinamik kod"),
+                ("__import__", "__import__ yuklash"),
+            ];
+            for (pattern, desc) in forbidden {
+                if code_lower.contains(pattern) {
+                    return Some(format!("Xavfsizlik qoidabuzarligi: Kodda taqiqlangan '{}' aniqlandi (Sandbox Policy Violation)", desc));
+                }
+            }
+        } else if language == "cpp" {
+            let forbidden = [
+                ("system(", "system() tizim chaqiruvi"),
+                ("popen(", "popen() buyruq chaqiruvi"),
+                ("fork(", "fork() jarayon chaqiruvi"),
+                ("<windows.h>", "<windows.h> sarlavhasi"),
+                ("<winsock", "winsock tarmoq moduli"),
+                ("<sys/socket.h>", "soket moduli"),
+                ("<unistd.h>", "unistd posix moduli"),
+            ];
+            for (pattern, desc) in forbidden {
+                if code_lower.contains(pattern) {
+                    return Some(format!("Xavfsizlik qoidabuzarligi: Kodda taqiqlangan '{}' aniqlandi (Sandbox Policy Violation)", desc));
+                }
+            }
+        }
+        None
+    }
+
     pub fn execute(
         language: &str,
         source_code: &str,
@@ -51,6 +91,22 @@ impl CodeRunner {
         time_limit_ms: u64,
         memory_limit_mb: u64,
     ) -> RunnerResult {
+        // Xavfsizlik filtri (Sandbox Policy Check)
+        if let Some(sec_err) = Self::check_security(language, source_code) {
+            return RunnerResult {
+                status: "runtime_error".to_string(),
+                stdout: String::new(),
+                stderr: format!("⚠️ {}\nUshbu urinish audit jurnalida qayd etildi.", sec_err),
+                execution_time_ms: 0,
+                cpu_time_ms: 0,
+                peak_memory_bytes: 0,
+                passedTests: 0,
+                total_tests: test_cases.len(),
+                test_results: vec![],
+                error: Some("Sandbox violation".to_string()),
+            };
+        }
+
         let temp_dir = match tempfile::Builder::new().prefix("codepractice_run_").tempdir() {
             Ok(dir) => dir,
             Err(e) => {

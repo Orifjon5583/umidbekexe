@@ -1,6 +1,54 @@
 import { RunnerResult, TestCase, ProgrammingLanguage, TestResultItem } from '@codepractice/shared-types';
+import { recordSecurityViolation } from '../hooks/useClipboardRestrictions';
 
 export class LocalRunnerService {
+  /**
+   * Kod xavfsizligini statik tahlil qilish (Sandbox Security Filter)
+   * Tizim chaqiruvlari, xavfli modullar va fayl operatsiyalarini cheklaydi
+   */
+  static validateCodeSecurity(language: ProgrammingLanguage, code: string): string | null {
+    if (language === 'python') {
+      const dangerousPatterns = [
+        { pattern: /\b(import\s+os|from\s+os\b)/i, name: 'os moduli (tizim chaqiruvlari)' },
+        { pattern: /\b(import\s+subprocess|from\s+subprocess\b)/i, name: 'subprocess jarayon boshqaruvi' },
+        { pattern: /\b(import\s+shutil|from\s+shutil\b)/i, name: 'shutil fayl tizimi boshqaruvi' },
+        { pattern: /\bsys\.(modules|exit|path|argv)\b/i, name: 'sys tizim chaqiruvlari' },
+        { pattern: /\b(import\s+socket|from\s+socket\b)/i, name: 'socket (tarmoq ulanishlari)' },
+        { pattern: /\b(import\s+requests|import\s+urllib|from\s+urllib\b)/i, name: 'tarmoq kutubxonalari' },
+        { pattern: /\b(eval|exec)\s*\(/i, name: 'eval/exec dinamik kod bajaruvchi' },
+        { pattern: /\b__import__\b/i, name: '__import__ funksiyasi' },
+        { pattern: /\bopen\s*\([^)]*['"][wa\+]/i, name: 'fayllarga yozish (file write)' },
+      ];
+
+      for (const item of dangerousPatterns) {
+        if (item.pattern.test(code)) {
+          return `Xavfsizlik qoidasi buzildi: Kodda ruxsat berilmagan '${item.name}' aniqlandi! (Sandbox Security Policy)`;
+        }
+      }
+    }
+
+    if (language === 'cpp') {
+      const dangerousPatterns = [
+        { pattern: /\bsystem\s*\(/i, name: 'system() tizim buyrug‘i' },
+        { pattern: /\bpopen\s*\(/i, name: 'popen() jarayon chaqiruvi' },
+        { pattern: /\bfork\s*\(/i, name: 'fork() jarayon nusxalash' },
+        { pattern: /<windows\.h>/i, name: '<windows.h> tizim kutubxonasi' },
+        { pattern: /<winsock2?\.h>/i, name: 'winsock tarmoq kutubxonasi' },
+        { pattern: /<sys\/socket\.h>/i, name: 'tarmoq soketlari' },
+        { pattern: /<unistd\.h>/i, name: '<unistd.h> posix chaqiruvlari' },
+        { pattern: /\bofstream\b/i, name: 'faylga yozish oqimi (ofstream)' },
+      ];
+
+      for (const item of dangerousPatterns) {
+        if (item.pattern.test(code)) {
+          return `Xavfsizlik qoidasi buzildi: Kodda ruxsat berilmagan '${item.name}' aniqlandi! (Sandbox Security Policy)`;
+        }
+      }
+    }
+
+    return null;
+  }
+
   static async runCode(
     language: ProgrammingLanguage,
     sourceCode: string,
@@ -8,6 +56,34 @@ export class LocalRunnerService {
     timeLimitMs: number = 2000,
     memoryLimitMb: number = 128,
   ): Promise<RunnerResult> {
+    // 0. Xavfsizlik tekshiruvi (Sandbox Security Check)
+    const securityError = this.validateCodeSecurity(language, sourceCode);
+    if (securityError) {
+      recordSecurityViolation('sandbox_violation', securityError);
+      return {
+        status: 'runtime_error',
+        stdout: '',
+        stderr: `⚠️ XAVFSIZLIK OGOHLANTIRISHI:\n${securityError}\nUshbu hodisa o‘qituvchi va administrator audit jurnalida qayd etildi.`,
+        executionTimeMs: 0,
+        cpuTimeMs: 0,
+        peakMemoryBytes: 0,
+        passedTests: 0,
+        totalTests: testCases.length,
+        testResults: testCases.map((tc, idx) => ({
+          testNumber: idx + 1,
+          testCaseId: tc.id,
+          status: 'error',
+          executionTimeMs: 0,
+          errorSummary: 'Xavfsizlik qoidabuzarligi (Sandbox Policy Violation)',
+          actualOutput: 'Bloklandi',
+          expectedOutput: tc.expectedOutput,
+          inputData: tc.inputData,
+          isHidden: tc.isHidden,
+        })),
+        error: 'Security Sandbox Policy Violation',
+      };
+    }
+
     // 1. Agar Tauri muhiti mavjud bo'lsa, Rust native runnerni chaqiramiz
     if (typeof window !== 'undefined' && (window as any).__TAURI_INTERNALS__) {
       try {

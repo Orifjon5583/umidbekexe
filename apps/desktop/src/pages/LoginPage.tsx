@@ -16,9 +16,25 @@ export const LoginPage: React.FC<Props> = ({ onLoginSuccess }) => {
   const [rememberMe, setRememberMe] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [failedAttempts, setFailedAttempts] = useState(0);
+  const [lockoutTimer, setLockoutTimer] = useState(0);
+
+  React.useEffect(() => {
+    if (lockoutTimer > 0) {
+      const interval = setInterval(() => {
+        setLockoutTimer((prev) => (prev > 0 ? prev - 1 : 0));
+      }, 1000);
+      return () => clearInterval(interval);
+    }
+  }, [lockoutTimer]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (lockoutTimer > 0) {
+      setError(`Xavfsizlik blokirovkasi: Iltimos, ${lockoutTimer} soniya kuting.`);
+      return;
+    }
+
     setError(null);
     setLoading(true);
 
@@ -35,10 +51,19 @@ export const LoginPage: React.FC<Props> = ({ onLoginSuccess }) => {
         return;
       }
 
+      setFailedAttempts(0);
+      setLockoutTimer(0);
       localStorage.setItem('cp_student_user', JSON.stringify(res.user));
       onLoginSuccess(res.user);
     } catch (err: any) {
-      setError(err?.message || 'Login yoki parol noto‘g‘ri kiritildi');
+      const newCount = failedAttempts + 1;
+      setFailedAttempts(newCount);
+      if (newCount >= 5) {
+        setLockoutTimer(60);
+        setError('Xavfsizlik cheklovi: Ketma-ket 5 marta xato login/parol kiritildi. Tizim 60 soniyaga bloklandi (Brute-Force Protection).');
+      } else {
+        setError(`${err?.message || 'Login yoki parol noto‘g‘ri kiritildi'} (Qolgan urinishlar: ${5 - newCount})`);
+      }
     } finally {
       setLoading(false);
     }
@@ -246,10 +271,16 @@ export const LoginPage: React.FC<Props> = ({ onLoginSuccess }) => {
                 {/* Submit CTA Button */}
                 <button
                   type="submit"
-                  disabled={loading}
+                  disabled={loading || lockoutTimer > 0}
                   className="w-full h-11 rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-blue-500/25 active:scale-[0.98] transition cursor-pointer disabled:opacity-50"
                 >
-                  <span>{loading ? 'Kirilmoqda...' : 'Tizimga kirish'}</span>
+                  <span>
+                    {loading
+                      ? 'Kirilmoqda...'
+                      : lockoutTimer > 0
+                      ? `Bloklangan (${lockoutTimer}s)`
+                      : 'Tizimga kirish'}
+                  </span>
                   <ArrowRight className="w-4 h-4" />
                 </button>
               </form>

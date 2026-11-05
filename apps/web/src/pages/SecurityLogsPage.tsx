@@ -73,9 +73,9 @@ export const SecurityLogsPage: React.FC = () => {
             <AlertTriangle className="w-5 h-5" />
           </div>
           <div className="min-w-0">
-            <p className="text-[10px] sm:text-xs text-slate-500 font-medium truncate">Clipboard urinishlari</p>
+            <p className="text-[10px] sm:text-xs text-slate-500 font-medium truncate">Anti-Cheat hodisalari</p>
             <p className="text-lg sm:text-xl font-bold text-slate-900">
-              {logs.filter((l) => l.eventType === 'clipboard_violation').length} ta
+              {logs.filter((l) => l.eventType === 'clipboard_violation' || l.eventType === 'window_blur').length} ta
             </p>
           </div>
         </div>
@@ -85,9 +85,9 @@ export const SecurityLogsPage: React.FC = () => {
             <ShieldAlert className="w-5 h-5" />
           </div>
           <div className="min-w-0">
-            <p className="text-[10px] sm:text-xs text-slate-500 font-medium truncate">Shubhali kirishlar</p>
+            <p className="text-[10px] sm:text-xs text-slate-500 font-medium truncate">Sandbox & Shubhali</p>
             <p className="text-lg sm:text-xl font-bold text-slate-900">
-              {logs.filter((l) => l.eventType === 'failed_login').length} ta
+              {logs.filter((l) => l.eventType === 'failed_login' || l.eventType === 'sandbox_violation').length} ta
             </p>
           </div>
         </div>
@@ -195,6 +195,10 @@ export const SecurityLogsPage: React.FC = () => {
                       <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold border ${badgeClass}`}>
                         {log.eventType === 'clipboard_violation'
                           ? 'Clipboard cheklovi'
+                          : log.eventType === 'window_blur'
+                          ? 'Oynadan chiqish (Alt+Tab)'
+                          : log.eventType === 'sandbox_violation'
+                          ? 'Sandbox qoidabuzarligi'
                           : log.eventType === 'login_success'
                           ? 'Tizimga kirish'
                           : log.eventType === 'failed_login'

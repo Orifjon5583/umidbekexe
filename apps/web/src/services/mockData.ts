@@ -412,13 +412,40 @@ export interface SecurityLogItem {
   timestamp: string;
   user: string;
   role: 'student' | 'teacher' | 'admin' | 'guest';
-  eventType: 'clipboard_violation' | 'login_success' | 'failed_login' | 'assignment_create' | 'settings_change';
+  eventType:
+    | 'clipboard_violation'
+    | 'window_blur'
+    | 'sandbox_violation'
+    | 'login_success'
+    | 'failed_login'
+    | 'assignment_create'
+    | 'settings_change';
   severity: 'danger' | 'warning' | 'info' | 'success';
   details: string;
   ip: string;
 }
 
 export const INITIAL_SECURITY_LOGS: SecurityLogItem[] = [
+  {
+    id: 'log-0a',
+    timestamp: '05.11.2026 16:45',
+    user: 'student3 (Sardor Rustamov)',
+    role: 'student',
+    eventType: 'sandbox_violation',
+    severity: 'danger',
+    details: 'Python yechimida taqiqlangan "import os; os.system" chaqiruvi aniqlandi va Sandbox tomonidan darhol to‘xtatildi.',
+    ip: '192.168.1.112',
+  },
+  {
+    id: 'log-0b',
+    timestamp: '05.11.2026 16:10',
+    user: 'student2 (Malika Karimova)',
+    role: 'student',
+    eventType: 'window_blur',
+    severity: 'warning',
+    details: 'Imtihon paytida dastur oynasidan chiqish (Alt+Tab / boshqa oynaga o‘tish) aniqlandi.',
+    ip: '192.168.1.108',
+  },
   {
     id: 'log-1',
     timestamp: '01.11.2026 14:52',

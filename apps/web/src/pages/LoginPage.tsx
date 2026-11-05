@@ -14,8 +14,24 @@ export const LoginPage: React.FC<Props> = ({ onLoginSuccess, onBackToHome }) => 
   const [rememberMe, setRememberMe] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [failedAttempts, setFailedAttempts] = useState(0);
+  const [lockoutTimer, setLockoutTimer] = useState(0);
+
+  React.useEffect(() => {
+    if (lockoutTimer > 0) {
+      const interval = setInterval(() => {
+        setLockoutTimer((prev) => (prev > 0 ? prev - 1 : 0));
+      }, 1000);
+      return () => clearInterval(interval);
+    }
+  }, [lockoutTimer]);
 
   const performLogin = async (userToLogin: string, passToLogin: string) => {
+    if (lockoutTimer > 0) {
+      setError(`Xavfsizlik blokirovkasi: Ketma-ket xato urinishlar tufayli tizim vaqtincha bloklandi. Iltimos ${lockoutTimer} soniya kuting.`);
+      return;
+    }
+
     setError(null);
     setLoading(true);
 
@@ -32,10 +48,19 @@ export const LoginPage: React.FC<Props> = ({ onLoginSuccess, onBackToHome }) => 
         return;
       }
 
+      setFailedAttempts(0);
+      setLockoutTimer(0);
       localStorage.setItem('cp_user', JSON.stringify(res.user));
       onLoginSuccess(res.user);
     } catch (err: any) {
-      setError(err.message || 'Login yoki parol noto‘g‘ri');
+      const newCount = failedAttempts + 1;
+      setFailedAttempts(newCount);
+      if (newCount >= 5) {
+        setLockoutTimer(60);
+        setError('Xavfsizlik cheklovi: Ketma-ket 5 marta xato urinish aniqlandi! Tizim 60 soniyaga bloklandi (Brute-Force Protection).');
+      } else {
+        setError(`${err.message || 'Login yoki parol noto‘g‘ri'} (Qolgan urinishlar: ${5 - newCount})`);
+      }
     } finally {
       setLoading(false);
     }
@@ -195,10 +220,14 @@ export const LoginPage: React.FC<Props> = ({ onLoginSuccess, onBackToHome }) => 
 
             <button
               type="submit"
-              disabled={loading}
+              disabled={loading || lockoutTimer > 0}
               className="w-full h-11 bg-[#2563EB] hover:bg-blue-700 text-white font-bold rounded-xl text-xs shadow-md shadow-blue-600/20 transition disabled:opacity-50 cursor-pointer"
             >
-              {loading ? 'Tekshirilmoqda...' : 'Kirish'}
+              {loading
+                ? 'Tekshirilmoqda...'
+                : lockoutTimer > 0
+                ? `Bloklangan (${lockoutTimer}s)`
+                : 'Kirish'}
             </button>
           </form>
         </div>

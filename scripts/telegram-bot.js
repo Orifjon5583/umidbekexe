@@ -22,10 +22,12 @@ function loadEnv() {
       const idx = trimmed.indexOf('=');
       if (idx !== -1) {
         const key = trimmed.slice(0, idx).trim();
-        const val = trimmed.slice(idx + 1).trim();
-        if (!process.env[key]) {
-          process.env[key] = val;
+        let val = trimmed.slice(idx + 1).trim();
+        // Qo'shtirnoqlarni olib tashlash ("..." yoki '...')
+        if ((val.startsWith('"') && val.endsWith('"')) || (val.startsWith("'") && val.endsWith("'"))) {
+          val = val.slice(1, -1);
         }
+        process.env[key] = val;
       }
     }
   }
@@ -154,7 +156,7 @@ async function handleUpdate(update) {
             reply_markup: {
               inline_keyboard: [
                 [
-                  { text: '🌐 Mintera Platformasi', url: 'http://localhost:3000' },
+                  { text: '🌐 Mintera Platformasi', url: process.env.WEB_APP_URL || 'https://mintera.orifdev.uz' },
                 ],
                 [
                   { text: '📋 Mening ID raqamim', callback_data: `my_id_${chatId}` },
@@ -263,7 +265,7 @@ async function pollUpdates() {
       allowed_updates: ['message', 'callback_query'],
     });
 
-    if (res.ok && Array.isArray(res.result)) {
+    if (res && res.ok && Array.isArray(res.result)) {
       for (const update of res.result) {
         lastUpdateId = Math.max(lastUpdateId, update.update_id);
         try {
@@ -271,6 +273,13 @@ async function pollUpdates() {
         } catch (updateErr) {
           console.error('[Telegram Bot] Update qayta ishlashda xatolik:', updateErr.message);
         }
+      }
+    } else if (res && !res.ok) {
+      console.error(`[Telegram Bot] Polling xatosi: ${res.description || JSON.stringify(res)}`);
+      if (res.error_code === 401 || res.error_code === 404) {
+        isPolling = false;
+        setTimeout(checkAndPoll, 10000);
+        return;
       }
     }
   } catch (err) {
@@ -341,10 +350,10 @@ async function startBot() {
 
   async function checkAndPoll() {
     loadEnv();
-    const currentToken = process.env.TELEGRAM_BOT_TOKEN;
-    if (!currentToken || currentToken.length < 15) {
-      console.log('[Telegram Bot] Kutilmoqda: .env fayliga yangi TELEGRAM_BOT_TOKEN kiritilishini kutyapti...');
-      setTimeout(checkAndPoll, 15000);
+    const currentToken = (process.env.TELEGRAM_BOT_TOKEN || '').trim();
+    if (!currentToken || currentToken.length < 20 || currentToken.includes('1234567890:ABCdef')) {
+      console.log('[Telegram Bot] Kutilmoqda: .env fayliga haqiqiy TELEGRAM_BOT_TOKEN kiritilishini kutyapti...');
+      setTimeout(checkAndPoll, 10000);
       return;
     }
 
@@ -352,15 +361,15 @@ async function startBot() {
       const me = await telegramRequest('getMe');
       if (!me.ok) {
         console.log(`[Telegram Bot] Diqqat: Token yaroqsiz (${me.description}). Yangi tokenni .env fayliga yozing.`);
-        setTimeout(checkAndPoll, 15000);
+        setTimeout(checkAndPoll, 10000);
         return;
       }
-      console.log(`[Telegram Bot] Muvaffaqiyatli ulandi! Bot: "${me.result.first_name}" (@${me.result.username})`);
-      console.log('[Telegram Bot] Xabarlarni qabul qilish (Long Polling) boshlandi...');
+      console.log(`[Telegram Bot] ✅ Muvaffaqiyatli ulandi! Bot: "${me.result.first_name}" (@${me.result.username})`);
+      console.log('[Telegram Bot] 🚀 Xabarlarni qabul qilish (Long Polling) boshlandi...');
       pollUpdates();
     } catch (err) {
       console.log('[Telegram Bot] Ulanish xatosi:', err.message);
-      setTimeout(checkAndPoll, 15000);
+      setTimeout(checkAndPoll, 10000);
     }
   }
 

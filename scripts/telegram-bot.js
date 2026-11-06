@@ -39,7 +39,7 @@ const HTTP_PORT = 4005;
 
 // Telegram API so'rov yuborish yordamchisi
 function telegramRequest(method, payload = {}) {
-  const currentToken = process.env.TELEGRAM_BOT_TOKEN || '';
+  const currentToken = (process.env.TELEGRAM_BOT_TOKEN || '').trim();
   return new Promise((resolve, reject) => {
     const bodyStr = JSON.stringify(payload);
     const options = {
@@ -60,6 +60,9 @@ function telegramRequest(method, payload = {}) {
       res.on('end', () => {
         try {
           const parsed = JSON.parse(data);
+          if (!parsed.ok) {
+            console.error(`[Telegram API Xatosi] ${method}: [${parsed.error_code}] ${parsed.description}`);
+          }
           resolve(parsed);
         } catch (err) {
           reject(new Error(`JSON Parse xatosi: ${data.slice(0, 100)}`));
@@ -81,12 +84,22 @@ function telegramRequest(method, payload = {}) {
 // Xabar yuborish
 async function sendMessage(chatId, text, options = {}) {
   try {
-    return await telegramRequest('sendMessage', {
+    const res = await telegramRequest('sendMessage', {
       chat_id: chatId,
       text: text,
       parse_mode: 'HTML',
       ...options,
     });
+    // Agar HTML formati yoki inline button (URL) tufayli rad etilgan bo'lsa, oddiy matn sifatida qayta jo'natish
+    if (!res || !res.ok) {
+      console.warn(`[Telegram Bot] Xabarni oddiy matn ko'rinishida yuborishga urinilmoqda (${chatId})...`);
+      const plainText = text.replace(/<[^>]*>/g, '');
+      return await telegramRequest('sendMessage', {
+        chat_id: chatId,
+        text: plainText,
+      });
+    }
+    return res;
   } catch (err) {
     console.error(`[Telegram Bot] Xabar yuborishda xatolik (${chatId}):`, err.message);
   }
@@ -138,6 +151,11 @@ async function handleUpdate(update) {
           }
         );
       } else {
+        let webUrl = (process.env.WEB_APP_URL || '').trim();
+        if (!webUrl || webUrl.includes('localhost') || webUrl.includes('127.0.0.1')) {
+          webUrl = 'https://mintera.orifdev.uz';
+        }
+
         await sendMessage(
           chatId,
           `👋 <b>Assalomu alaykum, ${userName}!</b>\n\n` +
@@ -156,7 +174,7 @@ async function handleUpdate(update) {
             reply_markup: {
               inline_keyboard: [
                 [
-                  { text: '🌐 Mintera Platformasi', url: process.env.WEB_APP_URL || 'https://mintera.orifdev.uz' },
+                  { text: '🌐 Mintera Platformasi', url: webUrl },
                 ],
                 [
                   { text: '📋 Mening ID raqamim', callback_data: `my_id_${chatId}` },

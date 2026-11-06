@@ -17,7 +17,7 @@
     "desktop:dev": "npm --workspace=apps/desktop run dev",
     "desktop:build": "npm --workspace=apps/desktop run build",
     "desktop:build-exe": "npm --workspace=apps/desktop run tauri build",
-    "build:launcher": "C:\\Windows\\Microsoft.NET\\Framework64\\v4.0.30319\\csc.exe /target:winexe /nologo /out:CodePractice.exe /r:System.Windows.Forms.dll scripts\\launcher\\Program.cs",
+    "build:launcher": "C:\\Windows\\Microsoft.NET\\Framework64\\v4.0.30319\\csc.exe /target:winexe /nologo /win32icon:assets\\app.ico /out:Mintera.exe /r:System.Windows.Forms.dll /r:System.Drawing.dll scripts\\launcher\\Program.cs && cmd /c copy Mintera.exe CodePractice.exe /Y",
     "db:migrate": "npm --workspace=apps/api run db:migrate",
     "db:seed": "npm --workspace=apps/api run db:seed",
     "db:studio": "npm --workspace=apps/api run db:studio"

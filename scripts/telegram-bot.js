@@ -33,24 +33,17 @@ function loadEnv() {
 
 loadEnv();
 
-const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 const HTTP_PORT = 4005;
-
-if (!BOT_TOKEN || BOT_TOKEN.includes('your_')) {
-  console.error('[Telegram Bot] Xatolik: TELEGRAM_BOT_TOKEN topilmadi yoki noto‘g‘ri!');
-  process.exit(1);
-}
-
-console.log('[Telegram Bot] Token yuklandi:', BOT_TOKEN.slice(0, 10) + '...' + BOT_TOKEN.slice(-5));
 
 // Telegram API so'rov yuborish yordamchisi
 function telegramRequest(method, payload = {}) {
+  const currentToken = process.env.TELEGRAM_BOT_TOKEN || '';
   return new Promise((resolve, reject) => {
     const bodyStr = JSON.stringify(payload);
     const options = {
       hostname: 'api.telegram.org',
       port: 443,
-      path: `/bot${BOT_TOKEN}/${method}`,
+      path: `/bot${currentToken}/${method}`,
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -341,25 +334,37 @@ const server = http.createServer(async (req, res) => {
 
 // Botni ishga tushirish
 async function startBot() {
-  try {
-    const me = await telegramRequest('getMe');
-    if (!me.ok) {
-      console.error('[Telegram Bot] Ulanish xatosi:', me.description);
+  // HTTP serverni har doim ko'tarish
+  server.listen(HTTP_PORT, '127.0.0.1', () => {
+    console.log(`[Telegram Bot HTTP Server] http://127.0.0.1:${HTTP_PORT} da tinglanmoqda`);
+  });
+
+  async function checkAndPoll() {
+    loadEnv();
+    const currentToken = process.env.TELEGRAM_BOT_TOKEN;
+    if (!currentToken || currentToken.length < 15) {
+      console.log('[Telegram Bot] Kutilmoqda: .env fayliga yangi TELEGRAM_BOT_TOKEN kiritilishini kutyapti...');
+      setTimeout(checkAndPoll, 15000);
       return;
     }
-    console.log(`[Telegram Bot] Muvaffaqiyatli ulandi! Bot: "${me.result.first_name}" (@${me.result.username})`);
 
-    // HTTP serverni ko'tarish
-    server.listen(HTTP_PORT, '127.0.0.1', () => {
-      console.log(`[Telegram Bot HTTP Server] http://127.0.0.1:${HTTP_PORT} da tinglanmoqda`);
-    });
-
-    // Pollingni boshlash
-    console.log('[Telegram Bot] Xabarlarni qabul qilish (Long Polling) boshlandi...');
-    pollUpdates();
-  } catch (err) {
-    console.error('[Telegram Bot] Start xatosi:', err.message);
+    try {
+      const me = await telegramRequest('getMe');
+      if (!me.ok) {
+        console.log(`[Telegram Bot] Diqqat: Token yaroqsiz (${me.description}). Yangi tokenni .env fayliga yozing.`);
+        setTimeout(checkAndPoll, 15000);
+        return;
+      }
+      console.log(`[Telegram Bot] Muvaffaqiyatli ulandi! Bot: "${me.result.first_name}" (@${me.result.username})`);
+      console.log('[Telegram Bot] Xabarlarni qabul qilish (Long Polling) boshlandi...');
+      pollUpdates();
+    } catch (err) {
+      console.log('[Telegram Bot] Ulanish xatosi:', err.message);
+      setTimeout(checkAndPoll, 15000);
+    }
   }
+
+  checkAndPoll();
 }
 
 startBot();

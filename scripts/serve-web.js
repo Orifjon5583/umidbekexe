@@ -2,7 +2,7 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 
-const PORT = 3000;
+const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
 
 // dist papkasini aniqlash
 let DIST_DIR = path.resolve(__dirname, '..', 'apps', 'web', 'dist');

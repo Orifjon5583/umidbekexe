@@ -421,32 +421,52 @@ export const apiClient = {
     }
   },
 
-  async testTelegramBotConnection(token: string): Promise<{ success: boolean; botName?: string; username?: string; message: string }> {
-    if (!token || !token.trim()) {
-      return { success: false, message: 'Iltimos, Bot Tokenni kiriting!' };
-    }
-    try {
-      const res = await fetch(`https://api.telegram.org/bot${token.trim()}/getMe`);
-      const data = await res.json();
-      if (data.ok) {
-        return {
-          success: true,
-          botName: data.result.first_name,
-          username: `@${data.result.username}`,
-          message: `Ulanish muvaffaqiyatli! Bot nomi: "${data.result.first_name}" (@${data.result.username})`,
-        };
-      } else {
+  async testTelegramBotConnection(token?: string): Promise<{ success: boolean; botName?: string; username?: string; message: string }> {
+    const cleanToken = token?.trim() || '';
+
+    // 1. Agar token bo'lsa, to'g'ridan-to'g'ri Telegram API orqali tekshirish
+    if (cleanToken) {
+      try {
+        const res = await fetch(`https://api.telegram.org/bot${cleanToken}/getMe`);
+        const data = await res.json();
+        if (data.ok) {
+          return {
+            success: true,
+            botName: data.result.first_name,
+            username: `@${data.result.username}`,
+            message: `Ulanish muvaffaqiyatli! Bot: "${data.result.first_name}" (@${data.result.username})`,
+          };
+        } else {
+          return {
+            success: false,
+            message: `Telegram xatoligi: ${data.description || 'Token noto‘g‘ri yoki yaroqsiz'}`,
+          };
+        }
+      } catch (err: any) {
         return {
           success: false,
-          message: `Telegram xatoligi: ${data.description || 'Token noto‘g‘ri yoki yaroqsiz'}`,
+          message: `Internet yoki tarmoq xatosi: ${err.message}`,
         };
       }
-    } catch (err: any) {
-      return {
-        success: false,
-        message: `Internet yoki tarmoq xatosi: ${err.message || 'Telegram serveriga ulanib bo‘lmadi'}`,
-      };
     }
+
+    // 2. Agar token kiritilmagan bo'lsa, serverdagi bot holatini tekshirish
+    try {
+      const serverRes = await fetch('/api/telegram/status');
+      if (serverRes.ok) {
+        const sData = await serverRes.json();
+        if (sData.online && sData.bot) {
+          return {
+            success: true,
+            botName: sData.bot,
+            username: `@${sData.bot}`,
+            message: `Serverdagi Telegram Bot (.env) faol va ulangan! (@${sData.bot})`,
+          };
+        }
+      }
+    } catch {}
+
+    return { success: false, message: 'Iltimos, Bot Tokenni kiriting yoki serverdagi botni tekshiring!' };
   },
 
   async sendTelegramGroupReport(data: {
@@ -462,8 +482,28 @@ export const apiClient = {
     let realSent = false;
     let deliveryNote = '';
 
-    if (token) {
-      // 1. Try local bot daemon on port 4005 first
+    // 1. Birinchi navbatda: Serverdagi bot xizmati (/api/telegram/send-message) orqali yuborish
+    // Server boti .env faylidagi tokenni avtomatik ishlatadi (brauzerga token kiritish talab qilinmaydi!)
+    try {
+      const serverResp = await fetch('/api/telegram/send-message', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          chatId: data.telegramChatId,
+          text: data.messageText,
+        }),
+      });
+      if (serverResp.ok) {
+        const serverJson = await serverResp.json();
+        if (serverJson.ok) {
+          realSent = true;
+          deliveryNote = ` (Server Telegram boti orqali muvaffaqiyatli yetkazildi, Msg ID: ${serverJson.result?.message_id || 'OK'})`;
+        }
+      }
+    } catch {}
+
+    // 2. Agar lokal muhitda ishlab turgan bo'lsa (http://127.0.0.1:4005)
+    if (!realSent) {
       try {
         const localResp = await fetch('http://127.0.0.1:4005/api/send-message', {
           method: 'POST',
@@ -473,37 +513,46 @@ export const apiClient = {
             text: data.messageText,
           }),
         });
-        const localJson = await localResp.json();
-        if (localJson.ok) {
-          realSent = true;
-          deliveryNote = ` (Telegram xabari yetkazildi, Msg ID: ${localJson.result?.message_id || 'OK'})`;
+        if (localResp.ok) {
+          const localJson = await localResp.json();
+          if (localJson.ok) {
+            realSent = true;
+            deliveryNote = ` (Lokal bot orqali muvaffaqiyatli yetkazildi, Msg ID: ${localJson.result?.message_id || 'OK'})`;
+          }
         }
       } catch {}
+    }
 
-      // 2. Fallback direct to Telegram API if local server didn't send
-      if (!realSent) {
-        try {
-          const response = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              chat_id: data.telegramChatId,
-              text: data.messageText,
-            }),
-          });
-          const resJson = await response.json();
-          if (resJson.ok) {
-            realSent = true;
-            deliveryNote = ` (Telegram xabari yetkazildi, Msg ID: ${resJson.result.message_id})`;
-          } else {
-            deliveryNote = ` (Telegram API: ${resJson.description}. Bot guruhga qo‘shilganini tekshiring!)`;
-          }
-        } catch (err: any) {
-          deliveryNote = ` (Tarmoq xatosi: ${err.message})`;
+    // 3. Agar server boti orqali o'tmagan bo'lsa va brauzerda Token saqlangan bo'lsa, to'g'ridan-to'g'ri Telegram API ga yuborish
+    if (!realSent && token) {
+      try {
+        const response = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            chat_id: data.telegramChatId,
+            text: data.messageText,
+          }),
+        });
+        const resJson = await response.json();
+        if (resJson.ok) {
+          realSent = true;
+          deliveryNote = ` (Telegram API orqali yetkazildi, Msg ID: ${resJson.result.message_id})`;
+        } else {
+          deliveryNote = ` (Telegram API xatosi: ${resJson.description}. Bot guruhda borligini tekshiring!)`;
         }
+      } catch (err: any) {
+        deliveryNote = ` (Tarmoq xatosi: ${err.message})`;
       }
-    } else {
-      deliveryNote = ` (Bot Token kiritilmagan. "Tizim sozlamalari"da Bot Tokenni kiriting).`;
+    }
+
+    // 4. Agar barcha usullar o'tmagan bo'lsa
+    if (!realSent && !deliveryNote) {
+      if (!token) {
+        deliveryNote = ` (Server boti aloqaga chiqmadi yoki token kiritilmagan. "Tizim sozlamalari"da Bot Tokenni kiriting yoki Nginx sozlamasini tekshiring).`;
+      } else {
+        deliveryNote = ` (Xabar yetkazilmadi. Telegram bot tokeni va guruh ID sini tekshiring).`;
+      }
     }
 
     console.log(`[Telegram Bot] Sent to ${data.groupName} (${data.telegramChatId}):\n`, data.messageText);

@@ -33,6 +33,33 @@ const ROOT_DIR = path.resolve(__dirname, '..');
 const PUBLIC_DIR = path.resolve(ROOT_DIR, 'apps', 'web', 'public');
 
 const server = http.createServer((req, res) => {
+  // Telegram Bot HTTP API Proxy (/api/telegram/* -> 127.0.0.1:4005/api/*)
+  if (req.url && req.url.startsWith('/api/telegram/')) {
+    const targetPath = req.url.replace('/api/telegram/', '/api/');
+    const proxyReq = http.request(
+      {
+        hostname: '127.0.0.1',
+        port: 4005,
+        path: targetPath,
+        method: req.method,
+        headers: {
+          ...req.headers,
+          host: '127.0.0.1:4005',
+        },
+      },
+      (proxyRes) => {
+        res.writeHead(proxyRes.statusCode, proxyRes.headers);
+        proxyRes.pipe(res);
+      }
+    );
+    proxyReq.on('error', (err) => {
+      res.writeHead(502, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ ok: false, error: 'Telegram bot xizmatiga ulanib bo‘lmadi: ' + err.message }));
+    });
+    req.pipe(proxyReq);
+    return;
+  }
+
   const urlPath = req.url.split('?')[0];
   let filePath = path.join(DIST_DIR, urlPath === '/' ? 'index.html' : urlPath);
 

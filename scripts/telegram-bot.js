@@ -131,28 +131,56 @@ function telegramRequest(method, payload = {}) {
   });
 }
 
-// Xabar yuborish
+// Xabar yuborish (Smart Candidate Retry bilan)
 async function sendMessage(chatId, text, options = {}) {
-  try {
-    const res = await telegramRequest('sendMessage', {
-      chat_id: chatId,
-      text: text,
-      parse_mode: 'HTML',
-      ...options,
-    });
-    // Agar HTML formati yoki inline button (URL) tufayli rad etilgan bo'lsa, oddiy matn sifatida qayta jo'natish
-    if (!res || !res.ok) {
-      console.warn(`[Telegram Bot] Xabarni oddiy matn ko'rinishida yuborishga urinilmoqda (${chatId})...`);
-      const plainText = text.replace(/<[^>]*>/g, '');
-      return await telegramRequest('sendMessage', {
-        chat_id: chatId,
-        text: plainText,
-      });
+  const rawChat = String(chatId || '').trim();
+  const candidates = [rawChat];
+
+  if (/^\d+$/.test(rawChat)) {
+    if (rawChat.startsWith('100')) {
+      candidates.push(`-${rawChat}`);
+    } else {
+      candidates.push(`-100${rawChat}`);
+      candidates.push(`-${rawChat}`);
     }
-    return res;
-  } catch (err) {
-    console.error(`[Telegram Bot] Xabar yuborishda xatolik (${chatId}):`, err.message);
+  } else if (rawChat.startsWith('-') && !rawChat.startsWith('-100')) {
+    candidates.push(`-100${rawChat.slice(1)}`);
   }
+
+  let lastRes = null;
+  for (const cId of candidates) {
+    try {
+      let res = await telegramRequest('sendMessage', {
+        chat_id: cId,
+        text: text,
+        parse_mode: 'HTML',
+        ...options,
+      });
+
+      if (res && res.ok) {
+        return res;
+      }
+
+      // Agar HTML yoki URL xatosi tufayli rad etilgan bo'lsa, oddiy matn sifatida sinash
+      if (
+        res &&
+        !res.ok &&
+        res.description &&
+        (res.description.includes("can't parse entities") || res.description.includes('BUTTON_URL_INVALID'))
+      ) {
+        const plainText = text.replace(/<[^>]*>/g, '');
+        const plainRes = await telegramRequest('sendMessage', {
+          chat_id: cId,
+          text: plainText,
+        });
+        if (plainRes && plainRes.ok) return plainRes;
+      }
+      lastRes = res;
+    } catch (err) {
+      console.error(`[Telegram Bot] Xabar yuborishda xatolik (${cId}):`, err.message);
+    }
+  }
+  return lastRes;
 }
 
 // Inline Callback queryga javob qaytarish

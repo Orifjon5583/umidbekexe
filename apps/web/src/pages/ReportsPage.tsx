@@ -730,7 +730,7 @@ export const ReportsPage: React.FC = () => {
                   value={telegramChatIdInput}
                   onChange={(e) => setTelegramChatIdInput(e.target.value)}
                   placeholder="Masalan: -100192837482 yoki @mintera_guruh_101"
-                  className="w-full h-11 pl-10 pr-3 border border-slate-300 rounded-xl text-sm font-mono focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                  className="w-full h-11 pl-10 pr-3 bg-white text-slate-900 font-semibold font-mono border-2 border-slate-300 rounded-xl text-sm placeholder:text-slate-500 focus:outline-none focus:border-cyan-600 focus:ring-2 focus:ring-cyan-500/20 shadow-xs"
                 />
                 <Send className="w-4 h-4 text-cyan-600 absolute left-3.5 top-3.5" />
               </div>

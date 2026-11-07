@@ -531,6 +531,64 @@ export const apiClient = {
     };
   },
 
+  // Talaba test topshirganda xabarni FAQAT uning o'z guruhiga yuborish (Strict Group Isolation)
+  async sendStudentSubmissionAlert(params: {
+    studentId: string;
+    studentName: string;
+    problemTitle: string;
+    status: 'accepted' | 'wrong_answer' | 'compilation_error' | 'runtime_error';
+    passedTests: number;
+    totalTests: number;
+  }): Promise<{ sent: boolean; groupName?: string }> {
+    const groups = getStored<Group[]>('groups', INITIAL_GROUPS);
+    let targetGroup: Group | undefined;
+
+    // Talabaning aynan qaysi guruhda o'qishini aniqlash (N1, N2, ...)
+    for (const g of groups) {
+      const defaultMembers =
+        g.id === 'g-1'
+          ? ['s-1', 's-2', 's-6']
+          : g.id === 'g-2'
+          ? ['s-3', 's-4', 's-7']
+          : ['s-5', 's-8'];
+      const memberIds = getStored<string[]>(`group_members_${g.id}`, defaultMembers);
+      if (memberIds.includes(params.studentId)) {
+        targetGroup = g;
+        break;
+      }
+    }
+
+    if (!targetGroup || !targetGroup.telegramChatId) {
+      // Guruh topilmadi yoki Telegram Chat ID biriktirilmagan
+      return { sent: false };
+    }
+
+    // FAQAT talabaning o'z guruhiga xabar yuborish (N1 talabasi boshqa guruhga aslo bormaydi)
+    const isAccepted = params.status === 'accepted';
+    const icon = isAccepted ? '🏆' : '⚠️';
+    const statusText = isAccepted ? 'Muvaffaqiyatli topshirildi (100%)' : 'Xatolik aniqlandi';
+
+    const text =
+      `${icon} <b>YANGI TOPSHIRIQ NATIJASI</b>\n\n` +
+      `👤 <b>O‘quvchi:</b> ${params.studentName}\n` +
+      `🏢 <b>Guruh:</b> <code>${targetGroup.name}</code>\n` +
+      `📝 <b>Masala:</b> ${params.problemTitle}\n` +
+      `📊 <b>Testlar natijasi:</b> ${params.passedTests} / ${params.totalTests} ta o‘tdi\n` +
+      `📌 <b>Holat:</b> ${statusText}\n` +
+      `⏱ <b>Vaqt:</b> ${new Date().toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit' })}\n\n` +
+      `<i>🔒 Ushbu xabar FAQAT «${targetGroup.name}» guruhi uchun chiqarildi.</i>`;
+
+    await this.sendTelegramGroupReport({
+      groupId: targetGroup.id,
+      groupName: targetGroup.name,
+      telegramChatId: targetGroup.telegramChatId,
+      assignmentTitle: params.problemTitle,
+      messageText: text,
+    });
+
+    return { sent: true, groupName: targetGroup.name };
+  },
+
   async exportReportCsv(groupId?: string): Promise<string> {
     try {
       return await realClient.exportReportCsv(groupId);

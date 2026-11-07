@@ -546,6 +546,46 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
+  // O'quvchi topshiriq topshirganda FAQAT o'z guruhiga xabar yuborish (Strict Group Isolation)
+  if (url === '/api/student-submission' && req.method === 'POST') {
+    let body = '';
+    req.on('data', (c) => (body += c));
+    req.on('end', async () => {
+      try {
+        const payload = JSON.parse(body);
+        const { studentName, groupName, telegramChatId, problemTitle, status, passedTests, totalTests } = payload;
+
+        if (!telegramChatId) {
+          res.writeHead(400, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ ok: false, error: 'telegramChatId talab qilinadi' }));
+          return;
+        }
+
+        const isAccepted = status === 'accepted';
+        const icon = isAccepted ? '🏆' : '⚠️';
+        const statusText = isAccepted ? 'Muvaffaqiyatli topshirildi (100%)' : 'Xatolik aniqlandi';
+
+        const text =
+          `${icon} <b>YANGI TOPSHIRIQ NATIJASI</b>\n\n` +
+          `👤 <b>O‘quvchi:</b> ${studentName || 'O‘quvchi'}\n` +
+          `🏢 <b>Guruh:</b> <code>${groupName || 'O‘quv Guruhi'}</code>\n` +
+          `📝 <b>Masala:</b> ${problemTitle || 'Topshiriq'}\n` +
+          `📊 <b>Testlar:</b> ${passedTests || 0} / ${totalTests || 0} ta o‘tdi\n` +
+          `📌 <b>Holat:</b> ${statusText}\n` +
+          `⏱ <b>Vaqt:</b> ${new Date().toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit' })}\n\n` +
+          `<i>🔒 Ushbu xabar FAQAT «${groupName || 'ushbu guruh'}» uchun yuborildi (boshqa guruhlarga yuborilmaydi).</i>`;
+
+        const telegramRes = await sendMessage(telegramChatId, text);
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify(telegramRes || { ok: true }));
+      } catch (err) {
+        res.writeHead(500, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ ok: false, error: err.message }));
+      }
+    });
+    return;
+  }
+
   res.writeHead(404, { 'Content-Type': 'text/plain' });
   res.end('Not Found');
 });

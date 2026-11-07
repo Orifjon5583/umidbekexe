@@ -14,6 +14,7 @@ import {
   Check,
   X,
   AlertCircle,
+  ShieldCheck,
 } from 'lucide-react';
 
 export const ReportsPage: React.FC = () => {
@@ -190,7 +191,8 @@ export const ReportsPage: React.FC = () => {
     }
 
     text += `\n📈 Guruh o‘zlashtirish ko‘rsatkichi: ${averagePercentage}%\n`;
-    text += `🚀 Hurmatli o‘quvchilar, topshiriq muddatiga e’tibor bering!`;
+    text += `🚀 Hurmatli o‘quvchilar, topshiriq muddatiga e’tibor bering!\n`;
+    text += `🔒 Ushbu hisobot faqat «${groupName}» guruhiga tegishli.`;
 
     return text;
   };
@@ -647,6 +649,13 @@ export const ReportsPage: React.FC = () => {
               <p className="text-[11px] text-slate-400 mt-1">
                 Har bir guruhning o‘z Telegram guruhi bo‘ladi. Bot xabarni aynan shu ID bo‘yicha yuboradi.
               </p>
+              <div className="mt-2.5 p-2.5 bg-amber-50/80 border border-amber-200/80 rounded-xl flex items-start gap-2 text-[11px] text-amber-900">
+                <ShieldCheck className="w-4 h-4 text-amber-700 shrink-0 mt-0.5" />
+                <div>
+                  <strong className="block text-amber-950 font-bold">Qat’iy guruh izolyatsiyasi:</strong>
+                  Ushbu hisobot FAQAT tanlangan <strong>«{groupProgress?.groupName}»</strong> guruhiga yetkaziladi. Boshqa guruhlar (masalan: N2, N3) a’zolariga bu o‘quvchilar ma’lumoti yuborilmaydi!
+                </div>
+              </div>
             </div>
 
             {/* Live Message Preview (Styled like Telegram Message Bubble) */}

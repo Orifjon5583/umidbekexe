@@ -225,6 +225,38 @@ export const desktopApiClient = {
         localStorage.setItem(historyKey, JSON.stringify([submission, ...existing]));
       } catch {}
 
+      // O‘quvchining aynan o‘z Telegram guruhiga bildirishnoma yuborish (Strict Group Isolation)
+      try {
+        let studentUser = { fullName: 'Jasur Aliyev', groupName: 'Guruh-101 (Python Asoslari)' };
+        try {
+          const uStr = localStorage.getItem('cp_student_user');
+          if (uStr) studentUser = JSON.parse(uStr);
+        } catch {}
+
+        let targetChatId = '';
+        try {
+          const storedGroups = JSON.parse(localStorage.getItem('cp_web_groups') || localStorage.getItem('cp_groups') || '[]');
+          const found = storedGroups.find((g: any) => g.name === studentUser.groupName || g.id === 'g-1');
+          if (found?.telegramChatId) targetChatId = found.telegramChatId;
+        } catch {}
+
+        if (targetChatId) {
+          fetch('http://127.0.0.1:4005/api/student-submission', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              studentName: studentUser.fullName,
+              groupName: studentUser.groupName,
+              telegramChatId: targetChatId,
+              problemTitle: `Masala #${payload.problemId}`,
+              status: submission.status,
+              passedTests: submission.passedTests,
+              totalTests: submission.totalTests,
+            }),
+          }).catch(() => {});
+        }
+      } catch {}
+
       return submission;
     }
   },

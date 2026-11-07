@@ -430,11 +430,25 @@ export const apiClient = {
         const res = await fetch(`https://api.telegram.org/bot${cleanToken}/getMe`);
         const data = await res.json();
         if (data.ok) {
+          const username = `@${data.result.username}`;
+          // Muvaffaqiyatli tekshiruvdan so'ng darhol xotiraga saqlash
+          try {
+            localStorage.setItem('mintera_telegram_bot_token', cleanToken);
+            localStorage.setItem('mintera_telegram_bot_username', username);
+          } catch {}
+
+          // Server boti bilan ham fonda sinxronizatsiya qilish
+          fetch('/api/telegram/set-token', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ token: cleanToken, username }),
+          }).catch(() => {});
+
           return {
             success: true,
             botName: data.result.first_name,
-            username: `@${data.result.username}`,
-            message: `Ulanish muvaffaqiyatli! Bot: "${data.result.first_name}" (@${data.result.username})`,
+            username: username,
+            message: `Ulanish muvaffaqiyatli! Bot: "${data.result.first_name}" (${username})`,
           };
         } else {
           return {
@@ -477,32 +491,63 @@ export const apiClient = {
     messageText: string;
   }): Promise<{ success: boolean; message: string; isRealTelegramSent?: boolean }> {
     const settings = getStored<SystemSettingsData>('system_settings', INITIAL_SYSTEM_SETTINGS);
-    const token = settings.telegramBotToken?.trim() || '';
+    const token = (
+      settings.telegramBotToken ||
+      localStorage.getItem('mintera_telegram_bot_token') ||
+      localStorage.getItem('cp_telegram_bot_token') ||
+      ''
+    ).trim();
 
     let realSent = false;
     let deliveryNote = '';
 
-    // 1. Birinchi navbatda: Serverdagi bot xizmati (/api/telegram/send-message) orqali yuborish
-    // Server boti .env faylidagi tokenni avtomatik ishlatadi (brauzerga token kiritish talab qilinmaydi!)
-    try {
-      const serverResp = await fetch('/api/telegram/send-message', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          chatId: data.telegramChatId,
-          text: data.messageText,
-        }),
-      });
-      if (serverResp.ok) {
-        const serverJson = await serverResp.json();
-        if (serverJson.ok) {
+    // 1. Agar brauzerda Token mavjud bo'lsa, to'g'ridan-to'g'ri rasmiy Telegram API orqali yuborish
+    // Bu usul hech qanday proxy yoki Nginx talab qilmaydi, 100% barqaror ishlaydi
+    if (token) {
+      try {
+        const response = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            chat_id: data.telegramChatId,
+            text: data.messageText,
+            parse_mode: 'HTML',
+          }),
+        });
+        const resJson = await response.json();
+        if (resJson.ok) {
           realSent = true;
-          deliveryNote = ` (Server Telegram boti orqali muvaffaqiyatli yetkazildi, Msg ID: ${serverJson.result?.message_id || 'OK'})`;
+          deliveryNote = ` (Telegram API orqali yetkazildi, Msg ID: ${resJson.result?.message_id || 'OK'})`;
+        } else {
+          deliveryNote = ` (Telegram API xatosi: ${resJson.description || 'Xabar yuborilmadi'}. Bot guruhda borligini va admin ekanini tekshiring!)`;
         }
+      } catch (err: any) {
+        deliveryNote = ` (Telegram ulanish xatosi: ${err.message})`;
       }
-    } catch {}
+    }
 
-    // 2. Agar lokal muhitda ishlab turgan bo'lsa (http://127.0.0.1:4005)
+    // 2. Agar to'g'ridan-to'g'ri o'tmagan bo'lsa, Serverdagi bot xizmati (/api/telegram/send-message) orqali yuborish
+    if (!realSent) {
+      try {
+        const serverResp = await fetch('/api/telegram/send-message', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            chatId: data.telegramChatId,
+            text: data.messageText,
+          }),
+        });
+        if (serverResp.ok) {
+          const serverJson = await serverResp.json();
+          if (serverJson.ok) {
+            realSent = true;
+            deliveryNote = ` (Server Telegram boti orqali muvaffaqiyatli yetkazildi, Msg ID: ${serverJson.result?.message_id || 'OK'})`;
+          }
+        }
+      } catch {}
+    }
+
+    // 3. Agar lokal muhitda ishlab turgan bo'lsa (http://127.0.0.1:4005)
     if (!realSent) {
       try {
         const localResp = await fetch('http://127.0.0.1:4005/api/send-message', {
@@ -523,33 +568,10 @@ export const apiClient = {
       } catch {}
     }
 
-    // 3. Agar server boti orqali o'tmagan bo'lsa va brauzerda Token saqlangan bo'lsa, to'g'ridan-to'g'ri Telegram API ga yuborish
-    if (!realSent && token) {
-      try {
-        const response = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            chat_id: data.telegramChatId,
-            text: data.messageText,
-          }),
-        });
-        const resJson = await response.json();
-        if (resJson.ok) {
-          realSent = true;
-          deliveryNote = ` (Telegram API orqali yetkazildi, Msg ID: ${resJson.result.message_id})`;
-        } else {
-          deliveryNote = ` (Telegram API xatosi: ${resJson.description}. Bot guruhda borligini tekshiring!)`;
-        }
-      } catch (err: any) {
-        deliveryNote = ` (Tarmoq xatosi: ${err.message})`;
-      }
-    }
-
     // 4. Agar barcha usullar o'tmagan bo'lsa
     if (!realSent && !deliveryNote) {
       if (!token) {
-        deliveryNote = ` (Server boti aloqaga chiqmadi yoki token kiritilmagan. "Tizim sozlamalari"da Bot Tokenni kiriting yoki Nginx sozlamasini tekshiring).`;
+        deliveryNote = ` (Telegram Bot Token kiritilmagan yoki saqlanmagan. "Tizim sozlamalari" sahifasida Bot Tokenni kiriting va "Saqlash" tugmasini bosing).`;
       } else {
         deliveryNote = ` (Xabar yetkazilmadi. Telegram bot tokeni va guruh ID sini tekshiring).`;
       }
@@ -767,13 +789,49 @@ export const apiClient = {
   },
 
   async getSystemSettings(): Promise<SystemSettingsData> {
-    return getStored<SystemSettingsData>('system_settings', INITIAL_SYSTEM_SETTINGS);
+    const settings = getStored<SystemSettingsData>('system_settings', INITIAL_SYSTEM_SETTINGS);
+    // Agar bot tokeni alohida xotira kalitida saqlangan bo'lsa, uni ham tekshirish
+    if (!settings.telegramBotToken) {
+      const fallback =
+        localStorage.getItem('mintera_telegram_bot_token') ||
+        localStorage.getItem('cp_telegram_bot_token');
+      if (fallback) settings.telegramBotToken = fallback;
+    }
+    if (!settings.telegramBotUsername) {
+      const fallbackUser = localStorage.getItem('mintera_telegram_bot_username');
+      if (fallbackUser) settings.telegramBotUsername = fallbackUser;
+    }
+    return settings;
   },
 
   async updateSystemSettings(dto: Partial<SystemSettingsData>): Promise<SystemSettingsData> {
     const current = getStored<SystemSettingsData>('system_settings', INITIAL_SYSTEM_SETTINGS);
     const updated = { ...current, ...dto };
     setStored('system_settings', updated);
+
+    // Cross-platform va zaxira xotira uchun saqlash
+    try {
+      localStorage.setItem('cp_system_settings', JSON.stringify(updated));
+      if (updated.telegramBotToken) {
+        localStorage.setItem('mintera_telegram_bot_token', updated.telegramBotToken.trim());
+      }
+      if (updated.telegramBotUsername) {
+        localStorage.setItem('mintera_telegram_bot_username', updated.telegramBotUsername.trim());
+      }
+    } catch {}
+
+    // Serverdagi bot servisi bilan fonda sinxronlash (.env fayliga yozish)
+    if (updated.telegramBotToken) {
+      fetch('/api/telegram/set-token', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          token: updated.telegramBotToken.trim(),
+          username: updated.telegramBotUsername?.trim() || '',
+        }),
+      }).catch(() => {});
+    }
+
     return updated;
   },
 

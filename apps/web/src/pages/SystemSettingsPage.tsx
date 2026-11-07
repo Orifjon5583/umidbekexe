@@ -63,11 +63,41 @@ export const SystemSettingsPage: React.FC = () => {
     setSettings({ ...settings, aiPlusGroups: updated });
   };
 
-  const handleSave = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSave = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
     await apiClient.updateSystemSettings(settings);
     setSavedMsg(true);
     setTimeout(() => setSavedMsg(false), 3500);
+  };
+
+  const handleSaveBot = async () => {
+    const cleanToken = settings.telegramBotToken?.trim();
+    if (!cleanToken) {
+      setBotTestResult({ success: false, message: 'Iltimos, avval Telegram Bot Tokenni kiriting!' });
+      return;
+    }
+    setTestingBot(true);
+    setBotTestResult(null);
+    try {
+      // 1. Sozlamalarni barcha xotiralarda saqlash
+      await apiClient.updateSystemSettings({
+        ...settings,
+        telegramBotToken: cleanToken,
+        telegramBotUsername: settings.telegramBotUsername?.trim() || '',
+      });
+      // 2. Telegram API bilan tekshirish
+      const res = await apiClient.testTelegramBotConnection(cleanToken);
+      setBotTestResult(res);
+      if (res.username) {
+        setSettings((prev) => ({ ...prev, telegramBotUsername: res.username }));
+      }
+      setSavedMsg(true);
+      setTimeout(() => setSavedMsg(false), 4000);
+    } catch (err: any) {
+      setBotTestResult({ success: false, message: err.message || 'Saqlashda xatolik yuz berdi' });
+    } finally {
+      setTestingBot(false);
+    }
   };
 
   const handleTestBot = async () => {
@@ -404,7 +434,7 @@ export const SystemSettingsPage: React.FC = () => {
         </div>
 
         {/* 3. Telegram Bot Integratsiyasi */}
-        <div className="bg-white rounded-2xl border border-blue-200 p-6 shadow-xs space-y-5 bg-gradient-to-b from-blue-50/20 to-white">
+        <div className="bg-white rounded-2xl border-2 border-blue-200 p-6 shadow-sm space-y-5 bg-gradient-to-b from-blue-50/20 to-white">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-blue-100">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center shadow-sm shadow-blue-500/20">
@@ -423,15 +453,20 @@ export const SystemSettingsPage: React.FC = () => {
               </div>
             </div>
 
-            <button
-              type="button"
-              onClick={handleTestBot}
-              disabled={testingBot}
-              className="px-4 py-2 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-xl text-xs font-bold border border-blue-200 flex items-center gap-1.5 transition cursor-pointer self-start sm:self-auto disabled:opacity-50"
-            >
-              <RefreshCw className={`w-3.5 h-3.5 ${testingBot ? 'animate-spin' : ''}`} />
-              <span>{testingBot ? 'Tekshirilmoqda...' : 'Bot ulanishini tekshirish (Ping)'}</span>
-            </button>
+            {/* Holat Badge */}
+            <div className="flex items-center gap-2">
+              {settings.telegramBotToken?.trim() ? (
+                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-xl text-xs font-bold shadow-2xs">
+                  <Check className="w-3.5 h-3.5 text-emerald-600" />
+                  <span>Faol: {settings.telegramBotUsername || 'Token saqlangan'}</span>
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 text-amber-700 border border-amber-200 rounded-xl text-xs font-semibold">
+                  <AlertCircle className="w-3.5 h-3.5 text-amber-600" />
+                  <span>Token saqlanmagan</span>
+                </span>
+              )}
+            </div>
           </div>
 
           {/* Test Result Toast/Banner */}
@@ -455,12 +490,12 @@ export const SystemSettingsPage: React.FC = () => {
           {/* Bot Key Inputs */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1 flex items-center justify-between">
+              <label className="block text-xs font-bold text-slate-900 mb-1 flex items-center justify-between">
                 <span className="flex items-center gap-1.5">
                   <Key className="w-3.5 h-3.5 text-blue-600" />
                   Telegram Bot API Token (Key):
                 </span>
-                <span className="text-[11px] text-slate-400 font-normal">@BotFather bergan kalit</span>
+                <span className="text-[11px] text-slate-500 font-medium">@BotFather bergan kalit</span>
               </label>
               <div className="relative">
                 <input
@@ -468,40 +503,71 @@ export const SystemSettingsPage: React.FC = () => {
                   value={settings.telegramBotToken || ''}
                   onChange={(e) => setSettings({ ...settings, telegramBotToken: e.target.value })}
                   placeholder="Masalan: 7123456789:AAHk_abcdef123456789..."
-                  className="w-full h-10 px-3 pr-10 border border-slate-300 rounded-xl text-xs font-mono bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  style={{ color: '#0F172A', backgroundColor: '#FFFFFF' }}
+                  className="w-full h-11 px-3.5 pr-10 border-2 border-slate-300 rounded-xl text-xs font-mono bg-white text-slate-900 font-bold focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-500/20 shadow-2xs"
                 />
                 <button
                   type="button"
                   onClick={() => setShowBotToken(!showBotToken)}
-                  className="absolute right-3 top-2.5 text-slate-400 hover:text-slate-600 cursor-pointer"
-                  title={showBotToken ? "Yashirish" : "Ko‘rsatish"}
+                  className="absolute right-3 top-3 text-slate-400 hover:text-slate-600 cursor-pointer"
+                  title={showBotToken ? 'Yashirish' : 'Ko‘rsatish'}
                 >
                   {showBotToken ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
-              <p className="text-[11px] text-slate-500 mt-1">
-                * Ushbu token orqali bot guruhlarga xabarlar, test natijalari va jadvallarni yuboradi.
+              <p className="text-[11px] text-slate-500 mt-1.5">
+                * Ushbu token orqali bot guruhlarga xabarlar, test natijalari va hisobotlarni to‘g‘ridan-to‘g‘ri yuboradi.
               </p>
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1 flex items-center justify-between">
+              <label className="block text-xs font-bold text-slate-900 mb-1 flex items-center justify-between">
                 <span className="flex items-center gap-1.5">
                   <Bot className="w-3.5 h-3.5 text-blue-600" />
                   Bot Username:
                 </span>
-                <span className="text-[11px] text-slate-400 font-normal">Havola va o‘quvchilar uchun</span>
+                <span className="text-[11px] text-slate-500 font-medium">Havola va o‘quvchilar uchun</span>
               </label>
               <input
                 type="text"
                 value={settings.telegramBotUsername || ''}
                 onChange={(e) => setSettings({ ...settings, telegramBotUsername: e.target.value })}
-                placeholder="@mintera_robot yoki @sizning_botingiz"
-                className="w-full h-10 px-3 border border-slate-300 rounded-xl text-xs font-mono bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="@MinteraAi_bot yoki @sizning_botingiz"
+                style={{ color: '#0F172A', backgroundColor: '#FFFFFF' }}
+                className="w-full h-11 px-3.5 border-2 border-slate-300 rounded-xl text-xs font-mono bg-white text-slate-900 font-bold focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-500/20 shadow-2xs"
               />
-              <p className="text-[11px] text-slate-500 mt-1">
-                * Sayt bosh sahifasida va o‘quvchilar panelida ko‘rinuvchi rasmiy bot manzili.
+              <p className="text-[11px] text-slate-500 mt-1.5">
+                * O‘quvchilar va guruh a’zolari botni oson topishi va guruhga qo‘shishi uchun rasmiy nom.
               </p>
+            </div>
+          </div>
+
+          {/* Dedicated Action Buttons for Telegram Card */}
+          <div className="p-3.5 bg-blue-50/70 border border-blue-200 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="text-xs text-blue-900">
+              <span className="font-bold block text-blue-950 mb-0.5">Tokenni saqlash va tekshirish:</span>
+              Bot kalitini kiritgach, uni saqlab, bir vaqtning o‘zida Telegram bilan aloqani faollashtiring.
+            </div>
+            <div className="flex items-center gap-2 shrink-0">
+              <button
+                type="button"
+                onClick={handleTestBot}
+                disabled={testingBot}
+                className="px-3.5 py-2 bg-white hover:bg-slate-50 text-slate-700 rounded-xl text-xs font-bold border border-slate-300 flex items-center gap-1.5 transition cursor-pointer disabled:opacity-50 shadow-2xs"
+              >
+                <RefreshCw className={`w-3.5 h-3.5 ${testingBot ? 'animate-spin' : ''}`} />
+                <span>{testingBot ? 'Tekshirilmoqda...' : 'Faqat tekshirish'}</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={handleSaveBot}
+                disabled={testingBot}
+                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-md shadow-blue-600/20 transition cursor-pointer disabled:opacity-50"
+              >
+                <Save className="w-3.5 h-3.5" />
+                <span>Botni Saqlash va Faollashtirish</span>
+              </button>
             </div>
           </div>
 
@@ -519,15 +585,15 @@ export const SystemSettingsPage: React.FC = () => {
                 Botingizga ixtiyoriy nom va oxiri <code className="bg-white px-1.5 py-0.5 rounded border border-slate-200 font-mono text-[11px]">bot</code> bilan tugovchi username tanlang (masalan: <em>mintera_edu_bot</em>).
               </li>
               <li>
-                BotFather bergan uzun <strong className="text-slate-800">HTTP API Token</strong>ni nusxalab, yuqoridagi <strong>«Telegram Bot API Token (Key)»</strong> maydoniga joylang.
+                BotFather bergan uzun <strong className="text-slate-800">HTTP API Token</strong>ni nusxalab, yuqoridagi <strong>«Telegram Bot API Token (Key)»</strong> maydoniga joylang va <strong>«Botni Saqlash va Faollashtirish»</strong> tugmasini bosing.
               </li>
               <li>
                 Botingizni o‘quvchilar Telegram guruhiga qo‘shing va unga <strong className="text-slate-900">Administrator (Admin)</strong> huquqini bering, aks holda bot guruhga xabar yubora olmaydi.
               </li>
             </ol>
             <div className="pt-2 border-t border-slate-200 flex flex-wrap items-center gap-2 text-[11px] text-slate-500">
-              <span className="font-medium">Muqobil usul:</span>
-              <span>Serverda <code className="bg-white px-1 py-0.5 rounded border border-slate-200 font-mono">.env</code> fayliga <code className="text-purple-700 font-mono font-bold">TELEGRAM_BOT_TOKEN=kalitingiz</code> qilib yozib qo‘yishingiz ham mumkin.</span>
+              <span className="font-medium">Server integratsiyasi:</span>
+              <span>Saqlash tugmasini bosganingizda token brauzerda ham, serverdagi <code className="bg-white px-1 py-0.5 rounded border border-slate-200 font-mono">.env</code> faylida ham avtomatik saqlanadi.</span>
             </div>
           </div>
         </div>
@@ -624,6 +690,27 @@ export const SystemSettingsPage: React.FC = () => {
               <p className="font-bold text-slate-900 mt-0.5">{settings.backupStatus}</p>
             </div>
           </div>
+        </div>
+
+        {/* Global Bottom Save Bar */}
+        <div className="p-4 bg-white border-2 border-purple-200 rounded-2xl shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <h4 className="font-bold text-slate-900 text-sm flex items-center gap-2">
+              <Save className="w-4 h-4 text-purple-600" />
+              <span>Barcha tizim sozlamalarini saqlash</span>
+            </h4>
+            <p className="text-xs text-slate-500 mt-0.5">
+              Dasturlash tillari, Telegram Bot Tokeni, AI kvotalari va barcha yangilanishlarni tizimda tasdiqlash
+            </p>
+          </div>
+          <button
+            type="submit"
+            onClick={handleSave}
+            className="h-11 px-6 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-sm font-bold flex items-center justify-center gap-2 shadow-md shadow-purple-600/20 transition cursor-pointer shrink-0"
+          >
+            <Save className="w-4 h-4 flex-shrink-0" />
+            <span>Sozlamalarni saqlash</span>
+          </button>
         </div>
       </form>
     </div>

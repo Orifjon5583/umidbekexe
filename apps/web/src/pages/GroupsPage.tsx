@@ -50,6 +50,7 @@ export const GroupsPage: React.FC = () => {
   const [newStudentUsername, setNewStudentUsername] = useState('');
   const [newStudentPassword, setNewStudentPassword] = useState('Talaba123!');
   const [showNewPassword, setShowNewPassword] = useState(false);
+  const [botUsername, setBotUsername] = useState('MinteraAi_bot');
 
   // Edit Student Password Modal
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
@@ -83,6 +84,11 @@ export const GroupsPage: React.FC = () => {
   useEffect(() => {
     fetchGroups();
     fetchStudents();
+    apiClient.getSystemSettings().then((s) => {
+      if (s.telegramBotUsername) {
+        setBotUsername(s.telegramBotUsername.replace('@', '').trim());
+      }
+    });
   }, []);
 
   const showToast = (msg: string) => {
@@ -591,7 +597,8 @@ export const GroupsPage: React.FC = () => {
                   value={groupNameInput}
                   onChange={(e) => setGroupNameInput(e.target.value)}
                   placeholder="Masalan: Guruh-104 (Java Dasturlash)"
-                  className="w-full h-11 px-3.5 bg-white text-slate-900 font-semibold border-2 border-slate-300 rounded-xl text-sm placeholder:text-slate-500 focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-500/20 shadow-xs"
+                  style={{ color: '#0F172A', backgroundColor: '#FFFFFF', WebkitTextFillColor: '#0F172A' }}
+                  className="w-full h-11 px-3.5 bg-white text-slate-900 font-bold border-2 border-slate-300 rounded-xl text-sm placeholder:text-slate-400 focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-500/20 shadow-xs"
                 />
                 <p className="text-xs text-slate-600 font-medium mt-1.5">
                   Tushunarli va guruh yo‘nalishini aks ettiruvchi nom kiriting.
@@ -609,7 +616,8 @@ export const GroupsPage: React.FC = () => {
                     value={groupTelegramInput}
                     onChange={(e) => setGroupTelegramInput(e.target.value)}
                     placeholder="Masalan: -100192837482 yoki @mintera_guruh_101"
-                    className="w-full h-11 pl-10 pr-3 bg-white text-slate-900 font-semibold font-mono border-2 border-slate-300 rounded-xl text-sm placeholder:text-slate-500 focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-500/20 shadow-xs"
+                    style={{ color: '#0F172A', backgroundColor: '#FFFFFF', WebkitTextFillColor: '#0F172A' }}
+                    className="w-full h-11 pl-10 pr-3 bg-white text-slate-900 font-bold font-mono border-2 border-slate-300 rounded-xl text-sm placeholder:text-slate-400 focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-500/20 shadow-xs"
                   />
                   <Send className="w-4 h-4 text-cyan-600 absolute left-3.5 top-3.5" />
                 </div>
@@ -637,7 +645,7 @@ export const GroupsPage: React.FC = () => {
                       </button>
                     )}
                     <a
-                      href="https://t.me/MinteraAi_bot?startgroup=admin"
+                      href={`https://t.me/${botUsername}?startgroup=admin`}
                       target="_blank"
                       rel="noreferrer"
                       className="shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-lg shadow-xs transition"

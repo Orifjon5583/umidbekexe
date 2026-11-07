@@ -586,6 +586,111 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
+  // Web paneldan kelgan yangi Telegram Bot Tokenni qabul qilish va .env faylga saqlash
+  if (url === '/api/set-token' && req.method === 'POST') {
+    let body = '';
+    req.on('data', (c) => (body += c));
+    req.on('end', async () => {
+      try {
+        const payload = JSON.parse(body);
+        const { token } = payload;
+        const cleanToken = (token || '').trim();
+
+        if (!cleanToken) {
+          res.writeHead(400, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ ok: false, error: 'Telegram Bot Token talab qilinadi!' }));
+          return;
+        }
+
+        // 1. Yangi tokenni Telegram API (getMe) orqali tekshirish
+        const verifyRes = await new Promise((resolve) => {
+          const reqTlg = https.request(
+            {
+              hostname: 'api.telegram.org',
+              port: 443,
+              path: `/bot${cleanToken}/getMe`,
+              method: 'GET',
+              timeout: 10000,
+            },
+            (r) => {
+              let d = '';
+              r.on('data', (chk) => (d += chk));
+              r.on('end', () => {
+                try {
+                  resolve(JSON.parse(d));
+                } catch {
+                  resolve({ ok: false, description: 'Telegram javobini tahlil qilib bo‘lmadi' });
+                }
+              });
+            }
+          );
+          reqTlg.on('error', (err) => resolve({ ok: false, description: err.message }));
+          reqTlg.end();
+        });
+
+        if (!verifyRes || !verifyRes.ok) {
+          res.writeHead(400, { 'Content-Type': 'application/json' });
+          res.end(
+            JSON.stringify({
+              ok: false,
+              error: `Telegram xatosi: ${verifyRes?.description || 'Token noto‘g‘ri yoki yaroqsiz!'}`,
+            })
+          );
+          return;
+        }
+
+        const botInfo = verifyRes.result;
+        currentBotUsername = (botInfo.username || '').replace('@', '').trim();
+        currentBotId = botInfo.id;
+        process.env.TELEGRAM_BOT_TOKEN = cleanToken;
+        process.env.TELEGRAM_BOT_USERNAME = currentBotUsername;
+
+        // 2. .env fayliga saqlash
+        try {
+          const envPath = path.resolve(__dirname, '..', '.env');
+          let envContent = fs.existsSync(envPath) ? fs.readFileSync(envPath, 'utf-8') : '';
+          if (envContent.includes('TELEGRAM_BOT_TOKEN=')) {
+            envContent = envContent.replace(/TELEGRAM_BOT_TOKEN=.*/g, `TELEGRAM_BOT_TOKEN=${cleanToken}`);
+          } else {
+            envContent += `\nTELEGRAM_BOT_TOKEN=${cleanToken}\n`;
+          }
+
+          if (currentBotUsername) {
+            if (envContent.includes('TELEGRAM_BOT_USERNAME=')) {
+              envContent = envContent.replace(/TELEGRAM_BOT_USERNAME=.*/g, `TELEGRAM_BOT_USERNAME=${currentBotUsername}`);
+            } else {
+              envContent += `\nTELEGRAM_BOT_USERNAME=${currentBotUsername}\n`;
+            }
+          }
+
+          fs.writeFileSync(envPath, envContent.trim() + '\n', 'utf-8');
+          console.log(`[Telegram Bot] 🔑 Yangi token .env ga saqlandi! Bot: "${botInfo.first_name}" (@${currentBotUsername})`);
+        } catch (envErr) {
+          console.warn('[Telegram Bot] .env yozishda eslatma:', envErr.message);
+        }
+
+        // 3. Pollingni qayta boshlash
+        isPolling = false;
+        setImmediate(pollUpdates);
+
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(
+          JSON.stringify({
+            ok: true,
+            bot: currentBotUsername,
+            botName: botInfo.first_name,
+            botId: currentBotId,
+            message: `Bot muvaffaqiyatli saqlandi va ulandi: @${currentBotUsername}`,
+          })
+        );
+      } catch (err) {
+        res.writeHead(500, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ ok: false, error: err.message }));
+      }
+    });
+    return;
+  }
+
   res.writeHead(404, { 'Content-Type': 'text/plain' });
   res.end('Not Found');
 });

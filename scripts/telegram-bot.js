@@ -90,6 +90,10 @@ function registerGroup(chatId, title, type = 'group') {
 // Telegram API so'rov yuborish yordamchisi
 function telegramRequest(method, payload = {}) {
   const currentToken = (process.env.TELEGRAM_BOT_TOKEN || '').trim();
+  if (!currentToken || currentToken.length < 20 || currentToken.includes('1234567890:ABCdef')) {
+    return Promise.resolve({ ok: false, error_code: 401, description: 'Token mavjud emas yoki yaroqsiz' });
+  }
+
   return new Promise((resolve, reject) => {
     const bodyStr = JSON.stringify(payload);
     const options = {
@@ -473,9 +477,17 @@ async function handleUpdate(update) {
 // Long-polling tsikli
 let lastUpdateId = 0;
 let isPolling = false;
+let pollingTimer = null;
 
 async function pollUpdates() {
   if (isPolling) return;
+  const currentToken = (process.env.TELEGRAM_BOT_TOKEN || '').trim();
+  if (!currentToken || currentToken.length < 20 || currentToken.includes('1234567890:ABCdef')) {
+    // Token bo'lmasa yoki yaroqsiz bo'lsa kutish va CPU ni 0.1% da saqlash
+    isPolling = false;
+    return;
+  }
+
   isPolling = true;
 
   try {
@@ -494,22 +506,29 @@ async function pollUpdates() {
           console.error('[Telegram Bot] Update qayta ishlashda xatolik:', updateErr.message);
         }
       }
+      isPolling = false;
+      // Keyingi so'rov 1 soniya tanaffus bilan yuboriladi (CPU 0.1% barqaror)
+      if (pollingTimer) clearTimeout(pollingTimer);
+      pollingTimer = setTimeout(pollUpdates, 1000);
+      return;
     } else if (res && !res.ok) {
-      console.error(`[Telegram Bot] Polling xatosi: ${res.description || JSON.stringify(res)}`);
-      if (res.error_code === 401 || res.error_code === 404) {
-        isPolling = false;
-        setTimeout(checkAndPoll, 10000);
-        return;
-      }
+      console.warn(`[Telegram Bot] Polling holati: ${res.description || JSON.stringify(res)}`);
+      isPolling = false;
+      // Xato bo'lsa (401 yoki 404), 10 soniya kutish (hech qanday CPU spin loop bo'lmaydi)
+      if (pollingTimer) clearTimeout(pollingTimer);
+      pollingTimer = setTimeout(pollUpdates, 10000);
+      return;
     }
   } catch (err) {
-    // Tarmoq xatosi bo'lsa qisqa tanaffus
-    await new Promise((r) => setTimeout(r, 3000));
-  } finally {
     isPolling = false;
-    // Darhol keyingi so'rovni yuborish
-    setImmediate(pollUpdates);
+    if (pollingTimer) clearTimeout(pollingTimer);
+    pollingTimer = setTimeout(pollUpdates, 5000);
+    return;
   }
+
+  isPolling = false;
+  if (pollingTimer) clearTimeout(pollingTimer);
+  pollingTimer = setTimeout(pollUpdates, 1500);
 }
 
 // Mahalliy HTTP Server (Web frontenddan to'g'ridan-to'g'ri xabar jo'natish va guruhlar ro'yxatini olish uchun)
@@ -699,7 +718,8 @@ const server = http.createServer(async (req, res) => {
 
         // 3. Pollingni qayta boshlash
         isPolling = false;
-        setImmediate(pollUpdates);
+        if (pollingTimer) clearTimeout(pollingTimer);
+        pollingTimer = setTimeout(pollUpdates, 200);
 
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(

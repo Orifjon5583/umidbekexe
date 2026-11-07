@@ -324,15 +324,27 @@ export const GroupsPage: React.FC = () => {
           </p>
         </div>
 
-        {isAdmin && (
-          <button
-            onClick={handleOpenCreateGroup}
-            className="h-11 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-semibold flex items-center gap-2 shadow-sm transition w-full sm:w-auto justify-center"
+        <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+          <a
+            href="https://t.me/MinteraAi_bot?startgroup=admin"
+            target="_blank"
+            rel="noreferrer"
+            className="h-11 px-4 bg-cyan-600 hover:bg-cyan-700 text-white rounded-xl text-sm font-semibold flex items-center gap-2 shadow-xs transition w-full sm:w-auto justify-center"
+            title="Botni Telegram guruhiga 1 bosish bilan qo‘shish"
           >
-            <Plus className="w-4 h-4 flex-shrink-0" />
-            Yangi guruh ochish
-          </button>
-        )}
+            <Send className="w-4 h-4 flex-shrink-0" />
+            Botni Guruhga Qo‘shish
+          </a>
+          {isAdmin && (
+            <button
+              onClick={handleOpenCreateGroup}
+              className="h-11 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-semibold flex items-center gap-2 shadow-sm transition w-full sm:w-auto justify-center"
+            >
+              <Plus className="w-4 h-4 flex-shrink-0" />
+              Yangi guruh ochish
+            </button>
+          )}
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
@@ -583,8 +595,23 @@ export const GroupsPage: React.FC = () => {
                   />
                   <Send className="w-4 h-4 text-cyan-600 absolute left-3 top-3.5" />
                 </div>
+                <div className="mt-2 p-2.5 bg-blue-50/70 border border-blue-100 rounded-xl flex items-center justify-between gap-3">
+                  <div className="text-[11px] text-blue-900 leading-tight">
+                    <span className="font-semibold block text-blue-950">1 bosish bilan ulash:</span>
+                    Botni guruhingizga qo‘shing va bot chiqargan Chat ID ni shu maydonga yozing.
+                  </div>
+                  <a
+                    href="https://t.me/MinteraAi_bot?startgroup=admin"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-lg shadow-xs transition"
+                  >
+                    <Send className="w-3.5 h-3.5" />
+                    <span>Guruhga qo‘shish</span>
+                  </a>
+                </div>
                 <p className="text-[11px] text-slate-400 mt-1">
-                  Ushbu guruhning test natijalari aynan shu Telegram guruhiga alohida yuboriladi.
+                  Ushbu guruhning test natijalari va hisobotlari aynan shu Telegram guruhiga avtomatik yuboriladi.
                 </p>
               </div>
 

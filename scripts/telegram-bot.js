@@ -4,6 +4,8 @@
  * Ushbu skript Telegram Bot API bilan doimiy aloqada bo'lib (Long-Polling),
  * foydalanuvchilar va o'quv guruhlariga /start, /id, /help buyruqlari bo'yicha
  * javob qaytaradi hamda guruhlarga avtomatik hisobotlar yuboradi.
+ * Shuningdek, botni Telegram guruhlariga 1 bosish bilan qo'shish (Add to Group)
+ * imkoniyatini taqdim etadi.
  */
 
 const https = require('https');
@@ -36,6 +38,54 @@ function loadEnv() {
 loadEnv();
 
 const HTTP_PORT = 4005;
+let currentBotUsername = (process.env.TELEGRAM_BOT_USERNAME || 'MinteraAi_bot').replace('@', '').trim();
+let currentBotId = 0;
+
+// Ulangan guruhlarni saqlash tizimi (Persistent Cache)
+const GROUPS_FILE = path.resolve(__dirname, '..', 'data', 'telegram-groups.json');
+
+function loadKnownGroups() {
+  try {
+    if (fs.existsSync(GROUPS_FILE)) {
+      const raw = fs.readFileSync(GROUPS_FILE, 'utf-8');
+      const list = JSON.parse(raw);
+      if (Array.isArray(list)) {
+        return new Map(list.map((g) => [String(g.id), g]));
+      }
+    }
+  } catch (err) {
+    console.warn('[Telegram Bot] Guruhlar faylini o‘qishda eslatma:', err.message);
+  }
+  return new Map();
+}
+
+const knownGroups = loadKnownGroups();
+
+function saveKnownGroups() {
+  try {
+    const dir = path.dirname(GROUPS_FILE);
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+    fs.writeFileSync(GROUPS_FILE, JSON.stringify(Array.from(knownGroups.values()), null, 2), 'utf-8');
+  } catch (err) {
+    console.error('[Telegram Bot] Guruhlarni saqlash xatosi:', err.message);
+  }
+}
+
+function registerGroup(chatId, title, type = 'group') {
+  if (!chatId) return;
+  const idStr = String(chatId);
+  const existing = knownGroups.get(idStr) || {};
+  const groupObj = {
+    id: idStr,
+    title: title || existing.title || 'O‘quv Guruhi',
+    type: type || existing.type || 'group',
+    updatedAt: new Date().toISOString(),
+    addedAt: existing.addedAt || new Date().toISOString(),
+  };
+  knownGroups.set(idStr, groupObj);
+  saveKnownGroups();
+  console.log(`[Telegram Bot] 📌 Guruh ro‘yxatga olindi: "${groupObj.title}" (${idStr})`);
+}
 
 // Telegram API so'rov yuborish yordamchisi
 function telegramRequest(method, payload = {}) {
@@ -106,12 +156,12 @@ async function sendMessage(chatId, text, options = {}) {
 }
 
 // Inline Callback queryga javob qaytarish
-async function answerCallbackQuery(callbackQueryId, text = '') {
+async function answerCallbackQuery(callbackQueryId, text = '', showAlert = false) {
   try {
     await telegramRequest('answerCallbackQuery', {
       callback_query_id: callbackQueryId,
       text: text,
-      show_alert: false,
+      show_alert: showAlert,
     });
   } catch (err) {
     console.error('[Telegram Bot] Callback query xatosi:', err.message);
@@ -120,6 +170,55 @@ async function answerCallbackQuery(callbackQueryId, text = '') {
 
 // Xabarlarni qayta ishlash
 async function handleUpdate(update) {
+  let webUrl = (process.env.WEB_APP_URL || '').trim();
+  if (!webUrl || webUrl.includes('localhost') || webUrl.includes('127.0.0.1')) {
+    webUrl = 'https://mintera.orifdev.uz';
+  }
+  const addToGroupUrl = `https://t.me/${currentBotUsername}?startgroup=admin`;
+
+  // 0. Bot guruhga a'zo qilinganda yoki adminlik berilganda (my_chat_member)
+  if (update.my_chat_member) {
+    const mcm = update.my_chat_member;
+    const chatId = mcm.chat.id;
+    const chatTitle = mcm.chat.title || 'O‘quv Guruhi';
+    const newStatus = mcm.new_chat_member?.status;
+    const isGroup = mcm.chat.type === 'group' || mcm.chat.type === 'supergroup' || mcm.chat.type === 'channel';
+
+    console.log(`[Telegram Bot] A'zolik yangilanishi: "${chatTitle}" (${chatId}) -> ${newStatus}`);
+
+    if (isGroup && (newStatus === 'member' || newStatus === 'administrator')) {
+      registerGroup(chatId, chatTitle, mcm.chat.type);
+
+      await sendMessage(
+        chatId,
+        `🎉 <b>Assalomu alaykum!</b>\n\n` +
+        `<b>Mintera Ta'lim Platformasi Boti</b> «<b>${chatTitle}</b>» guruhiga muvaffaqiyatli ulandi! 🚀\n\n` +
+        `🏢 <b>Guruh nomi:</b> <code>${chatTitle}</code>\n` +
+        `🆔 <b>Ushbu guruhning Chat ID si:</b>\n<code>${chatId}</code>\n\n` +
+        `━━━━━━━━━━━━━━━━━━━━\n` +
+        `💡 <b>O‘qituvchi va Administratorlar uchun yo‘riqnoma:</b>\n` +
+        `1️⃣ Yuqoridagi Chat ID ni bosing (nusxalanadi);\n` +
+        `2️⃣ <a href="${webUrl}/groups">Mintera Platformasi</a>dagi <b>«Guruhlar»</b> bo‘limiga kiring;\n` +
+        `3️⃣ Tegishli guruh tahririda <b>Telegram Chat ID</b> maydoniga joylang;\n` +
+        `4️⃣ Botga guruhda <b>Administrator</b> huquqini bering.\n\n` +
+        `✅ Shundan so‘ng o‘quvchilar test yechganda natijalar, yangi topshiriqlar va hisobotlar avtomatik shu guruhga yetkaziladi!`,
+        {
+          reply_markup: {
+            inline_keyboard: [
+              [
+                { text: '📋 Chat ID ni nusxalash', callback_data: `copy_id_${chatId}` },
+              ],
+              [
+                { text: '🌐 Mintera Guruhlar Bo‘limi', url: `${webUrl}/groups` },
+              ],
+            ],
+          },
+        }
+      );
+      return;
+    }
+  }
+
   // 1. Matnli xabarlar
   if (update.message) {
     const msg = update.message;
@@ -128,8 +227,49 @@ async function handleUpdate(update) {
     const text = (msg.text || '').trim();
     const fromUser = msg.from || {};
     const userName = fromUser.first_name || fromUser.username || 'Foydalanuvchi';
+    const chatTitle = msg.chat.title || 'O‘quv Guruhi';
+
+    if (isGroup) {
+      registerGroup(chatId, chatTitle, msg.chat.type);
+    }
 
     console.log(`[Telegram Bot] Yangi xabar: "${text}" from ${userName} (chat: ${chatId})`);
+
+    // Guruhga yangi a'zo qo'shilganda (bot qo'shilganda)
+    if (msg.new_chat_members && msg.new_chat_members.length > 0) {
+      const isMeAdded = msg.new_chat_members.some(
+        (m) => m.id === currentBotId || m.username === currentBotUsername || (m.is_bot && m.username?.toLowerCase().includes('mintera'))
+      );
+      if (isMeAdded) {
+        registerGroup(chatId, chatTitle, msg.chat.type);
+        await sendMessage(
+          chatId,
+          `🎉 <b>Assalomu alaykum!</b>\n\n` +
+          `<b>Mintera Ta'lim Platformasi Boti</b> «<b>${chatTitle}</b>» guruhiga muvaffaqiyatli qo‘shildi! 🚀\n\n` +
+          `🏢 <b>Guruh nomi:</b> <code>${chatTitle}</code>\n` +
+          `🆔 <b>Ushbu guruhning Chat ID si:</b>\n<code>${chatId}</code>\n\n` +
+          `━━━━━━━━━━━━━━━━━━━━\n` +
+          `💡 <b>O‘qituvchi va Administratorlar uchun:</b>\n` +
+          `1️⃣ Yuqoridagi Chat ID ni bosing (nusxalanadi);\n` +
+          `2️⃣ <a href="${webUrl}/groups">Mintera Guruhlar Bo‘limi</a>ga kirib, guruh sozlamasiga shu ID ni kiriting;\n` +
+          `3️⃣ Botga guruhda <b>Administrator</b> huquqini bering.\n\n` +
+          `Shundan so‘ng hisobotlar va test natijalari avtomatik shu yerda ko‘rinadi!`,
+          {
+            reply_markup: {
+              inline_keyboard: [
+                [
+                  { text: '📋 Chat ID ni nusxalash', callback_data: `copy_id_${chatId}` },
+                ],
+                [
+                  { text: '🌐 Mintera Platformasi', url: `${webUrl}/groups` },
+                ],
+              ],
+            },
+          }
+        );
+        return;
+      }
+    }
 
     // /start buyrug'i
     if (text.startsWith('/start')) {
@@ -137,42 +277,42 @@ async function handleUpdate(update) {
         await sendMessage(
           chatId,
           `👥 <b>Mintera Guruh Boti Muvaffaqiyatli Ulandi!</b>\n\n` +
-          `Ushbu guruh Mintera platformasiga hisobotlar va test natijalarini qabul qilishga to‘liq tayyor.\n\n` +
+          `🏢 <b>Guruh nomi:</b> <code>${chatTitle}</code>\n` +
           `🆔 <b>Ushbu guruhning Chat ID si:</b>\n<code>${chatId}</code>\n\n` +
-          `<i>(Ushbu ID ni Mintera boshqaruv panelidagi "Guruhlar" bo'limida tegishli guruhga kiriting).</i>`,
+          `<i>(Ushbu ID ni Mintera boshqaruv panelidagi "Guruhlar" bo‘limida tegishli guruhga kiriting).</i>`,
           {
             reply_markup: {
               inline_keyboard: [
                 [
                   { text: '📋 ID ni nusxalash', callback_data: `copy_id_${chatId}` },
                 ],
+                [
+                  { text: '🌐 Mintera Platformasi', url: `${webUrl}/groups` },
+                ],
               ],
             },
           }
         );
       } else {
-        let webUrl = (process.env.WEB_APP_URL || '').trim();
-        if (!webUrl || webUrl.includes('localhost') || webUrl.includes('127.0.0.1')) {
-          webUrl = 'https://mintera.orifdev.uz';
-        }
-
+        // Shaxsiy chatda /start
         await sendMessage(
           chatId,
           `👋 <b>Assalomu alaykum, ${userName}!</b>\n\n` +
           `<b>Mintera Ta'lim Platformasi</b>ning rasmiy botiga xush kelibsiz! 🚀\n\n` +
-          `Ushbu bot orqali siz:\n` +
-          `📊 O‘quv guruhlari bo‘yicha topshiriqlar hisobotini olasiz\n` +
-          `✅ Qaysi o‘quvchi vazifani bajarganini va kimlar bajarmaganini bilib borasiz\n` +
-          `📈 Dasturlash bo‘yicha test natijalarini kuzatasiz\n\n` +
-          `📌 <b>Sizning Telegram ID:</b> <code>${chatId}</code>\n\n` +
+          `Ushbu bot orqali o‘quv markazlari va dasturlash guruhlariga test natijalari, hisobotlar hamda dars eslatmalari avtomatik yetkazib beriladi.\n\n` +
+          `📌 <b>Sizning shaxsiy Telegram ID:</b> <code>${chatId}</code>\n\n` +
           `━━━━━━━━━━━━━━━━━━━━\n` +
-          `💡 <b>Guruhga hisobotlarni qabul qilish uchun:</b>\n` +
-          `1️⃣ Ushbu botni o‘quv guruhingizga qo‘shing;\n` +
-          `2️⃣ Botga guruhda <b>Administrator (Admin)</b> huquqini bering;\n` +
-          `3️⃣ Guruhda <code>/id</code> deb yozing va olingan Chat ID ni Mintera platformasidagi "Guruhlar" bo‘limiga kiriting.`,
+          `👥 <b>BOTNI O‘QUV GURUHIGA ULASH:</b>\n` +
+          `1️⃣ Pastdagi <b>«➕ Botni Guruhga Qo‘shish»</b> tugmasini bosing;\n` +
+          `2️⃣ O‘quv guruhingizni tanlang va botni qo‘shing;\n` +
+          `3️⃣ Bot guruhda o‘z <b>Chat ID</b> raqamini chiqaradi;\n` +
+          `4️⃣ Shu ID ni <a href="${webUrl}/groups">Mintera platformasi</a>dagi "Guruhlar" bo‘limiga kiriting!`,
           {
             reply_markup: {
               inline_keyboard: [
+                [
+                  { text: '➕ Botni Guruhga Qo‘shish', url: addToGroupUrl },
+                ],
                 [
                   { text: '🌐 Mintera Platformasi', url: webUrl },
                 ],
@@ -188,15 +328,42 @@ async function handleUpdate(update) {
       return;
     }
 
-    // /id buyrug'i
-    if (text.startsWith('/id')) {
-      await sendMessage(
-        chatId,
-        `🆔 <b>Chat ID ma'lumoti:</b>\n\n` +
-        `Ushbu chatning ID raqami: <code>${chatId}</code>\n` +
-        `Chat turi: <i>${msg.chat.type}</i>\n\n` +
-        `<i>Mintera panelida ushbu Chat ID ni kiritib, hisobotlarni shu yerga qabul qilishingiz mumkin.</i>`
-      );
+    // /id, /chatid, /group_id buyruqlari
+    if (text.startsWith('/id') || text.startsWith('/chatid') || text.startsWith('/group_id')) {
+      if (isGroup) {
+        await sendMessage(
+          chatId,
+          `🆔 <b>Guruh Chat ID ma'lumoti:</b>\n\n` +
+          `🏢 <b>Guruh:</b> <code>${chatTitle}</code>\n` +
+          `📌 <b>Chat ID:</b> <code>${chatId}</code>\n` +
+          `Chat turi: <i>${msg.chat.type}</i>\n\n` +
+          `<i>Mintera panelida ushbu Chat ID ni kiritib, hisobotlarni shu yerga qabul qilishingiz mumkin.</i>`,
+          {
+            reply_markup: {
+              inline_keyboard: [
+                [
+                  { text: '📋 ID ni nusxalash', callback_data: `copy_id_${chatId}` },
+                ],
+              ],
+            },
+          }
+        );
+      } else {
+        await sendMessage(
+          chatId,
+          `🆔 <b>Sizning shaxsiy Telegram ID:</b>\n<code>${chatId}</code>\n\n` +
+          `💡 <i>Agar o‘quv guruhi ID sini bilmoqchi bo‘lsangiz, botni o‘quv guruhingizga qo‘shing va guruh ichida <code>/id</code> deb yozing.</i>`,
+          {
+            reply_markup: {
+              inline_keyboard: [
+                [
+                  { text: '➕ Botni Guruhga Qo‘shish', url: addToGroupUrl },
+                ],
+              ],
+            },
+          }
+        );
+      }
       return;
     }
 
@@ -210,7 +377,16 @@ async function handleUpdate(update) {
         `🔹 <code>/id</code> — Chat yoki guruh ID sini aniqlash\n` +
         `🔹 <code>/status</code> — Botning platforma bilan aloqasini tekshirish\n` +
         `🔹 <code>/help</code> — Yordam ma'lumotlari\n\n` +
-        `Savollar yoki yordam uchun administratorga murojaat qiling.`
+        `➕ <b>Botni guruhga ulash uchun:</b> pastdagi tugmani bosing va guruhingizni tanlang.`,
+        {
+          reply_markup: {
+            inline_keyboard: [
+              [
+                { text: '➕ Botni Guruhga Qo‘shish', url: addToGroupUrl },
+              ],
+            ],
+          },
+        }
       );
       return;
     }
@@ -221,24 +397,11 @@ async function handleUpdate(update) {
         chatId,
         `✅ <b>Mintera Bot Tizimi Faol!</b>\n\n` +
         `⏱ <b>Sana:</b> ${new Date().toLocaleString('uz-UZ')}\n` +
+        `🤖 <b>Bot nomi:</b> @${currentBotUsername}\n` +
+        `👥 <b>Ulangan guruhlar soni:</b> ${knownGroups.size} ta\n` +
         `📡 <b>Aloqa:</b> 100% Barqaror\n` +
         `🏢 <b>Platforma:</b> Mintera LMS v2.4 (Active)`
       );
-      return;
-    }
-
-    // Guruhga yangi a'zo qo'shilganda (masalan, bot o'zi guruhga qo'shilganda)
-    if (msg.new_chat_members && msg.new_chat_members.length > 0) {
-      const botAdded = msg.new_chat_members.some((m) => m.is_bot && m.username === 'MinteraAi_bot');
-      if (botAdded) {
-        await sendMessage(
-          chatId,
-          `🎉 <b>Assalomu alaykum!</b>\n\n` +
-          `Mintera Boti ushbu guruhga muvaffaqiyatli qo‘shildi!\n\n` +
-          `📌 <b>Ushbu guruhning Chat ID si:</b>\n<code>${chatId}</code>\n\n` +
-          `⚠️ <b>MUHIM:</b> Bot topshiriqlar hisobotini yuborishi uchun unga guruhda <b>Administrator</b> huquqini berishni unutmang!`
-        );
-      }
       return;
     }
   }
@@ -249,18 +412,29 @@ async function handleUpdate(update) {
     const data = cb.data || '';
     const chatId = cb.message?.chat?.id;
 
-    if (data.startsWith('my_id_') || data.startsWith('copy_id_')) {
-      await answerCallbackQuery(cb.id, `Sizning ID: ${chatId}`);
-      await sendMessage(chatId, `📌 <b>Sizning ID raqamingiz:</b> <code>${chatId}</code>`);
+    if (data.startsWith('copy_id_') || data.startsWith('my_id_')) {
+      const targetId = data.replace('copy_id_', '').replace('my_id_', '') || chatId;
+      await answerCallbackQuery(cb.id, `ID: ${targetId}`, true);
+      await sendMessage(chatId, `📌 <b>Chat ID:</b> <code>${targetId}</code>\n<i>(Nusxalash uchun ID ustiga bosing)</i>`);
     } else if (data === 'help_info') {
       await answerCallbackQuery(cb.id, 'Qo‘llanma');
       await sendMessage(
         chatId,
         `📖 <b>Tezkor Yo‘riqnoma:</b>\n\n` +
-        `1. Botni guruhingizga qo‘shing;\n` +
-        `2. Botga Admin huquqini bering;\n` +
-        `3. Guruh ID sini Mintera paneliga kiriting;\n` +
-        `4. O‘qituvchi hisobot yuborganda natijalar avtomatik shu yerda ko‘rinadi!`
+        `1. «➕ Botni Guruhga Qo‘shish» tugmasini bosing;\n` +
+        `2. Guruhingizni tanlang va botga Admin huquqini bering;\n` +
+        `3. Bot guruhga yozgan Chat ID ni nusxalang;\n` +
+        `4. Mintera saytida «Guruhlar» bo‘limiga kiriting;\n` +
+        `5. O‘qituvchi hisobot yuborganda natijalar avtomatik shu yerda ko‘rinadi!`,
+        {
+          reply_markup: {
+            inline_keyboard: [
+              [
+                { text: '➕ Botni Guruhga Qo‘shish', url: addToGroupUrl },
+              ],
+            ],
+          },
+        }
       );
     } else {
       await answerCallbackQuery(cb.id);
@@ -280,7 +454,7 @@ async function pollUpdates() {
     const res = await telegramRequest('getUpdates', {
       offset: lastUpdateId + 1,
       timeout: 25,
-      allowed_updates: ['message', 'callback_query'],
+      allowed_updates: ['message', 'callback_query', 'my_chat_member', 'chat_member'],
     });
 
     if (res && res.ok && Array.isArray(res.result)) {
@@ -310,7 +484,7 @@ async function pollUpdates() {
   }
 }
 
-// Mahalliy HTTP Server (Web frontenddan to'g'ridan-to'g'ri xabar jo'natish uchun)
+// Mahalliy HTTP Server (Web frontenddan to'g'ridan-to'g'ri xabar jo'natish va guruhlar ro'yxatini olish uchun)
 const server = http.createServer(async (req, res) => {
   // CORS sarlavhalari
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -327,7 +501,24 @@ const server = http.createServer(async (req, res) => {
 
   if (url === '/api/status' && req.method === 'GET') {
     res.writeHead(200, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({ status: 'ok', bot: 'MinteraAi_bot', online: true }));
+    res.end(JSON.stringify({
+      status: 'ok',
+      bot: currentBotUsername,
+      botId: currentBotId,
+      online: true,
+      addToGroupUrl: `https://t.me/${currentBotUsername}?startgroup=admin`,
+      groupsCount: knownGroups.size,
+    }));
+    return;
+  }
+
+  if (url === '/api/groups' && req.method === 'GET') {
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({
+      ok: true,
+      groups: Array.from(knownGroups.values()),
+      count: knownGroups.size,
+    }));
     return;
   }
 
@@ -382,7 +573,10 @@ async function startBot() {
         setTimeout(checkAndPoll, 10000);
         return;
       }
-      console.log(`[Telegram Bot] ✅ Muvaffaqiyatli ulandi! Bot: "${me.result.first_name}" (@${me.result.username})`);
+      currentBotUsername = me.result.username || currentBotUsername;
+      currentBotId = me.result.id;
+      console.log(`[Telegram Bot] ✅ Muvaffaqiyatli ulandi! Bot: "${me.result.first_name}" (@${currentBotUsername})`);
+      console.log(`[Telegram Bot] 👥 Guruhga qo‘shish havolasi: https://t.me/${currentBotUsername}?startgroup=admin`);
       console.log('[Telegram Bot] 🚀 Xabarlarni qabul qilish (Long Polling) boshlandi...');
       pollUpdates();
     } catch (err) {

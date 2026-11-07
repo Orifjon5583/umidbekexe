@@ -170,7 +170,7 @@ const translations: Record<Language, any> = {
       botPill: 'Telegram Bot',
       botTitle: 'Mintera Telegram Boti',
       botDesc: 'O‘quvchilar test yechganda natijalarni, yangi topshiriqlar va eslatmalarni bevosita Telegram orqali qabul qiling.',
-      botBtn: 'Botga ulanish (@minterabot)',
+      botBtn: 'Botga ulanish (@MinteraAi_bot)',
     },
     modal: {
       title: 'Yuklab olish boshlandi!',
@@ -290,7 +290,7 @@ const translations: Record<Language, any> = {
       botPill: 'Telegram-бот',
       botTitle: 'Telegram-бот Mintera',
       botDesc: 'Получайте результаты тестов, новые задания и системные уведомления прямо в Telegram.',
-      botBtn: 'Подключить бота (@minterabot)',
+      botBtn: 'Подключить бота (@MinteraAi_bot)',
     },
     modal: {
       title: 'Загрузка началась!',
@@ -410,7 +410,7 @@ const translations: Record<Language, any> = {
       botPill: 'Telegram Бот',
       botTitle: 'Mintera Telegram Боти',
       botDesc: 'Ўқувчилар тест топширганда натижаларни, янги топшириқлар ва эслатмаларни бевосита Telegram орқали қабул қилинг.',
-      botBtn: 'Ботга уланиш (@minterabot)',
+      botBtn: 'Ботга уланиш (@MinteraAi_bot)',
     },
     modal: {
       title: 'Юклаб олиш бошланди!',
@@ -1815,7 +1815,7 @@ export const LandingPage: React.FC<Props> = ({ onGoToLogin, currentUser, onGoToD
 
                 <div className="pt-1">
                   <a
-                    href="https://t.me/minterabot"
+                    href="https://t.me/MinteraAi_bot?startgroup=admin"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#229ED9] hover:bg-[#1E8BC0] text-white font-bold text-xs transition shadow-md shadow-cyan-600/20 active:scale-95"
@@ -1878,13 +1878,13 @@ export const LandingPage: React.FC<Props> = ({ onGoToLogin, currentUser, onGoToD
               </span>
               <div className="flex flex-col gap-2.5 text-xs sm:text-sm text-slate-400">
                 <a
-                  href="https://t.me/minterabot"
+                  href="https://t.me/MinteraAi_bot?startgroup=admin"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-2 text-cyan-400 hover:text-cyan-300 transition"
                 >
                   <Send className="w-4 h-4" />
-                  <span>Telegram Bot: @minterabot</span>
+                  <span>Telegram Bot: @MinteraAi_bot</span>
                 </a>
                 <a
                   href="https://t.me/mintera_uz"

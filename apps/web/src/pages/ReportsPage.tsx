@@ -15,6 +15,9 @@ import {
   X,
   AlertCircle,
   ShieldCheck,
+  FileText,
+  FlaskConical,
+  Sparkles,
 } from 'lucide-react';
 
 export const ReportsPage: React.FC = () => {
@@ -34,6 +37,7 @@ export const ReportsPage: React.FC = () => {
   const [isTelegramModalOpen, setIsTelegramModalOpen] = useState(false);
   const [telegramChatIdInput, setTelegramChatIdInput] = useState('');
   const [isSendingTelegram, setIsSendingTelegram] = useState(false);
+  const [isSendingTest, setIsSendingTest] = useState(false);
   const [copiedTelegram, setCopiedTelegram] = useState(false);
 
   useEffect(() => {
@@ -275,6 +279,69 @@ export const ReportsPage: React.FC = () => {
     }
   };
 
+  // Testoviy xabar yuborish (Aloqani tekshirish)
+  const handleSendTestMessage = async (customChatId?: string) => {
+    const targetChat = (customChatId || telegramChatIdInput || groupProgress?.telegramChatId || '').trim();
+    if (!targetChat) {
+      alert('Iltimos, avval ushbu guruhning Telegram Chat ID sini kiriting!');
+      return;
+    }
+
+    setIsSendingTest(true);
+    try {
+      const res = await apiClient.sendTestGroupMessage(
+        targetChat,
+        groupProgress?.groupName || 'Guruh',
+      );
+      showToast(res.message);
+    } catch (err: any) {
+      alert('Sinov xabari yuborishda xatolik: ' + err.message);
+    } finally {
+      setIsSendingTest(false);
+    }
+  };
+
+  // Matnli hisobotni (TXT) yuklab olish
+  const handleExportTxt = () => {
+    const groupName = groupProgress?.groupName || 'Guruh';
+    const assignmentTitle = activeAssignment?.title || 'Topshiriq';
+    const today = new Date().toLocaleDateString('uz-UZ', { day: '2-digit', month: 'long', year: 'numeric' });
+
+    let content = `=========================================================\n`;
+    content += `MINTERA LMS — GURUH BO‘YICHA TO‘LIQ NATIJALAR HISOBOTI\n`;
+    content += `=========================================================\n`;
+    content += `Guruh: ${groupName}\n`;
+    content += `Topshiriq: ${assignmentTitle}\n`;
+    content += `Sana: ${today}\n`;
+    content += `Guruh o‘rtacha o‘zlashtirishi: ${averagePercentage}%\n`;
+    content += `Jami o‘quvchilar: ${currentStudentsList.length} nafar\n`;
+    content += `To‘liq bajarganlar (100%): ${completedStudents.length} nafar\n`;
+    content += `Jarayonda bo‘lganlar: ${inProgressStudents.length} nafar\n`;
+    content += `Topshirmaganlar: ${notStartedStudents.length} nafar\n`;
+    content += `---------------------------------------------------------\n\n`;
+
+    content += `O‘QUVCHILARNING INDIVIDUAL RO‘YXATI:\n`;
+    currentStudentsList.forEach((s: any, idx: number) => {
+      content += `${idx + 1}. ${s.studentName} (@${s.username}) — ${s.progressPercentage}% (${s.completedProblems}/${s.totalProblems} masala) [${s.status.toUpperCase()}]\n`;
+    });
+
+    content += `\n---------------------------------------------------------\n`;
+    content += `Ushbu hisobot Mintera Ta'lim Platformasi tomonidan avtomatik shakllantirildi.\n`;
+
+    const blob = new Blob([content], { type: 'text/plain;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute(
+      'download',
+      `Mintera_Hisobot_${groupName.replace(/[^a-zA-Z0-9]/g, '_')}_${new Date().toISOString().slice(0, 10)}.txt`,
+    );
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    showToast('Matnli hisobot (TXT) muvaffaqiyatli yuklab olindi! 📄');
+  };
+
   return (
     <div className="space-y-6">
       {/* Toast Notification */}
@@ -297,7 +364,7 @@ export const ReportsPage: React.FC = () => {
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2.5">
+        <div className="flex flex-wrap items-center gap-2">
           <button
             onClick={handleOpenTelegramModal}
             className="h-11 px-4 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 text-white rounded-xl text-sm font-bold flex items-center gap-2 shadow-md shadow-cyan-600/20 transition cursor-pointer flex-1 sm:flex-none justify-center"
@@ -308,12 +375,33 @@ export const ReportsPage: React.FC = () => {
           </button>
 
           <button
+            type="button"
+            onClick={() => handleSendTestMessage()}
+            disabled={isSendingTest}
+            className="h-11 px-3.5 bg-cyan-50 hover:bg-cyan-100 text-cyan-800 border border-cyan-200 rounded-xl text-sm font-semibold flex items-center gap-1.5 transition cursor-pointer disabled:opacity-50 flex-1 sm:flex-none justify-center"
+            title="Tanlangan guruhga aloqani tekshirish uchun sinov xabarini yuborish"
+          >
+            <FlaskConical className="w-4 h-4 text-cyan-600" />
+            <span>{isSendingTest ? 'Sinov yuborilmoqda...' : 'Sinov xabari'}</span>
+          </button>
+
+          <button
             onClick={handleExportCsv}
             disabled={exporting}
-            className="h-11 px-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-semibold flex items-center gap-2 shadow-sm transition disabled:opacity-50 cursor-pointer flex-1 sm:flex-none justify-center"
+            className="h-11 px-3.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-semibold flex items-center gap-1.5 shadow-sm transition disabled:opacity-50 cursor-pointer flex-1 sm:flex-none justify-center"
+            title="Excel va jadval uchun CSV formatda yuklab olish"
           >
             <Download className="w-4 h-4 flex-shrink-0" />
-            <span>{exporting ? 'Eksport qilinmoqda...' : 'CSV Eksport'}</span>
+            <span>{exporting ? 'Eksport...' : 'CSV'}</span>
+          </button>
+
+          <button
+            onClick={handleExportTxt}
+            className="h-11 px-3.5 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 rounded-xl text-sm font-semibold flex items-center gap-1.5 transition cursor-pointer flex-1 sm:flex-none justify-center"
+            title="To‘liq matnli hisobotni TXT formatda yuklab olish"
+          >
+            <FileText className="w-4 h-4 text-slate-600 flex-shrink-0" />
+            <span>TXT</span>
           </button>
         </div>
       </div>
@@ -656,6 +744,38 @@ export const ReportsPage: React.FC = () => {
                   Ushbu hisobot FAQAT tanlangan <strong>«{groupProgress?.groupName}»</strong> guruhiga yetkaziladi. Boshqa guruhlar (masalan: N2, N3) a’zolariga bu o‘quvchilar ma’lumoti yuborilmaydi!
                 </div>
               </div>
+
+              {/* Utility actions: Test ping, Download TXT, Download CSV */}
+              <div className="flex flex-wrap items-center gap-2 mt-2.5">
+                <button
+                  type="button"
+                  onClick={() => handleSendTestMessage(telegramChatIdInput)}
+                  disabled={isSendingTest}
+                  className="px-3 py-1.5 bg-cyan-50 hover:bg-cyan-100 text-cyan-800 border border-cyan-200 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition cursor-pointer disabled:opacity-50"
+                  title="Ushbu guruhga sinov xabari yuborib ko‘rish"
+                >
+                  <FlaskConical className="w-3.5 h-3.5 text-cyan-600" />
+                  <span>{isSendingTest ? 'Sinov yuborilmoqda...' : '🧪 Sinov xabari yuborish'}</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={handleExportTxt}
+                  className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition cursor-pointer"
+                  title="Matnli fayl (.txt) ko‘rinishida yuklab olish"
+                >
+                  <FileText className="w-3.5 h-3.5 text-slate-600" />
+                  <span>TXT yuklab olish</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={handleExportCsv}
+                  className="px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition cursor-pointer"
+                  title="Excel (.csv) jadval ko‘rinishida yuklab olish"
+                >
+                  <Download className="w-3.5 h-3.5 text-emerald-600" />
+                  <span>CSV yuklab olish</span>
+                </button>
+              </div>
             </div>
 
             {/* Live Message Preview (Styled like Telegram Message Bubble) */}
@@ -703,7 +823,7 @@ export const ReportsPage: React.FC = () => {
               >
                 <Send className="w-4 h-4" />
                 <span>
-                  {isSendingTelegram ? 'Yuborilmoqda...' : 'Telegram guruhiga yuborish 🚀'}
+                  {isSendingTelegram ? 'Yuborilmoqda...' : '⚡️ Hozirgi hisobotni guruhga yuborish 🚀'}
                 </span>
               </button>
             </div>

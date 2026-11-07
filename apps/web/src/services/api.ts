@@ -531,6 +531,32 @@ export const apiClient = {
     };
   },
 
+  // Telegram guruhiga sinov xabari yuborib aloqani tekshirish
+  async sendTestGroupMessage(chatId: string, groupName: string): Promise<{ success: boolean; message: string }> {
+    const text =
+      `🔔 <b>MINTERA LMS — ALOQA TESTI</b>\n\n` +
+      `🏢 <b>Guruh:</b> <code>${groupName}</code>\n` +
+      `🆔 <b>Chat ID:</b> <code>${chatId}</code>\n` +
+      `✅ <b>Holat:</b> Telegram bot va Mintera platformasi o‘rtasida aloqa 100% barqaror!\n` +
+      `⏱ <b>Vaqt:</b> ${new Date().toLocaleString('uz-UZ')}\n\n` +
+      `<i>Ushbu test xabari orqali botning ushbu guruhda hisobotlar yoza olishi tasdiqlandi.</i>`;
+
+    const res = await this.sendTelegramGroupReport({
+      groupId: 'test-ping',
+      groupName: groupName,
+      telegramChatId: chatId,
+      assignmentTitle: 'Aloqa Sinovi',
+      messageText: text,
+    });
+
+    return {
+      success: res.isRealTelegramSent ?? res.success,
+      message: res.isRealTelegramSent
+        ? `«${groupName}» guruhiga sinov xabari muvaffaqiyatli yuborildi! Telegramni tekshiring. 🚀`
+        : res.message,
+    };
+  },
+
   // Talaba test topshirganda xabarni FAQAT uning o'z guruhiga yuborish (Strict Group Isolation)
   async sendStudentSubmissionAlert(params: {
     studentId: string;

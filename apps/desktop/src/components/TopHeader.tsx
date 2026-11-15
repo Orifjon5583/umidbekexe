@@ -1,5 +1,5 @@
-import React from 'react';
-import { Sun, Moon } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Sun, Moon, Clock, CheckCircle2 } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 
 interface Props {
@@ -15,6 +15,31 @@ export const TopHeader: React.FC<Props> = ({
   breadcrumb = 'Bosh sahifa',
 }) => {
   const { theme, toggleTheme } = useTheme();
+
+  // 1 soatlik dars taymeri (60 daqiqa)
+  const [remainingSeconds, setRemainingSeconds] = useState<number>(3600);
+
+  useEffect(() => {
+    const calc = () => {
+      const loginTimeStr = localStorage.getItem('cp_login_timestamp');
+      if (!loginTimeStr) return 3600;
+      const loginTime = parseInt(loginTimeStr, 10);
+      const elapsed = Math.floor((Date.now() - loginTime) / 1000);
+      return Math.max(0, 3600 - elapsed);
+    };
+
+    setRemainingSeconds(calc());
+    const interval = setInterval(() => {
+      setRemainingSeconds(calc());
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  const isLockdownActive = remainingSeconds > 0;
+  const minutes = Math.floor(remainingSeconds / 60);
+  const seconds = remainingSeconds % 60;
+  const timeString = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
 
   return (
     <header
@@ -61,6 +86,32 @@ export const TopHeader: React.FC<Props> = ({
         <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-semibold bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-mono">
           <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
           <span>Server faol</span>
+        </div>
+
+        {/* Live 1-Hour Session Countdown Pill */}
+        <div
+          className={`hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-semibold font-mono border transition-all ${
+            isLockdownActive
+              ? 'bg-amber-500/10 border-amber-500/25 text-amber-400 shadow-sm shadow-amber-500/5'
+              : 'bg-emerald-500/10 border-emerald-500/25 text-emerald-400 shadow-sm shadow-emerald-500/5'
+          }`}
+          title={
+            isLockdownActive
+              ? `1 soatlik majburiy dars rejimi. Chiqish uchun o‘qituvchi PIN kodi talab etiladi. Qolgan vaqt: ${timeString}`
+              : '1 soatlik dars muvaffaqiyatli yakunlandi. Bemalol chiqishingiz mumkin.'
+          }
+        >
+          {isLockdownActive ? (
+            <>
+              <Clock className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
+              <span>Dars: {timeString}</span>
+            </>
+          ) : (
+            <>
+              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+              <span>1 soat to‘ldi</span>
+            </>
+          )}
         </div>
 
         {/* Student Avatar Pill (Mintera Royal Blue & Gold Accent) */}

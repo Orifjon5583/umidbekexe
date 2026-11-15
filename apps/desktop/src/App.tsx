@@ -77,6 +77,12 @@ export const App: React.FC = () => {
       try {
         const user = JSON.parse(userJson);
         setCurrentUser(user);
+
+        // 1 soatlik majburiy mashg'ulot taymeri uchun boshlanish vaqtini saqlash
+        if (!localStorage.getItem('cp_login_timestamp')) {
+          localStorage.setItem('cp_login_timestamp', String(Date.now()));
+        }
+
         if (hasReadGuide) {
           setCurrentScreen('dashboard');
         } else {
@@ -86,8 +92,58 @@ export const App: React.FC = () => {
     }
   }, []);
 
+  // 1 soatlik majburiy dars davomida oynani yoki sahifani ruxsatsiz yopishni to'xtatish
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (currentScreen === 'login') return;
+
+      const loginTimeStr = localStorage.getItem('cp_login_timestamp');
+      if (loginTimeStr) {
+        const loginTime = parseInt(loginTimeStr, 10);
+        const remSeconds = 3600 - Math.floor((Date.now() - loginTime) / 1000);
+        if (remSeconds > 0) {
+          e.preventDefault();
+          e.returnValue = '1 soatlik majburiy dars rejimi faol! Muddatidan oldin chiqish taqiqlangan.';
+          setIsExitModalOpen(true);
+          return e.returnValue;
+        }
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    // Tauri oynani yopish so'rovini tutish (Alt+F4 yoki X tugmasi)
+    let unlistenTauriClose: any = null;
+    if (typeof window !== 'undefined' && (window as any).__TAURI_INTERNALS__) {
+      import('@tauri-apps/api/window').then(({ getCurrentWindow }) => {
+        getCurrentWindow().onCloseRequested((event) => {
+          const loginTimeStr = localStorage.getItem('cp_login_timestamp');
+          if (loginTimeStr) {
+            const loginTime = parseInt(loginTimeStr, 10);
+            const remSeconds = 3600 - Math.floor((Date.now() - loginTime) / 1000);
+            if (remSeconds > 0) {
+              event.preventDefault();
+              setIsExitModalOpen(true);
+            }
+          }
+        }).then((fn) => { unlistenTauriClose = fn; });
+      }).catch(() => {});
+    }
+
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      if (unlistenTauriClose) unlistenTauriClose();
+    };
+  }, [currentScreen]);
+
   const handleLoginSuccess = (user: any) => {
     setCurrentUser(user);
+
+    // 1 soatlik mashg'ulot taymerini boshlash
+    if (!localStorage.getItem('cp_login_timestamp')) {
+      localStorage.setItem('cp_login_timestamp', String(Date.now()));
+    }
+
     const hasReadGuide = sessionStorage.getItem('cp_guide_read');
     if (hasReadGuide) {
       setCurrentScreen('dashboard');
@@ -106,6 +162,7 @@ export const App: React.FC = () => {
     localStorage.removeItem('cp_student_access_token');
     localStorage.removeItem('cp_student_refresh_token');
     localStorage.removeItem('cp_student_user');
+    localStorage.removeItem('cp_login_timestamp');
     sessionStorage.removeItem('cp_guide_read');
     setCurrentUser(null);
     setCurrentScreen('login');

@@ -231,6 +231,11 @@ namespace Mintera
                 };
 
                 Process.Start(psi);
+
+                if (profileName == "MinteraStudentApp")
+                {
+                    StartStudentLockdownWatcher();
+                }
             }
             else
             {
@@ -239,7 +244,63 @@ namespace Mintera
                     FileName = appUrl,
                     UseShellExecute = true
                 });
+
+                if (profileName == "MinteraStudentApp")
+                {
+                    StartStudentLockdownWatcher();
+                }
             }
+        }
+
+        [DllImport("user32.dll")]
+        public static extern IntPtr GetSystemMenu(IntPtr hWnd, bool bRevert);
+
+        [DllImport("user32.dll")]
+        public static extern bool EnableMenuItem(IntPtr hMenu, uint uIDEnableItem, uint uEnable);
+
+        [DllImport("user32.dll")]
+        public static extern bool EnumWindows(EnumWindowsProc lpEnumFunc, IntPtr lParam);
+        public delegate bool EnumWindowsProc(IntPtr hWnd, IntPtr lParam);
+
+        [DllImport("user32.dll", CharSet = CharSet.Auto)]
+        public static extern int GetWindowText(IntPtr hWnd, System.Text.StringBuilder lpString, int nMaxCount);
+
+        const uint SC_CLOSE = 0xF060;
+        const uint MF_BYCOMMAND = 0x00000000;
+        const uint MF_GRAYED = 0x00000001;
+        const uint MF_DISABLED = 0x00000002;
+
+        public static void StartStudentLockdownWatcher()
+        {
+            Thread t = new Thread(() =>
+            {
+                // Edge oynasi ochilgach, har 1 soniyada oynaning Close (X) tugmasini o'chirib qo'yish
+                for (int i = 0; i < 7200; i++)
+                {
+                    try
+                    {
+                        EnumWindows((hWnd, lParam) =>
+                        {
+                            System.Text.StringBuilder sb = new System.Text.StringBuilder(256);
+                            GetWindowText(hWnd, sb, 256);
+                            string title = sb.ToString();
+                            if (!string.IsNullOrEmpty(title) && (title.Contains("Mintera") || title.Contains("O‘quvchi") || title.Contains("O'quvchi")))
+                            {
+                                IntPtr hMenu = GetSystemMenu(hWnd, false);
+                                if (hMenu != IntPtr.Zero)
+                                {
+                                    EnableMenuItem(hMenu, SC_CLOSE, MF_BYCOMMAND | MF_DISABLED | MF_GRAYED);
+                                }
+                            }
+                            return true;
+                        }, IntPtr.Zero);
+                    }
+                    catch {}
+                    Thread.Sleep(1000);
+                }
+            });
+            t.IsBackground = true;
+            t.Start();
         }
     }
 
@@ -515,9 +576,12 @@ namespace Mintera
             Thread.Sleep(300);
             Program.LaunchMode(mode, isKiosk);
 
-            // Splash oynasini yopish
+            // Splash oynasini yashirish
             this.Hide();
-            Application.Exit();
+            if (mode != "student" && mode != "both")
+            {
+                Application.Exit();
+            }
         }
     }
 }

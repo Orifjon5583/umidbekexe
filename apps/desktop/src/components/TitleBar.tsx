@@ -16,37 +16,37 @@ export const TitleBar: React.FC<Props> = ({
   // Check if running inside frameless Tauri window
   const isTauri = typeof window !== 'undefined' && Boolean((window as any).__TAURI_INTERNALS__);
 
-  // If running in Edge App mode (which provides native Windows titlebar with -, □, X)
-  // or a standard browser, hide duplicate in-page titlebar to prevent double headers.
-  if (!isTauri) {
-    return null;
-  }
-
   const handleMinimize = () => {
-    try {
-      import('@tauri-apps/api/window').then(({ getCurrentWindow }) => {
-        getCurrentWindow().minimize();
-      });
-    } catch {}
+    if (isTauri) {
+      try {
+        import('@tauri-apps/api/window').then(({ getCurrentWindow }) => {
+          getCurrentWindow().minimize();
+        });
+      } catch {}
+    }
   };
 
   const handleMaximize = () => {
-    try {
-      import('@tauri-apps/api/window').then(({ getCurrentWindow }) => {
-        getCurrentWindow().toggleMaximize();
-      });
-    } catch {}
+    if (isTauri) {
+      try {
+        import('@tauri-apps/api/window').then(({ getCurrentWindow }) => {
+          getCurrentWindow().toggleMaximize();
+        });
+      } catch {}
+    } else {
+      try {
+        if (!document.fullscreenElement) {
+          document.documentElement.requestFullscreen().catch(() => {});
+        } else {
+          document.exitFullscreen().catch(() => {});
+        }
+      } catch {}
+    }
   };
 
   const handleClose = () => {
     if (onExitRequest) {
       onExitRequest();
-    } else {
-      try {
-        import('@tauri-apps/api/window').then(({ getCurrentWindow }) => {
-          getCurrentWindow().close();
-        });
-      } catch {}
     }
   };
 

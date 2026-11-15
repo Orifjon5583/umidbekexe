@@ -157,7 +157,7 @@ export const App: React.FC = () => {
     setCurrentScreen('dashboard');
   };
 
-  const handleConfirmExit = () => {
+  const handleConfirmExit = async () => {
     setIsExitModalOpen(false);
     localStorage.removeItem('cp_student_access_token');
     localStorage.removeItem('cp_student_refresh_token');
@@ -167,20 +167,33 @@ export const App: React.FC = () => {
     setCurrentUser(null);
     setCurrentScreen('login');
 
-    // Agar Tauri muhitida bo'lsa oynani yopish
+    // 1. Agar Tauri muhitida bo'lsa oynani yopish
     if (typeof window !== 'undefined' && (window as any).__TAURI_INTERNALS__) {
       try {
-        import('@tauri-apps/api/window').then(({ getCurrentWindow }) => {
-          getCurrentWindow().close();
-        });
+        const { getCurrentWindow } = await import('@tauri-apps/api/window');
+        getCurrentWindow().close();
+        return;
       } catch {}
     }
+
+    // 2. Mahalliy server orqali Edge/Ilova oynasini yopish
+    try {
+      await fetch('/api/close-app', { method: 'POST' });
+    } catch {}
+
+    // 3. Brauzer oynasini yopish
+    try {
+      window.close();
+    } catch {}
   };
 
   return (
     <ThemeProvider>
       {currentScreen === 'login' && (
-        <LoginPage onLoginSuccess={handleLoginSuccess} />
+        <LoginPage
+          onLoginSuccess={handleLoginSuccess}
+          onRequestExit={() => setIsExitModalOpen(true)}
+        />
       )}
 
       {currentScreen === 'guide' && (

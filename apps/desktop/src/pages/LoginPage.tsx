@@ -6,9 +6,10 @@ import { Eye, EyeOff, User, Lock, Sparkles, ArrowRight, ShieldCheck } from 'luci
 
 interface Props {
   onLoginSuccess: (user: any) => void;
+  onRequestExit?: () => void;
 }
 
-export const LoginPage: React.FC<Props> = ({ onLoginSuccess }) => {
+export const LoginPage: React.FC<Props> = ({ onLoginSuccess, onRequestExit }) => {
   const { theme } = useTheme();
   const [username, setUsername] = useState('student1');
   const [password, setPassword] = useState('Talaba123!');
@@ -81,7 +82,7 @@ export const LoginPage: React.FC<Props> = ({ onLoginSuccess }) => {
         theme === 'dark' ? 'mesh-bg-dark text-slate-100' : 'mesh-bg-light text-slate-800'
       }`}
     >
-      <TitleBar title="Mintera — Tizimga Kirish" />
+      <TitleBar title="Mintera — Tizimga Kirish" onExitRequest={onRequestExit} />
 
       {/* Background Decorative Mesh Gradients */}
       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[350px] bg-gradient-to-tr from-blue-600/20 via-indigo-500/15 to-cyan-400/20 blur-[120px] pointer-events-none rounded-full" />

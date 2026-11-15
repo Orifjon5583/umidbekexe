@@ -207,6 +207,30 @@ const server = http.createServer((req, res) => {
     return;
   }
 
+  // O'qituvchi PIN kodi tasdiqlanganda ilovani yopish
+  if (urlPath === '/api/close-app') {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
+    if (req.method === 'OPTIONS') {
+      res.writeHead(204);
+      res.end();
+      return;
+    }
+
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ success: true, message: 'Ilova muvaffaqiyatli yopilmoqda' }));
+
+    setTimeout(() => {
+      try {
+        const { exec } = require('child_process');
+        exec('powershell -Command "Get-CimInstance Win32_Process -Filter \\"Name = \'msedge.exe\'\\" | Where-Object { $_.CommandLine -like \'*1420*\' -or $_.CommandLine -like \'*MinteraStudentApp*\' } | Stop-Process -Force"', () => {});
+      } catch {}
+    }, 300);
+    return;
+  }
+
   let filePath = path.join(DIST_DIR, urlPath === '/' ? 'index.html' : urlPath);
 
   fs.stat(filePath, (err, stats) => {

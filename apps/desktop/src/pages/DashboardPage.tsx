@@ -13,6 +13,7 @@ import {
   Sparkles,
   Play,
   Gift,
+  Keyboard,
 } from 'lucide-react';
 
 interface Props {
@@ -249,6 +250,40 @@ export const DashboardPage: React.FC<Props> = ({
               >
                 <span>Sovg‘alarni ko‘rish</span>
                 <ArrowRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
+
+            {/* Tez Yozish (Typing Test) Banner */}
+            <div
+              className={`p-5 rounded-3xl border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 relative overflow-hidden ${
+                theme === 'dark'
+                  ? 'bg-gradient-to-r from-[#08182B] via-[#0A2038] to-[#0A122E] border-cyan-500/30 shadow-xl shadow-cyan-950/20'
+                  : 'bg-gradient-to-r from-cyan-50 via-blue-50 to-indigo-50 border-cyan-200 shadow-sm'
+              }`}
+            >
+              <div className="flex items-center gap-3.5 z-10">
+                <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-cyan-500 to-blue-600 flex items-center justify-center text-white shadow-md shadow-cyan-500/30 flex-shrink-0">
+                  <Keyboard className="w-6 h-6" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-black text-cyan-400 font-mono">WPM KLAVIATURA MASHQI ⚡️</span>
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-cyan-500/15 text-cyan-300 font-bold border border-cyan-500/25">
+                      3 xil tilda (UZ, RU, EN)
+                    </span>
+                  </div>
+                  <h4 className={`text-sm font-extrabold mt-0.5 ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
+                    Klaviaturada tez yozishni mashq qiling va qo‘shimcha tangalar yutib oling!
+                  </h4>
+                </div>
+              </div>
+
+              <button
+                onClick={() => onNavigateTab('typing')}
+                className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold text-xs flex items-center gap-1.5 shadow-md shadow-cyan-500/25 transition active:scale-95 cursor-pointer z-10 flex-shrink-0"
+              >
+                <Keyboard className="w-4 h-4" />
+                <span>Mashqni boshlash</span>
               </button>
             </div>
 

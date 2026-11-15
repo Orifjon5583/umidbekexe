@@ -9,6 +9,7 @@ import { ProblemsPage } from './pages/ProblemsPage';
 import { AssignmentsPage } from './pages/AssignmentsPage';
 import { ReportsPage } from './pages/ReportsPage';
 import { RewardsPage } from './pages/RewardsPage';
+import { TypingPage } from './pages/TypingPage';
 import { TeachersPage } from './pages/TeachersPage';
 import { SystemSettingsPage } from './pages/SystemSettingsPage';
 import { SecurityLogsPage } from './pages/SecurityLogsPage';
@@ -93,6 +94,7 @@ export const App: React.FC = () => {
           {currentTab === 'problems' && <ProblemsPage />}
           {currentTab === 'assignments' && <AssignmentsPage onNavigateToReports={() => setCurrentTab('reports')} />}
           {currentTab === 'reports' && <ReportsPage />}
+          {currentTab === 'typing' && <TypingPage />}
           {currentTab === 'rewards' && <RewardsPage />}
 
           {/* Admin Exclusive Tabs */}

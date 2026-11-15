@@ -185,8 +185,19 @@ export const RewardsPage: React.FC<Props> = ({ onNavigateTab, onRequestExit }) =
   const { theme } = useTheme();
 
   // Student balance
-  const [studentCoins, setStudentCoins] = useState<number>(850);
-  const [studentXp, setStudentXp] = useState<number>(1240);
+  const [studentCoins, setStudentCoins] = useState<number>(() => {
+    const saved = localStorage.getItem('cp_student_coins');
+    return saved !== null ? Number(saved) : 850;
+  });
+  const [studentXp, setStudentXp] = useState<number>(() => {
+    const saved = localStorage.getItem('cp_student_xp');
+    return saved !== null ? Number(saved) : 1240;
+  });
+
+  useEffect(() => {
+    localStorage.setItem('cp_student_coins', String(studentCoins));
+    localStorage.setItem('cp_student_xp', String(studentXp));
+  }, [studentCoins, studentXp]);
 
   // Active view tab: 'catalog' | 'my_rewards'
   const [activeTab, setActiveTab] = useState<'catalog' | 'my_rewards'>('catalog');

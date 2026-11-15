@@ -17,6 +17,7 @@ import {
   MoreHorizontal,
   Globe,
   Download,
+  Keyboard,
 } from 'lucide-react';
 
 interface Props {
@@ -59,6 +60,7 @@ export const DashboardLayout: React.FC<Props> = ({ currentTab, onTabChange, chil
     { id: 'problems', label: 'Masalalar banki', icon: Code2 },
     { id: 'assignments', label: 'Topshiriqlar', icon: CheckSquare },
     { id: 'reports', label: 'Umumiy hisobotlar', icon: BarChart3 },
+    { id: 'typing', label: 'Tez Yozish (Typing)', icon: Keyboard },
     { id: 'rewards', label: 'Sovg‘alar (Do‘kon)', icon: Gift },
     { id: 'settings', label: 'Tizim sozlamalari', icon: Sliders, badge: 'Admin' },
     { id: 'logs', label: 'Xavfsizlik jurnali', icon: ShieldAlert, badge: 'Admin' },
@@ -70,6 +72,7 @@ export const DashboardLayout: React.FC<Props> = ({ currentTab, onTabChange, chil
     { id: 'problems', label: 'Masalalar banki', icon: Code2 },
     { id: 'assignments', label: 'Vazifalar', icon: CheckSquare },
     { id: 'reports', label: 'Natijalar va Hisobot', icon: BarChart3 },
+    { id: 'typing', label: 'Tez Yozish (Typing)', icon: Keyboard },
     { id: 'rewards', label: 'Sovg‘alar (Do‘kon)', icon: Gift },
   ];
 

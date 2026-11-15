@@ -9,6 +9,7 @@ import { CodeEditorPage } from './pages/CodeEditorPage';
 import { ResultsPage } from './pages/ResultsPage';
 import { RewardsPage } from './pages/RewardsPage';
 import { ProfilePage } from './pages/ProfilePage';
+import { TypingPage } from './pages/TypingPage';
 import { SubmissionResultPage } from './pages/SubmissionResultPage';
 import { ExitModal } from './components/ExitModal';
 
@@ -21,6 +22,7 @@ type AppScreen =
   | 'code_editor'
   | 'results'
   | 'rewards'
+  | 'typing'
   | 'profile'
   | 'submission_result';
 
@@ -190,6 +192,13 @@ export const App: React.FC = () => {
 
       {currentScreen === 'rewards' && (
         <RewardsPage
+          onNavigateTab={(tab) => setCurrentScreen(tab)}
+          onRequestExit={() => setIsExitModalOpen(true)}
+        />
+      )}
+
+      {currentScreen === 'typing' && (
+        <TypingPage
           onNavigateTab={(tab) => setCurrentScreen(tab)}
           onRequestExit={() => setIsExitModalOpen(true)}
         />

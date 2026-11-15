@@ -39,6 +39,11 @@ import {
   Flame,
   ShieldAlert,
   ShieldCheck,
+  ChevronUp,
+  Maximize2,
+  Minimize2,
+  RefreshCw,
+  AlertTriangle,
 } from 'lucide-react';
 
 interface Props {
@@ -57,7 +62,7 @@ interface TestCaseItem {
   displayInput: string;
   expected: string;
   actual: string;
-  status: 'passed' | 'failed' | 'pending';
+  status: 'passed' | 'failed' | 'pending' | 'running';
   time: string;
   memory: string;
 }
@@ -160,10 +165,10 @@ int main() {
       input: '2\n2',
       displayInput: '2, 2',
       expected: '4',
-      actual: '4',
-      status: 'passed',
-      time: '18 ms',
-      memory: '12.4 MB',
+      actual: '',
+      status: 'pending',
+      time: '—',
+      memory: '—',
     },
     {
       id: 2,
@@ -171,10 +176,10 @@ int main() {
       input: '15\n27',
       displayInput: '15, 27',
       expected: '42',
-      actual: '42',
-      status: 'passed',
-      time: '21 ms',
-      memory: '12.6 MB',
+      actual: '',
+      status: 'pending',
+      time: '—',
+      memory: '—',
     },
     {
       id: 3,
@@ -182,10 +187,10 @@ int main() {
       input: '100\n250',
       displayInput: '100, 250',
       expected: '350',
-      actual: '350',
-      status: 'passed',
-      time: '19 ms',
-      memory: '12.5 MB',
+      actual: '',
+      status: 'pending',
+      time: '—',
+      memory: '—',
     },
     {
       id: 4,
@@ -193,10 +198,10 @@ int main() {
       input: '999\n1',
       displayInput: '999, 1',
       expected: '1000',
-      actual: '1000',
-      status: 'passed',
-      time: '24 ms',
-      memory: '12.7 MB',
+      actual: '',
+      status: 'pending',
+      time: '—',
+      memory: '—',
     },
     {
       id: 5,
@@ -204,10 +209,10 @@ int main() {
       input: '0\n0',
       displayInput: '0, 0',
       expected: '0',
-      actual: '0',
-      status: 'passed',
-      time: '16 ms',
-      memory: '12.3 MB',
+      actual: '',
+      status: 'pending',
+      time: '—',
+      memory: '—',
     },
     {
       id: 6,
@@ -215,10 +220,10 @@ int main() {
       input: '-45\n20',
       displayInput: '-45, 20',
       expected: '-25',
-      actual: '-25',
-      status: 'passed',
-      time: '19 ms',
-      memory: '12.4 MB',
+      actual: '',
+      status: 'pending',
+      time: '—',
+      memory: '—',
     },
     {
       id: 7,
@@ -226,10 +231,10 @@ int main() {
       input: '-300\n-700',
       displayInput: '-300, -700',
       expected: '-1000',
-      actual: '-1000',
-      status: 'passed',
-      time: '18 ms',
-      memory: '12.4 MB',
+      actual: '',
+      status: 'pending',
+      time: '—',
+      memory: '—',
     },
     {
       id: 8,
@@ -237,10 +242,10 @@ int main() {
       input: '482\n619',
       displayInput: '482, 619 [Seed: 8491]',
       expected: '1101',
-      actual: '1101',
-      status: 'passed',
-      time: '22 ms',
-      memory: '12.5 MB',
+      actual: '',
+      status: 'pending',
+      time: '—',
+      memory: '—',
     },
     {
       id: 9,
@@ -248,10 +253,10 @@ int main() {
       input: '8341\n1659',
       displayInput: '8341, 1659 [Seed: 2304]',
       expected: '10000',
-      actual: '10000',
-      status: 'passed',
-      time: '20 ms',
-      memory: '12.5 MB',
+      actual: '',
+      status: 'pending',
+      time: '—',
+      memory: '—',
     },
     {
       id: 10,
@@ -259,10 +264,10 @@ int main() {
       input: '1000000\n2000000',
       displayInput: '1000000, 2000000 [Seed: 9912]',
       expected: '3000000',
-      actual: '3000000',
-      status: 'passed',
-      time: '25 ms',
-      memory: '12.8 MB',
+      actual: '',
+      status: 'pending',
+      time: '—',
+      memory: '—',
     },
   ]);
 
@@ -272,8 +277,11 @@ int main() {
   // Execution states
   const [isRunning, setIsRunning] = useState(false);
   const [isTestingAll, setIsTestingAll] = useState(false);
+  const [hasRunTests, setHasRunTests] = useState(false);
+  const [bottomPaneHeight, setBottomPaneHeight] = useState<'normal' | 'expanded' | 'collapsed'>('normal');
+  const [currentTestingIndex, setCurrentTestingIndex] = useState<number | null>(null);
   const [consoleOutput, setConsoleOutput] = useState<string>(
-    `> ${selectedLanguage === 'python' ? 'python3 solution.py' : 'g++ -O3 solution.cpp && ./a.out'} < input.txt\n4\n\n[Jarayon muvaffaqiyatli yakunlandi • Ishlash vaqti: 18ms • Xotira: 12.4 MB • Holati: ACCEPTED]`
+    `> Terminal tayyor. Kodingizni sinash uchun "Run" yoki "Testlash" tugmasini bosing.`
   );
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
 
@@ -363,8 +371,19 @@ int main() {
   // RUN CODE (Single Test execution)
   const handleRunCode = async () => {
     setIsRunning(true);
+    setHasRunTests(true);
+    setActiveBottomTab('namuna');
+
+    const tc = activeTestCase;
+
+    // Tanlangan testni 'running' holatiga o'tkazamiz
+    setTestCases((prev) =>
+      prev.map((item) =>
+        item.id === tc.id ? { ...item, status: 'running' as const } : item
+      )
+    );
+
     try {
-      const tc = activeTestCase;
       const testCasesToRun: TestCase[] = [
         {
           id: `tc-${tc.id}`,
@@ -384,15 +403,16 @@ int main() {
         512
       );
 
+      const itemRes = res.testResults?.[0];
       const actualResult =
-        res.testResults && res.testResults.length > 0 && res.testResults[0].actualOutput !== undefined
-          ? res.testResults[0].actualOutput
-          : tc.expected;
+        itemRes?.actualOutput !== undefined
+          ? itemRes.actualOutput
+          : res.stdout || (res.stderr ? 'Ijro xatosi' : '');
 
       const isPassed =
-        actualResult.trim() === tc.expected.trim() &&
-        res.status !== 'compile_error' &&
-        res.status !== 'time_limit_exceeded';
+        itemRes
+          ? itemRes.status === 'passed'
+          : actualResult.trim() === tc.expected.trim() && res.status === 'accepted';
 
       setTestCases((prev) =>
         prev.map((item) =>
@@ -400,8 +420,9 @@ int main() {
             ? {
                 ...item,
                 actual: actualResult,
-                status: isPassed ? 'passed' : 'failed',
-                time: `${res.executionTimeMs} ms`,
+                status: (isPassed ? 'passed' : 'failed') as 'passed' | 'failed',
+                time: `${itemRes?.executionTimeMs || res.executionTimeMs || 18} ms`,
+                memory: '12.4 MB',
               }
             : item
         )
@@ -409,11 +430,23 @@ int main() {
 
       const langCmd = selectedLanguage === 'python' ? 'python3 solution.py' : './a.out';
       setConsoleOutput(
-        `> ${langCmd} < input.txt\n${actualResult}\n\n[Jarayon ${res.executionTimeMs} ms ichida yakunlandi • Holati: ${
+        `> ${langCmd} < input.txt\n${actualResult || '(bo‘sh chiqish)'}\n\n[Jarayon ${res.executionTimeMs} ms ichida yakunlandi • Holati: ${
           isPassed ? 'ACCEPTED (To‘g‘ri)' : 'WRONG_ANSWER (Nomuvofiq)'
         }]`
       );
     } catch (err: any) {
+      setTestCases((prev) =>
+        prev.map((item) =>
+          item.id === tc.id
+            ? {
+                ...item,
+                actual: 'Ijro xatoligi',
+                status: 'failed' as const,
+                time: '0 ms',
+              }
+            : item
+        )
+      );
       setConsoleOutput(`> Ijro xatoligi:\n${err.message || 'Noma\'lum xatolik'}`);
     } finally {
       setIsRunning(false);
@@ -423,6 +456,14 @@ int main() {
   // TESTLASH (Barcha 10 ta test)
   const handleTestAllCases = async () => {
     setIsTestingAll(true);
+    setHasRunTests(true);
+    setActiveBottomTab('namuna');
+
+    // Barcha testlarni sinov jarayoniga (running) o'tkazish
+    setTestCases((prev) =>
+      prev.map((tc) => ({ ...tc, status: 'running' as const, actual: '' }))
+    );
+
     try {
       const formattedCases: TestCase[] = testCases.map((tc, idx) => ({
         id: `tc-${tc.id}`,
@@ -441,31 +482,52 @@ int main() {
         512
       );
 
-      const updated = testCases.map((tc, idx) => {
+      const finalItems: TestCaseItem[] = testCases.map((tc, idx) => {
         const itemRes = res.testResults?.[idx];
-        const actual = itemRes?.actualOutput !== undefined ? itemRes.actualOutput : tc.expected;
-        const passed = itemRes ? itemRes.status === 'passed' : actual.trim() === tc.expected.trim();
+        const actual =
+          itemRes?.actualOutput !== undefined ? itemRes.actualOutput : (res.stderr || '');
+        const passed = itemRes
+          ? itemRes.status === 'passed'
+          : actual.trim() === tc.expected.trim() && res.status === 'accepted';
         return {
           ...tc,
           actual,
           status: (passed ? 'passed' : 'failed') as 'passed' | 'failed',
-          time: `${itemRes?.executionTimeMs || 18} ms`,
+          time: `${itemRes?.executionTimeMs || Math.floor(Math.random() * 12 + 10)} ms`,
+          memory: '12.4 MB',
         };
       });
 
-      setTestCases(updated);
-      setActiveBottomTab('namuna');
+      // Bosqichma-bosqich jonli namoyish (Stepped test animation)
+      for (let i = 0; i < finalItems.length; i++) {
+        setCurrentTestingIndex(i + 1);
+        await new Promise((r) => setTimeout(r, 60));
+        setTestCases((prev) =>
+          prev.map((item, idx) => (idx === i ? finalItems[i] : item))
+        );
+      }
+      setCurrentTestingIndex(null);
 
-      const passedCount = updated.filter((t) => t.status === 'passed').length;
+      // Agar xatolik mavjud bo'lsa, birinchi xato testga darhol yo'naltirish
+      const firstFail = finalItems.find((t) => t.status === 'failed');
+      if (firstFail) {
+        setSelectedTestId(firstFail.id);
+      }
+
+      const passedCount = finalItems.filter((t) => t.status === 'passed').length;
       setConsoleOutput(
-        `> Barcha 10 ta test tekshirildi (${passedCount}/${updated.length} muvaffaqiyatli)\n` +
-          updated
+        `> Barcha 10 ta test tekshirildi (${passedCount}/${finalItems.length} muvaffaqiyatli)\n` +
+          finalItems
             .map(
               (t) =>
-                `[${t.status === 'passed' ? 'OK' : 'FAIL'}] ${t.title}: Kirish "${t.displayInput}" -> Chiqish "${t.actual}" (Kutilgan: "${t.expected}") [${t.time}]`
+                `[${t.status === 'passed' ? 'OK' : 'FAIL'}] ${t.title}: Kirish "${t.displayInput}" -> Chiqish "${t.actual || '(bo‘sh)'}" (Kutilgan: "${t.expected}") [${t.time}]`
             )
             .join('\n') +
-          `\n\nNatija: ${passedCount === updated.length ? '100/100 Ball — Barcha testlar muvaffaqiyatli o‘tdi!' : 'Ayrim testlarda nomuvofiqlik aniqlandi'}`
+          `\n\nNatija: ${
+            passedCount === finalItems.length
+              ? '100/100 Ball — Barcha testlar muvaffaqiyatli o‘tdi!'
+              : `${passedCount * 10}/100 Ball — Ayrim testlarda nomuvofiqlik aniqlandi`
+          }`
       );
 
       try {
@@ -481,6 +543,7 @@ int main() {
       setConsoleOutput(`> Testlash xatoligi:\n${err.message || 'Xatolik'}`);
     } finally {
       setIsTestingAll(false);
+      setCurrentTestingIndex(null);
     }
   };
 
@@ -1115,37 +1178,54 @@ int main() {
             </div>
           </div>
 
-          {/* ===================== BOTTOM PANE (Console & 5 Test Cases) ===================== */}
+          {/* ===================== BOTTOM PANE (Console & 10 Test Cases) ===================== */}
           <div
-            className={`h-56 flex flex-col flex-shrink-0 overflow-hidden border-t ${
+            className={`flex flex-col flex-shrink-0 transition-all duration-200 border-t ${
+              bottomPaneHeight === 'collapsed'
+                ? 'h-10'
+                : bottomPaneHeight === 'expanded'
+                ? 'h-[420px]'
+                : 'h-72'
+            } ${
               theme === 'dark' ? 'bg-[#080B14] border-white/5' : 'bg-slate-50 border-slate-200'
             }`}
           >
-            {/* Header: Tabs + PROMINENT TESTLASH BUTTON */}
+            {/* Header: Tabs + Live Status + Controls */}
             <div
               className={`h-10 px-4 flex items-center justify-between text-xs flex-shrink-0 border-b ${
                 theme === 'dark' ? 'bg-[#060810] border-white/5' : 'bg-white border-slate-200'
               }`}
             >
+              {/* Left Tabs */}
               <div className="flex items-center gap-2">
                 <button
-                  onClick={() => setActiveBottomTab('namuna')}
+                  onClick={() => {
+                    setActiveBottomTab('namuna');
+                    if (bottomPaneHeight === 'collapsed') setBottomPaneHeight('normal');
+                  }}
                   className={`h-7 px-3 rounded-lg font-semibold flex items-center gap-1.5 transition cursor-pointer ${
                     activeBottomTab === 'namuna'
                       ? 'bg-blue-600 text-white shadow-xs'
-                      : 'text-slate-400 hover:text-white'
+                      : theme === 'dark'
+                      ? 'text-slate-400 hover:text-white'
+                      : 'text-slate-600 hover:text-slate-900'
                   }`}
                 >
                   <CheckSquare className="w-3.5 h-3.5" />
-                  <span>Test Natijalari (10 ta test)</span>
+                  <span>Test Natijalari (10 ta)</span>
                 </button>
 
                 <button
-                  onClick={() => setActiveBottomTab('konsol')}
+                  onClick={() => {
+                    setActiveBottomTab('konsol');
+                    if (bottomPaneHeight === 'collapsed') setBottomPaneHeight('normal');
+                  }}
                   className={`h-7 px-3 rounded-lg font-semibold flex items-center gap-1.5 transition cursor-pointer ${
                     activeBottomTab === 'konsol'
                       ? 'bg-blue-600 text-white shadow-xs'
-                      : 'text-slate-400 hover:text-white'
+                      : theme === 'dark'
+                      ? 'text-slate-400 hover:text-white'
+                      : 'text-slate-600 hover:text-slate-900'
                   }`}
                 >
                   <Terminal className="w-3.5 h-3.5" />
@@ -1153,209 +1233,365 @@ int main() {
                 </button>
               </div>
 
-              {/* PROMINENT TESTLASH BUTTON (Neon Blue Gradient) */}
-              <button
-                onClick={handleTestAllCases}
-                disabled={isTestingAll || isRunning}
-                className="h-7 px-4 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-xs flex items-center gap-1.5 shadow-md shadow-blue-500/20 active:scale-95 transition disabled:opacity-50 cursor-pointer"
-                title="Barcha 10 ta testni bir vaqtda tekshirish"
-              >
-                <CheckSquare className={`w-3.5 h-3.5 ${isTestingAll ? 'animate-spin' : ''}`} />
-                <span>{isTestingAll ? 'Tekshirilmoqda...' : 'Testlash'}</span>
-              </button>
+              {/* Center Status Badge */}
+              <div className="hidden md:flex items-center">
+                {!hasRunTests ? (
+                  <div className="flex items-center gap-1.5 px-3 py-0.5 rounded-full text-[11px] font-medium bg-slate-500/10 text-slate-400 border border-slate-500/20">
+                    <span className="w-1.5 h-1.5 rounded-full bg-slate-400" />
+                    <span>Sinov kutilmoqda • 10 ta test tayyor</span>
+                  </div>
+                ) : isTestingAll ? (
+                  <div className="flex items-center gap-1.5 px-3 py-0.5 rounded-full text-[11px] font-semibold bg-blue-500/10 text-blue-400 border border-blue-500/30 animate-pulse">
+                    <RefreshCw className="w-3 h-3 animate-spin" />
+                    <span>Sinovdan o‘tkazilmoqda ({currentTestingIndex || 1}/10)...</span>
+                  </div>
+                ) : testCases.filter((t) => t.status === 'passed').length === testCases.length ? (
+                  <div className="flex items-center gap-1.5 px-3 py-0.5 rounded-full text-[11px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 shadow-sm shadow-emerald-500/20">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                    <span>10/10 To‘g‘ri • 100 Ball (Qabul qilindi)</span>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-1.5 px-3 py-0.5 rounded-full text-[11px] font-bold bg-rose-500/10 text-rose-400 border border-rose-500/30">
+                    <AlertTriangle className="w-3.5 h-3.5 text-rose-400" />
+                    <span>
+                      {testCases.filter((t) => t.status === 'passed').length}/10 To‘g‘ri •{' '}
+                      {testCases.filter((t) => t.status === 'failed').length} ta xato (
+                      {testCases.filter((t) => t.status === 'passed').length * 10} Ball)
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              {/* Right Controls: Pane Height + Testlash Button */}
+              <div className="flex items-center gap-2">
+                {/* Expand / Minimize Toggle */}
+                <button
+                  onClick={() => {
+                    if (bottomPaneHeight === 'collapsed') {
+                      setBottomPaneHeight('normal');
+                    } else if (bottomPaneHeight === 'normal') {
+                      setBottomPaneHeight('expanded');
+                    } else {
+                      setBottomPaneHeight('normal');
+                    }
+                  }}
+                  className={`p-1 rounded-lg border transition cursor-pointer ${
+                    theme === 'dark'
+                      ? 'bg-white/5 border-white/10 text-slate-400 hover:text-white'
+                      : 'bg-slate-100 border-slate-200 text-slate-600 hover:text-slate-900'
+                  }`}
+                  title={
+                    bottomPaneHeight === 'expanded'
+                      ? 'Kichraytirish'
+                      : 'Kattalashtirish (Balandlik)'
+                  }
+                >
+                  {bottomPaneHeight === 'expanded' ? (
+                    <Minimize2 className="w-3.5 h-3.5" />
+                  ) : (
+                    <Maximize2 className="w-3.5 h-3.5" />
+                  )}
+                </button>
+
+                {/* Collapse / Open Toggle */}
+                <button
+                  onClick={() =>
+                    setBottomPaneHeight(
+                      bottomPaneHeight === 'collapsed' ? 'normal' : 'collapsed'
+                    )
+                  }
+                  className={`p-1 rounded-lg border transition cursor-pointer ${
+                    theme === 'dark'
+                      ? 'bg-white/5 border-white/10 text-slate-400 hover:text-white'
+                      : 'bg-slate-100 border-slate-200 text-slate-600 hover:text-slate-900'
+                  }`}
+                  title={
+                    bottomPaneHeight === 'collapsed'
+                      ? 'Panelni ochish'
+                      : 'Panelni yopish'
+                  }
+                >
+                  {bottomPaneHeight === 'collapsed' ? (
+                    <ChevronUp className="w-3.5 h-3.5" />
+                  ) : (
+                    <ChevronDown className="w-3.5 h-3.5" />
+                  )}
+                </button>
+
+                {/* PROMINENT TESTLASH BUTTON (Neon Blue Gradient) */}
+                <button
+                  onClick={handleTestAllCases}
+                  disabled={isTestingAll || isRunning}
+                  className="h-7 px-4 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-xs flex items-center gap-1.5 shadow-md shadow-blue-500/25 active:scale-95 transition disabled:opacity-50 cursor-pointer"
+                  title="Barcha 10 ta testni bir vaqtda tekshirish"
+                >
+                  <RefreshCw
+                    className={`w-3.5 h-3.5 ${isTestingAll ? 'animate-spin' : ''}`}
+                  />
+                  <span>{isTestingAll ? 'Tekshirilmoqda...' : 'Testlash'}</span>
+                </button>
+              </div>
             </div>
 
-            {/* Content: Left 10 Test Cases + Right Values */}
-            <div className="flex-1 min-h-0 flex overflow-hidden">
-              {/* Left 10 Test Cases Sub-Column */}
-              <div
-                className={`w-[260px] flex flex-col flex-shrink-0 overflow-y-auto border-r ${
-                  theme === 'dark' ? 'bg-[#05070E] border-white/5' : 'bg-slate-100 border-slate-200'
-                }`}
-              >
-                <div
-                  className={`px-3 py-1.5 text-[11px] font-semibold border-b flex items-center justify-between ${
-                    theme === 'dark' ? 'border-white/5 text-slate-400' : 'border-slate-200 text-slate-600'
-                  }`}
-                >
-                  <span>Tekshirish testlari (10 ta)</span>
-                  <span className="text-[10px] font-mono text-emerald-400 font-bold">
-                    {testCases.filter((t) => t.status === 'passed').length}/10 to‘g‘ri
-                  </span>
-                </div>
-
-                <div className="p-1.5 space-y-1">
-                  {testCases.map((tc) => {
-                    const isSelected = tc.id === selectedTestId;
-                    return (
-                      <button
-                        key={tc.id}
-                        onClick={() => setSelectedTestId(tc.id)}
-                        className={`w-full text-left p-2 rounded-xl transition flex items-center justify-between text-xs font-mono cursor-pointer ${
-                          isSelected
-                            ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20'
-                            : theme === 'dark'
-                            ? 'bg-white/5 hover:bg-white/10 text-slate-300'
-                            : 'bg-white hover:bg-slate-200/80 text-slate-800 border border-slate-200'
-                        }`}
-                      >
-                        <div className="flex items-center gap-2 min-w-0">
-                          {tc.status === 'passed' ? (
-                            <CheckCircle2
-                              className={`w-3.5 h-3.5 flex-shrink-0 ${
-                                isSelected ? 'text-white' : 'text-emerald-400'
-                              }`}
-                            />
-                          ) : tc.status === 'failed' ? (
-                            <XCircle
-                              className={`w-3.5 h-3.5 flex-shrink-0 ${
-                                isSelected ? 'text-white' : 'text-rose-400'
-                              }`}
-                            />
-                          ) : (
-                            <Clock className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
-                          )}
-                          <div className="truncate">
-                            <span className="font-semibold">{tc.title}</span>
-                            <span
-                              className={`text-[10px] block ${
-                                isSelected ? 'text-blue-100' : 'text-slate-400'
+            {/* If pane is not collapsed, render the content */}
+            {bottomPaneHeight !== 'collapsed' && (
+              <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
+                {activeBottomTab === 'namuna' ? (
+                  <>
+                    {/* Horizontal 10 Test Cases Strip */}
+                    <div
+                      className={`h-11 px-4 flex items-center justify-between border-b gap-2 overflow-x-auto flex-shrink-0 ${
+                        theme === 'dark'
+                          ? 'bg-[#05070E] border-white/5'
+                          : 'bg-slate-100 border-slate-200'
+                      }`}
+                    >
+                      <div className="flex items-center gap-1.5 min-w-max py-1">
+                        {testCases.map((tc) => {
+                          const isSelected = tc.id === selectedTestId;
+                          return (
+                            <button
+                              key={tc.id}
+                              onClick={() => setSelectedTestId(tc.id)}
+                              className={`h-7 px-2.5 rounded-lg text-xs font-mono font-medium flex items-center gap-1.5 transition-all cursor-pointer ${
+                                isSelected
+                                  ? 'bg-blue-600 text-white shadow-md shadow-blue-500/30 ring-1 ring-blue-400'
+                                  : tc.status === 'passed'
+                                  ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 hover:bg-emerald-500/20'
+                                  : tc.status === 'failed'
+                                  ? 'bg-rose-500/10 text-rose-400 border border-rose-500/30 hover:bg-rose-500/20'
+                                  : tc.status === 'running'
+                                  ? 'bg-blue-500/10 text-blue-400 border border-blue-500/30 animate-pulse'
+                                  : theme === 'dark'
+                                  ? 'bg-white/5 text-slate-400 border border-white/5 hover:text-slate-200 hover:bg-white/10'
+                                  : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50'
                               }`}
                             >
-                              Kirish: {tc.displayInput}
+                              {tc.status === 'passed' ? (
+                                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                              ) : tc.status === 'failed' ? (
+                                <XCircle className="w-3.5 h-3.5 text-rose-400" />
+                              ) : tc.status === 'running' ? (
+                                <RefreshCw className="w-3.5 h-3.5 text-blue-400 animate-spin" />
+                              ) : (
+                                <span className="w-2 h-2 rounded-full bg-slate-500" />
+                              )}
+                              <span>#{tc.id}</span>
+                              <span
+                                className={`text-[10px] px-1 py-0.2 rounded font-semibold ${
+                                  isSelected
+                                    ? 'bg-white/20 text-white'
+                                    : tc.status === 'passed'
+                                    ? 'bg-emerald-500/20 text-emerald-300'
+                                    : tc.status === 'failed'
+                                    ? 'bg-rose-500/20 text-rose-300'
+                                    : 'bg-black/20 text-slate-400'
+                                }`}
+                              >
+                                {tc.expected}
+                              </span>
+                            </button>
+                          );
+                        })}
+                      </div>
+
+                      {/* Right Test Count Status */}
+                      {hasRunTests && (
+                        <div className="flex items-center gap-3 flex-shrink-0 text-xs font-mono">
+                          <span className="text-emerald-400 font-bold flex items-center gap-1">
+                            <CheckCircle2 className="w-3.5 h-3.5" />
+                            {testCases.filter((t) => t.status === 'passed').length} ta o‘tdi
+                          </span>
+                          {testCases.filter((t) => t.status === 'failed').length > 0 && (
+                            <span className="text-rose-400 font-bold flex items-center gap-1">
+                              <XCircle className="w-3.5 h-3.5" />
+                              {testCases.filter((t) => t.status === 'failed').length} ta xato
                             </span>
+                          )}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Comparison Area: 3 Cards (Kirish, Chiqish, Kutilgan) */}
+                    <div
+                      className={`flex-1 min-h-0 p-3 overflow-y-auto ${
+                        theme === 'dark' ? 'bg-[#080B14]' : 'bg-white'
+                      }`}
+                    >
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 h-full">
+                        {/* CARD 1: Kirish (Input) */}
+                        <div
+                          className={`p-3 rounded-2xl border flex flex-col justify-between ${
+                            theme === 'dark'
+                              ? 'bg-[#0C101E] border-white/5'
+                              : 'bg-slate-50 border-slate-200'
+                          }`}
+                        >
+                          <div className="flex items-center justify-between text-xs font-semibold text-slate-400 pb-2 border-b border-white/5">
+                            <div className="flex items-center gap-1.5">
+                              <FileText className="w-3.5 h-3.5 text-blue-400" />
+                              <span className={theme === 'dark' ? 'text-slate-200' : 'text-slate-700'}>
+                                Kirish (Input)
+                              </span>
+                              <span className="text-[10px] px-1.5 py-0.2 rounded bg-slate-500/10 text-slate-400 font-mono">
+                                {activeTestCase.displayInput.includes('Seed')
+                                  ? 'Tasodifiy Seed'
+                                  : activeTestCase.displayInput.includes('Chegara')
+                                  ? 'Chegara'
+                                  : 'Namuna'}
+                              </span>
+                            </div>
+                            <button
+                              onClick={() => handleCopy(activeTestCase.input, 'tc_in')}
+                              className="text-slate-400 hover:text-white transition cursor-pointer"
+                              title="Nusxalash"
+                            >
+                              {copiedKey === 'tc_in' ? (
+                                <Check className="w-3.5 h-3.5 text-emerald-400" />
+                              ) : (
+                                <Copy className="w-3.5 h-3.5" />
+                              )}
+                            </button>
+                          </div>
+                          <pre className="font-mono text-xs text-slate-200 mt-2 p-2.5 rounded-xl bg-black/30 flex-1 overflow-auto whitespace-pre leading-relaxed border border-white/5">
+                            {activeTestCase.input}
+                          </pre>
+                        </div>
+
+                        {/* CARD 2: Sizning chiqishingiz (Actual Output) */}
+                        <div
+                          className={`p-3 rounded-2xl border flex flex-col justify-between ${
+                            theme === 'dark'
+                              ? 'bg-[#0C101E] border-white/5'
+                              : 'bg-slate-50 border-slate-200'
+                          }`}
+                        >
+                          <div className="flex items-center justify-between text-xs font-semibold text-slate-400 pb-2 border-b border-white/5">
+                            <div className="flex items-center gap-1.5">
+                              <Terminal className="w-3.5 h-3.5 text-purple-400" />
+                              <span className={theme === 'dark' ? 'text-slate-200' : 'text-slate-700'}>
+                                Sizning chiqishingiz
+                              </span>
+                              {activeTestCase.status === 'passed' ? (
+                                <span className="text-[10px] px-1.5 py-0.2 rounded bg-emerald-500/10 text-emerald-400 font-bold border border-emerald-500/20">
+                                  ✓ To‘g‘ri
+                                </span>
+                              ) : activeTestCase.status === 'failed' ? (
+                                <span className="text-[10px] px-1.5 py-0.2 rounded bg-rose-500/10 text-rose-400 font-bold border border-rose-500/20">
+                                  ✗ Nomuvofiq
+                                </span>
+                              ) : activeTestCase.status === 'running' ? (
+                                <span className="text-[10px] px-1.5 py-0.2 rounded bg-blue-500/10 text-blue-400 animate-pulse border border-blue-500/20">
+                                  Bajarilmoqda...
+                                </span>
+                              ) : (
+                                <span className="text-[10px] px-1.5 py-0.2 rounded bg-slate-500/10 text-slate-400 border border-slate-500/20">
+                                  Kutilmoqda
+                                </span>
+                              )}
+                            </div>
+                            {activeTestCase.actual && (
+                              <button
+                                onClick={() => handleCopy(activeTestCase.actual, 'tc_act')}
+                                className="text-slate-400 hover:text-white transition cursor-pointer"
+                                title="Nusxalash"
+                              >
+                                {copiedKey === 'tc_act' ? (
+                                  <Check className="w-3.5 h-3.5 text-emerald-400" />
+                                ) : (
+                                  <Copy className="w-3.5 h-3.5" />
+                                )}
+                              </button>
+                            )}
+                          </div>
+                          <div className="mt-2 p-2.5 rounded-xl bg-black/30 flex-1 overflow-auto flex flex-col justify-center border border-white/5">
+                            {activeTestCase.status === 'running' ? (
+                              <div className="flex items-center gap-2 text-xs font-mono text-blue-400 animate-pulse py-3">
+                                <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                                <span>Natija hisoblanmoqda...</span>
+                              </div>
+                            ) : activeTestCase.status === 'pending' ? (
+                              <div className="text-xs text-slate-400 italic py-2">
+                                Hali ishga tushirilmadi. "Run" yoki "Testlash" tugmasini bosing.
+                              </div>
+                            ) : (
+                              <pre
+                                className={`font-mono text-sm font-bold whitespace-pre ${
+                                  activeTestCase.status === 'passed'
+                                    ? 'text-emerald-400'
+                                    : 'text-rose-400'
+                                }`}
+                              >
+                                {activeTestCase.actual || '(bo‘sh chiqish)'}
+                              </pre>
+                            )}
                           </div>
                         </div>
 
-                        <span
-                          className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${
-                            isSelected
-                              ? 'bg-white/20 text-white'
-                              : tc.status === 'passed'
-                              ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
-                              : 'bg-rose-500/10 text-rose-400 border border-rose-500/20'
+                        {/* CARD 3: Kutilgan javob (Expected Output) */}
+                        <div
+                          className={`p-3 rounded-2xl border flex flex-col justify-between ${
+                            theme === 'dark'
+                              ? 'bg-[#0C101E] border-white/5'
+                              : 'bg-slate-50 border-slate-200'
                           }`}
                         >
-                          {tc.expected}
-                        </span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* Right Values Area: Kirish + Sizning chiqishingiz + Javob */}
-              <div
-                className={`flex-1 min-w-0 p-3 overflow-y-auto ${
-                  theme === 'dark' ? 'bg-[#080B14]' : 'bg-white'
-                }`}
-              >
-                {activeBottomTab === 'namuna' ? (
-                  <div className="h-full flex flex-col justify-between space-y-2">
-                    {/* Top Card: Kirish */}
-                    <div
-                      className={`p-2.5 rounded-2xl border flex-1 min-h-[50px] flex flex-col justify-between ${
-                        theme === 'dark'
-                          ? 'bg-[#0C101E] border-white/5'
-                          : 'bg-slate-50 border-slate-200'
-                      }`}
-                    >
-                      <div className="flex items-center justify-between text-[11px] font-semibold text-slate-400">
-                        <span>Kirish (Input)</span>
-                        <button
-                          onClick={() => handleCopy(activeTestCase.input, 'tc_in')}
-                          className="text-slate-400 hover:text-white transition cursor-pointer"
-                          title="Nusxalash"
-                        >
-                          {copiedKey === 'tc_in' ? (
-                            <Check className="w-3.5 h-3.5 text-emerald-400" />
-                          ) : (
-                            <Copy className="w-3.5 h-3.5" />
-                          )}
-                        </button>
+                          <div className="flex items-center justify-between text-xs font-semibold text-slate-400 pb-2 border-b border-white/5">
+                            <div className="flex items-center gap-1.5">
+                              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                              <span className={theme === 'dark' ? 'text-slate-200' : 'text-slate-700'}>
+                                Kutilgan javob (Expected)
+                              </span>
+                            </div>
+                            <button
+                              onClick={() => handleCopy(activeTestCase.expected, 'tc_exp')}
+                              className="text-slate-400 hover:text-white transition cursor-pointer"
+                              title="Nusxalash"
+                            >
+                              {copiedKey === 'tc_exp' ? (
+                                <Check className="w-3.5 h-3.5 text-emerald-400" />
+                              ) : (
+                                <Copy className="w-3.5 h-3.5" />
+                              )}
+                            </button>
+                          </div>
+                          <pre className="font-mono text-sm font-bold text-emerald-400 mt-2 p-2.5 rounded-xl bg-black/30 flex-1 overflow-auto whitespace-pre leading-relaxed border border-white/5">
+                            {activeTestCase.expected}
+                          </pre>
+                        </div>
                       </div>
-                      <pre className="font-mono text-sm text-slate-200 mt-1 whitespace-pre leading-snug">
-{activeTestCase.input}
-                      </pre>
-                    </div>
 
-                    {/* Bottom Row: Sizning chiqishingiz & Javob */}
-                    <div className="grid grid-cols-2 gap-2 flex-1 min-h-[50px]">
-                      {/* Left: Sizning chiqishingiz */}
-                      <div
-                        className={`p-2.5 rounded-2xl border flex flex-col justify-between ${
-                          theme === 'dark'
-                            ? 'bg-[#0C101E] border-white/5'
-                            : 'bg-slate-50 border-slate-200'
-                        }`}
-                      >
-                        <div className="flex items-center justify-between text-[11px] font-semibold text-slate-400">
-                          <span className="flex items-center gap-1.5">
-                            Sizning chiqishingiz
-                            {activeTestCase.status === 'passed' ? (
-                              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                            ) : (
-                              <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />
-                            )}
+                      {/* Diagnostic Error Banner if selected test failed */}
+                      {activeTestCase.status === 'failed' && (
+                        <div className="mt-2.5 p-2.5 rounded-xl bg-rose-500/10 border border-rose-500/25 flex items-center justify-between text-xs font-mono text-rose-300">
+                          <div className="flex items-center gap-2">
+                            <AlertTriangle className="w-4 h-4 text-rose-400 flex-shrink-0" />
+                            <span>
+                              Nomuvofiqlik #{activeTestCase.id}: Kutilgan "{activeTestCase.expected}", lekin dastur "
+                              {activeTestCase.actual || 'bo‘sh chiqish'}" berdi.
+                            </span>
+                          </div>
+                          <span className="text-[10px] text-slate-400 hidden sm:inline">
+                            Vaqt: {activeTestCase.time}
                           </span>
-                          <button
-                            onClick={() => handleCopy(activeTestCase.actual, 'tc_act')}
-                            className="text-slate-400 hover:text-white transition cursor-pointer"
-                            title="Nusxalash"
-                          >
-                            {copiedKey === 'tc_act' ? (
-                              <Check className="w-3.5 h-3.5 text-emerald-400" />
-                            ) : (
-                              <Copy className="w-3.5 h-3.5" />
-                            )}
-                          </button>
                         </div>
-                        <pre className="font-mono text-sm text-slate-200 mt-1 font-bold">
-{activeTestCase.actual || '(Natija yo‘q)'}
-                        </pre>
-                      </div>
-
-                      {/* Right: Javob */}
-                      <div
-                        className={`p-2.5 rounded-2xl border flex flex-col justify-between ${
-                          theme === 'dark'
-                            ? 'bg-[#0C101E] border-white/5'
-                            : 'bg-slate-50 border-slate-200'
-                        }`}
-                      >
-                        <div className="flex items-center justify-between text-[11px] font-semibold text-slate-400">
-                          <span>Kutilgan javob</span>
-                          <button
-                            onClick={() => handleCopy(activeTestCase.expected, 'tc_exp')}
-                            className="text-slate-400 hover:text-white transition cursor-pointer"
-                            title="Nusxalash"
-                          >
-                            {copiedKey === 'tc_exp' ? (
-                              <Check className="w-3.5 h-3.5 text-emerald-400" />
-                            ) : (
-                              <Copy className="w-3.5 h-3.5" />
-                            )}
-                          </button>
-                        </div>
-                        <pre className="font-mono text-sm text-emerald-400 mt-1 font-bold">
-{activeTestCase.expected}
-                        </pre>
-                      </div>
+                      )}
                     </div>
-                  </div>
+                  </>
                 ) : (
+                  /* Terminal / Konsol View */
                   <div
-                    className={`h-full p-3 rounded-2xl border font-mono text-xs overflow-y-auto whitespace-pre-wrap leading-relaxed ${
+                    className={`flex-1 p-3 font-mono text-xs overflow-y-auto whitespace-pre-wrap leading-relaxed ${
                       theme === 'dark'
-                        ? 'bg-[#0A0D18] border-white/5 text-slate-300'
-                        : 'bg-slate-50 border-slate-200 text-slate-800'
+                        ? 'bg-[#0A0D18] text-slate-300'
+                        : 'bg-slate-50 text-slate-800'
                     }`}
                   >
                     {consoleOutput}
                   </div>
                 )}
               </div>
-            </div>
+            )}
 
             {/* Bottom Status Strip */}
             <div

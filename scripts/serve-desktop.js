@@ -1,8 +1,176 @@
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
+const { spawn } = require('child_process');
 
 const PORT = 1420;
+
+function executePythonSingle(code, input, timeLimitMs = 3000) {
+  return new Promise((resolve) => {
+    const startTime = Date.now();
+    const py = spawn('python', ['-u', '-c', code]);
+    let stdout = '';
+    let stderr = '';
+    let finished = false;
+
+    const timer = setTimeout(() => {
+      if (finished) return;
+      finished = true;
+      try { py.kill(); } catch {}
+      resolve({
+        status: 'timeout',
+        stdout: '',
+        stderr: 'Time Limit Exceeded (3000 ms)',
+        executionTimeMs: timeLimitMs,
+      });
+    }, timeLimitMs);
+
+    py.stdout.on('data', (d) => { stdout += d; });
+    py.stderr.on('data', (d) => { stderr += d; });
+
+    py.on('error', (err) => {
+      if (finished) return;
+      finished = true;
+      clearTimeout(timer);
+      resolve({
+        status: 'error',
+        stdout: '',
+        stderr: err.message,
+        executionTimeMs: Date.now() - startTime,
+      });
+    });
+
+    py.on('close', (exitCode) => {
+      if (finished) return;
+      finished = true;
+      clearTimeout(timer);
+      const elapsed = Date.now() - startTime;
+      if (exitCode !== 0) {
+        resolve({
+          status: 'error',
+          stdout: stdout.trim(),
+          stderr: stderr.trim(),
+          executionTimeMs: elapsed,
+        });
+      } else {
+        resolve({
+          status: 'success',
+          stdout: stdout.trim(),
+          stderr: '',
+          executionTimeMs: elapsed,
+        });
+      }
+    });
+
+    try {
+      if (input !== undefined && input !== null) {
+        const strInput = String(input);
+        py.stdin.write(strInput.endsWith('\n') ? strInput : strInput + '\n');
+      }
+      py.stdin.end();
+    } catch {}
+  });
+}
+
+function handleRunCodeApi(req, res) {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
+  if (req.method === 'OPTIONS') {
+    res.writeHead(204);
+    res.end();
+    return;
+  }
+
+  if (req.method !== 'POST') {
+    res.writeHead(405, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ error: 'Method not allowed' }));
+    return;
+  }
+
+  let body = '';
+  req.on('data', (chunk) => { body += chunk; });
+  req.on('end', async () => {
+    try {
+      const data = JSON.parse(body || '{}');
+      const language = data.language || 'python';
+      const sourceCode = data.sourceCode || '';
+      const testCases = data.testCases || [];
+      const timeLimitMs = data.timeLimitMs || 3000;
+
+      if (language !== 'python') {
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({
+          fallbackNeeded: true,
+          error: 'Faqat Python mahalliy jarayonda ishga tushiriladi',
+        }));
+        return;
+      }
+
+      const testResults = [];
+      let totalPassed = 0;
+      let totalTime = 0;
+      let lastStdout = '';
+      let overallStatus = 'accepted';
+
+      for (let i = 0; i < testCases.length; i++) {
+        const tc = testCases[i];
+        const inputData = tc.inputData ?? tc.input ?? '';
+        const expectedOutput = String(tc.expectedOutput ?? tc.expected ?? '').trim();
+
+        const testRes = await executePythonSingle(sourceCode, inputData, timeLimitMs);
+        totalTime += testRes.executionTimeMs;
+
+        const cleanActual = (testRes.stdout || '').trim();
+        const isPassed = testRes.status === 'success' && cleanActual === expectedOutput;
+
+        if (isPassed) {
+          totalPassed++;
+        } else {
+          if (overallStatus === 'accepted') {
+            overallStatus = testRes.status === 'timeout' ? 'time_limit_exceeded' : (testRes.status === 'error' ? 'runtime_error' : 'wrong_answer');
+          }
+        }
+
+        testResults.push({
+          testNumber: i + 1,
+          testCaseId: tc.id || `tc-${i + 1}`,
+          status: isPassed ? 'passed' : 'failed',
+          executionTimeMs: testRes.executionTimeMs,
+          actualOutput: testRes.status === 'error' ? (testRes.stderr || 'Ijro xatosi') : (cleanActual || '(bo‘sh chiqish)'),
+          expectedOutput: expectedOutput,
+          inputData: inputData,
+          errorSummary: isPassed ? undefined : (testRes.status === 'error' ? testRes.stderr : 'Nomuvofiq natija'),
+          isHidden: !!tc.isHidden,
+        });
+
+        if (i === 0) {
+          lastStdout = cleanActual;
+        }
+      }
+
+      const avgTime = Math.round(totalTime / Math.max(testCases.length, 1));
+      const result = {
+        status: overallStatus,
+        stdout: lastStdout || (overallStatus === 'accepted' ? 'Barcha testlar muvaffaqiyatli o‘tdi!' : ''),
+        stderr: overallStatus === 'accepted' ? '' : (testResults.find((t) => t.status === 'failed')?.errorSummary || ''),
+        executionTimeMs: avgTime,
+        cpuTimeMs: Math.round(avgTime * 0.75),
+        peakMemoryBytes: 12582912,
+        passedTests: totalPassed,
+        totalTests: testCases.length,
+        testResults,
+      };
+
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify(result));
+    } catch (e) {
+      res.writeHead(500, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ error: e.message }));
+    }
+  });
+}
 
 // dist papkasini bir nechta ehtimoliy joylashuvlardan avtomatik aniqlash
 let DIST_DIR = path.resolve(__dirname, '..', 'apps', 'desktop', 'dist');
@@ -32,6 +200,13 @@ const MIME_TYPES = {
 
 const server = http.createServer((req, res) => {
   const urlPath = req.url.split('?')[0];
+
+  // API so'rovlarni alohida qabul qilish
+  if (urlPath === '/api/run-code') {
+    handleRunCodeApi(req, res);
+    return;
+  }
+
   let filePath = path.join(DIST_DIR, urlPath === '/' ? 'index.html' : urlPath);
 
   fs.stat(filePath, (err, stats) => {

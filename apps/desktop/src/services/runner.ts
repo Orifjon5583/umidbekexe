@@ -130,7 +130,32 @@ export class LocalRunnerService {
       }
     }
 
-    // 2. Brauzer yoki zaxira ish muhiti uchun to'liq test tekshiruvi (Fallback Runner)
+    // 2. Agar /api/run-code mavjud bo'lsa (Mintera Desktop Node Runner)
+    if (language === 'python' && typeof window !== 'undefined') {
+      try {
+        const response = await fetch('/api/run-code', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            language,
+            sourceCode,
+            testCases,
+            timeLimitMs,
+            memoryLimitMb,
+          }),
+        });
+        if (response.ok) {
+          const resJson = await response.json();
+          if (resJson && Array.isArray(resJson.testResults) && !resJson.fallbackNeeded) {
+            return resJson;
+          }
+        }
+      } catch (err: any) {
+        // Fallback ga o'tiladi
+      }
+    }
+
+    // 3. Brauzer yoki zaxira ish muhiti uchun to'liq test tekshiruvi (Fallback Runner)
     return this.fallbackSimulateExecution(language, sourceCode, testCases, timeLimitMs);
   }
 
@@ -316,7 +341,11 @@ export class LocalRunnerService {
       const hasDivide = code.includes('/') || code.includes('//');
 
       if (parts.length >= 2 && !isNaN(parts[0]) && !isNaN(parts[1])) {
-        if (hasMinus && !hasPlus) {
+        // String literal chiqarishni tekshirish
+        const strMatch = code.match(/print\s*\(\s*["']([^"']+)["']\s*\)/);
+        if (strMatch) {
+          simulatedOutput = strMatch[1];
+        } else if (hasMinus && !hasPlus) {
           // O'quvchi tasodifan ayiruv yozgan bo'lsa
           simulatedOutput = String(parts[0] - parts[1]);
         } else if (hasMultiply && !hasPlus) {
@@ -329,7 +358,8 @@ export class LocalRunnerService {
           // To'g'ri yig'indi
           simulatedOutput = String(parts[0] + parts[1]);
         } else {
-          simulatedOutput = tc.expectedOutput.trim();
+          // Boshqa noto'g'ri ifoda
+          simulatedOutput = 'Nomuvofiq chiqish';
         }
       } else if (!isNaN(parseInt(tc.inputData.trim(), 10))) {
         const n = parseInt(tc.inputData.trim(), 10);
@@ -338,15 +368,15 @@ export class LocalRunnerService {
           for (let k = 2; k <= Math.min(n, 12); k++) f *= k;
           simulatedOutput = String(f);
         } else {
-          simulatedOutput = tc.expectedOutput.trim();
+          simulatedOutput = 'Nomuvofiq chiqish';
         }
       } else {
-        simulatedOutput = tc.expectedOutput.trim();
+        simulatedOutput = 'Nomuvofiq chiqish';
       }
 
       const cleanExpected = tc.expectedOutput.trim();
       const cleanActual = simulatedOutput.trim();
-      const isCorrect = cleanExpected === cleanActual && trimmed.length > 15;
+      const isCorrect = cleanExpected === cleanActual && cleanActual !== 'Nomuvofiq chiqish' && trimmed.length > 10;
 
       if (isCorrect) {
         passed++;
